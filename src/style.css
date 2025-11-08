@@ -1,0 +1,97 @@
+.color-picker {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Tailwind CSS for live preview */
+.preview-container {
+  font-family: Inter, system-ui, sans-serif;
+}
+
+/* Base button styles */
+.preview-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Hover effects */
+.preview-button:hover {
+  transform: translateY(-1px);
+}
+
+/* Focus effects */
+.preview-button:focus {
+  outline: none;
+}
+
+/* Active effects */
+.preview-button:active {
+  transform: translateY(0);
+}
+
+/* Sticky positioning support */
+.sticky-preview {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Custom scrollbar for controls */
+.controls-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+}
+
+.controls-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.controls-scroll::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.controls-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.controls-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Divider line styling */
+.section-divider {
+  border-bottom: 1px dashed #d1d5db;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+
+/* Equal width columns */
+.equal-columns {
+  display: flex;
+  gap: 24px;
+}
+
+.equal-columns > div {
+  flex: 1;
+}
+
+/* Placeholder abu-abu untuk input, textarea, dan Textbox */
+input::placeholder,
+textarea::placeholder {
+  color: #b0b0b0 !important;
+  opacity: 1;
+}
+
+.create-figma-plugin_textbox__input::placeholder {
+  color: #b0b0b0 !important;
+  opacity: 1;
+}
