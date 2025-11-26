@@ -28,6 +28,7 @@ export interface CreateButtonHandler extends EventHandler {
     hoverScaleType?: string,
     hoverOpacity?: string,
     hoverScale?: string,
+    hoverScaleDuration?: string,
     hoverTranslateX?: string,
     hoverRotate?: string
   ) => void;
@@ -115,6 +116,63 @@ export interface CreateSwitchHandler extends EventHandler {
     disabledStates: string;
     focusRingWidth: string;
     focusRingColor: string;
+    transitionType: string;
+    htmltailwind: string;
+  }) => void;
+}
+
+export interface CreateProgressIndicatorHandler extends EventHandler {
+  name: "CREATE_PROGRESS_INDICATOR";
+  handler: (props: { progressValue: string; progressType: string; width: string; height: string; progressColor: string; bgColor: string; borderRadius: string; percentageTextColor: string; percentageMargin: string; showPercentage: string; htmltailwind: string }) => void;
+}
+
+export interface CreateDataTableHandler extends EventHandler {
+  name: "CREATE_DATA_TABLE";
+  handler: (props: {
+    columns: string;
+    rows: string;
+    headerBgColor: string;
+    headerTextColor: string;
+    rowBgColor: string;
+    stripedRowBgColor: string;
+    rowTextColor: string;
+    borderColor: string;
+    fontSize: string;
+    padding: string;
+    stripedRows: string;
+    textAlignment: string;
+    htmltailwind: string;
+  }) => void;
+}
+
+export interface CreateTooltipHandler extends EventHandler {
+  name: "CREATE_TOOLTIP";
+  handler: (props: {
+    tooltipText: string;
+    bgColor: string;
+    textColor: string;
+    fontSize: string;
+    padding: string;
+    borderRadius: string;
+    marginBottom: string;
+    htmltailwind: string;
+  }) => void;
+}
+
+export interface CreateRadioButtonHandler extends EventHandler {
+  name: "CREATE_RADIO_BUTTON";
+  handler: (props: {
+    headingLabel: string;
+    headingFontSize: string;
+    headingColor: string;
+    radioLabels: string;
+    radioCount: string;
+    labelColor: string;
+    labelFontSize: string;
+    checkedColor: string;
+    layoutDirection: string;
+    hoverBorderColor: string;
+    hoverBgColor: string;
     transitionType: string;
     htmltailwind: string;
   }) => void;

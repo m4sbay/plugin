@@ -1,5 +1,17 @@
 import { once, on, showUI, emit } from "@create-figma-plugin/utilities";
-import { CloseHandler, CreateButtonHandler, SelectionChangeHandler, CreateTabsHandler, CreateSwitchHandler, CreateAlertBannerHandler } from "./types/types";
+import {
+  CloseHandler,
+  CreateButtonHandler,
+  SelectionChangeHandler,
+  CreateTabsHandler,
+  CreateSwitchHandler,
+  CreateAlertBannerHandler,
+  CreateTooltipHandler,
+  CreateProgressIndicatorHandler,
+  CreateDataTableHandler,
+  CreateRadioButtonHandler,
+} from "./types/types";
+import { VerticalSpace } from "@create-figma-plugin/ui";
 
 // Fungsi kustom untuk mengkonversi hex ke RGB
 function customConvertHexColorToRgbColor(hex: string): { r: number; g: number; b: number } | null {
@@ -19,7 +31,7 @@ function customConvertHexColorToRgbColor(hex: string): { r: number; g: number; b
 }
 
 export default function () {
-  once<CreateButtonHandler>(
+  on<CreateButtonHandler>(
     "CREATE_BUTTON",
     async (
       color,
@@ -46,6 +58,7 @@ export default function () {
       hoverScaleType,
       hoverOpacity,
       hoverScale,
+      hoverScaleDuration,
       hoverTranslateX,
       hoverRotate
     ) => {
@@ -94,6 +107,7 @@ export default function () {
       }
 
       const component = figma.createComponent();
+      component.name = "Button";
       component.layoutMode = "HORIZONTAL";
       component.primaryAxisAlignItems = "CENTER";
       component.counterAxisAlignItems = "CENTER";
@@ -124,17 +138,19 @@ export default function () {
           component.strokes = [{ type: "SOLID", color: borderRgb }];
           component.strokeWeight = borderWidth;
         }
-      } else {
-        // Clear any existing strokes if borderWidth is 0 or null
-        component.strokes = [];
-        component.strokeWeight = 0;
       }
 
       const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
       component.setPluginData("id", componentId);
       component.setPluginData("htmltailwind", htmltailwind);
 
-      // Store static styling data
+      // Store all styling data for reloading
+      component.setPluginData("color", color || "");
+      component.setPluginData("label", label || "");
+      component.setPluginData("borderRadius", borderRadius?.toString() || "");
+      component.setPluginData("fontSize", fontSize?.toString() || "");
+      component.setPluginData("padding", padding || "");
+      component.setPluginData("labelColor", labelColor || "");
       component.setPluginData("borderWidth", borderWidth?.toString() || "");
       component.setPluginData("borderColor", borderColor || "");
 
@@ -152,15 +168,29 @@ export default function () {
       component.setPluginData("transitionDelay", transitionDelay?.toString() || "");
       component.setPluginData("transitionType", transitionType || "");
       component.setPluginData("hoverScaleType", hoverScaleType || "");
-      component.setPluginData("hoverOpacity", hoverOpacity?.toString() || "");
-      component.setPluginData("hoverScale", hoverScale?.toString() || "");
-      component.setPluginData("hoverTranslateX", hoverTranslateX?.toString() || "");
-      component.setPluginData("hoverRotate", hoverRotate?.toString() || "");
+      // Only save if value exists and is not null/undefined
+      if (hoverOpacity !== undefined && hoverOpacity !== null) {
+        component.setPluginData("hoverOpacity", hoverOpacity.toString());
+      }
+      if (hoverScale !== undefined && hoverScale !== null) {
+        component.setPluginData("hoverScale", hoverScale.toString());
+      }
+      if (hoverScaleDuration !== undefined && hoverScaleDuration !== null) {
+        component.setPluginData("hoverScaleDuration", hoverScaleDuration.toString());
+      }
+      if (hoverTranslateX !== undefined && hoverTranslateX !== null) {
+        component.setPluginData("hoverTranslateX", hoverTranslateX.toString());
+      }
+      if (hoverRotate !== undefined && hoverRotate !== null) {
+        component.setPluginData("hoverRotate", hoverRotate.toString());
+      }
 
       component.appendChild(text);
 
+      figma.currentPage.appendChild(component);
       figma.currentPage.selection = [component];
       figma.viewport.scrollAndZoomIntoView([component]);
+      figma.notify("✅ Button berhasil dibuat!");
     }
   );
 
@@ -169,7 +199,223 @@ export default function () {
     if (selection.length > 0) {
       const selectedNode = selection[0];
       const htmltailwind = selectedNode.getPluginData("htmltailwind");
-      emit<SelectionChangeHandler>("SELECTION_CHANGE", htmltailwind || "");
+
+      // Check if this is a button component
+      if (htmltailwind && selectedNode.name === "Button") {
+        // Get all stored data
+        const buttonData = {
+          htmltailwind: htmltailwind,
+          color: selectedNode.getPluginData("color") || "",
+          label: selectedNode.getPluginData("label") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          borderWidth: selectedNode.getPluginData("borderWidth") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          hoverTextColor: selectedNode.getPluginData("hoverTextColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          focusBorderColor: selectedNode.getPluginData("focusBorderColor") || "",
+          focusRingSize: selectedNode.getPluginData("focusRingSize") || "",
+          activeBgColor: selectedNode.getPluginData("activeBgColor") || "",
+          activeShadowSize: selectedNode.getPluginData("activeShadowSize") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+          transitionEasing: selectedNode.getPluginData("transitionEasing") || "",
+          transitionDelay: selectedNode.getPluginData("transitionDelay") || "",
+          hoverScaleType: selectedNode.getPluginData("hoverScaleType") || "",
+          hoverOpacity: selectedNode.getPluginData("hoverOpacity") || undefined,
+          hoverScale: selectedNode.getPluginData("hoverScale") || undefined,
+          hoverScaleDuration: selectedNode.getPluginData("hoverScaleDuration") || undefined,
+          hoverTranslateX: selectedNode.getPluginData("hoverTranslateX") || undefined,
+          hoverRotate: selectedNode.getPluginData("hoverRotate") || undefined,
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(buttonData));
+      } else if (htmltailwind && selectedNode.name === "Checkbox") {
+        // Get all stored checkbox data
+        const checkboxData = {
+          htmltailwind: htmltailwind,
+          headingLabel: selectedNode.getPluginData("headingLabel") || "",
+          headingFontSize: selectedNode.getPluginData("headingFontSize") || "",
+          headingColor: selectedNode.getPluginData("headingColor") || "",
+          checkboxLabel: selectedNode.getPluginData("checkboxLabel") || "",
+          checkboxCount: selectedNode.getPluginData("checkboxCount") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          checkboxSize: selectedNode.getPluginData("checkboxSize") || "",
+          borderWidth: selectedNode.getPluginData("borderWidth") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
+          checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
+          uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
+          gapBetweenCheckboxLabel: selectedNode.getPluginData("gapBetweenCheckboxLabel") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(checkboxData));
+      } else if (htmltailwind && selectedNode.name === "Radio Button") {
+        const radioData = {
+          componentType: "radio-button",
+          htmltailwind: htmltailwind,
+          headingLabel: selectedNode.getPluginData("headingLabel") || "",
+          headingFontSize: selectedNode.getPluginData("headingFontSize") || "",
+          headingColor: selectedNode.getPluginData("headingColor") || "",
+          radioLabels: selectedNode.getPluginData("radioLabels") || "",
+          radioCount: selectedNode.getPluginData("radioCount") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          checkedColor: selectedNode.getPluginData("checkedColor") || "",
+          layoutDirection: selectedNode.getPluginData("layoutDirection") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(radioData));
+      } else if (htmltailwind && selectedNode.name === "Text Field") {
+        // Get all stored text field data
+        const textFieldData = {
+          htmltailwind: htmltailwind,
+          label: selectedNode.getPluginData("label") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || selectedNode.getPluginData("fontSize") || "",
+          placeholder: selectedNode.getPluginData("placeholder") || "",
+          width: selectedNode.getPluginData("width") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          outlineColor: selectedNode.getPluginData("outlineColor") || "",
+          inputPadding: selectedNode.getPluginData("inputPadding") || "",
+          wrapperPadding: selectedNode.getPluginData("wrapperPadding") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || selectedNode.getPluginData("ringColor") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(textFieldData));
+      } else if (htmltailwind && selectedNode.name === "Progress Indicator") {
+        const progressData = {
+          componentType: "progress-indicator",
+          htmltailwind: htmltailwind,
+          progressValue: selectedNode.getPluginData("progressValue") || "",
+          progressType: selectedNode.getPluginData("progressType") || "",
+          width: selectedNode.getPluginData("width") || "",
+          height: selectedNode.getPluginData("height") || "",
+          progressColor: selectedNode.getPluginData("progressColor") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          percentageTextColor: selectedNode.getPluginData("percentageTextColor") || "",
+          percentageMargin: selectedNode.getPluginData("percentageMargin") || "",
+          showPercentage: selectedNode.getPluginData("showPercentage") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(progressData));
+      } else if (htmltailwind && selectedNode.name === "Data Table") {
+        const dataTableData = {
+          componentType: "data-table",
+          htmltailwind: htmltailwind,
+          columns: selectedNode.getPluginData("columns") || "",
+          rows: selectedNode.getPluginData("rows") || "",
+          headerBgColor: selectedNode.getPluginData("headerBgColor") || "",
+          headerTextColor: selectedNode.getPluginData("headerTextColor") || "",
+          rowBgColor: selectedNode.getPluginData("rowBgColor") || "",
+          stripedRowBgColor: selectedNode.getPluginData("stripedRowBgColor") || "",
+          rowTextColor: selectedNode.getPluginData("rowTextColor") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          stripedRows: selectedNode.getPluginData("stripedRows") || "",
+          textAlignment: selectedNode.getPluginData("textAlignment") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(dataTableData));
+      } else if (htmltailwind && selectedNode.name === "Tooltip") {
+        const tooltipData = {
+          componentType: "tooltip",
+          htmltailwind: htmltailwind,
+          tooltipText: selectedNode.getPluginData("tooltipText") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          textColor: selectedNode.getPluginData("textColor") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          marginBottom: selectedNode.getPluginData("marginBottom") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(tooltipData));
+      } else if (htmltailwind && selectedNode.name === "Alert Banner") {
+        const alertBannerData = {
+          componentType: "alert-banner",
+          htmltailwind: htmltailwind,
+          alertType: selectedNode.getPluginData("alertType") || "",
+          title: selectedNode.getPluginData("title") || "",
+          message: selectedNode.getPluginData("message") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          width: selectedNode.getPluginData("width") || "",
+          height: selectedNode.getPluginData("height") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          iconSize: selectedNode.getPluginData("iconSize") || "",
+          titleFontSize: selectedNode.getPluginData("titleFontSize") || "",
+          titleColor: selectedNode.getPluginData("titleColor") || "",
+          messageFontSize: selectedNode.getPluginData("messageFontSize") || "",
+          messageColor: selectedNode.getPluginData("messageColor") || "",
+          borderWidth: selectedNode.getPluginData("borderWidth") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(alertBannerData));
+      } else if (htmltailwind && selectedNode.name === "Switch") {
+        const switchData = {
+          componentType: "switch",
+          htmltailwind: htmltailwind,
+          switchCount: selectedNode.getPluginData("switchCount") || "",
+          switchLabels: selectedNode.getPluginData("switchLabels") || "",
+          containerWidth: selectedNode.getPluginData("containerWidth") || "",
+          headlineText: selectedNode.getPluginData("headlineText") || "",
+          headlineColor: selectedNode.getPluginData("headlineColor") || "",
+          headlineFontSize: selectedNode.getPluginData("headlineFontSize") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          switchWidth: selectedNode.getPluginData("switchWidth") || "",
+          switchHeight: selectedNode.getPluginData("switchHeight") || "",
+          toggleSize: selectedNode.getPluginData("toggleSize") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          uncheckedBorderColor: selectedNode.getPluginData("uncheckedBorderColor") || "",
+          uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
+          checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
+          checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
+          toggleBgColor: selectedNode.getPluginData("toggleBgColor") || "",
+          defaultCheckedStates: selectedNode.getPluginData("defaultCheckedStates") || "",
+          disabledStates: selectedNode.getPluginData("disabledStates") || "",
+          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(switchData));
+      } else if (htmltailwind && selectedNode.name === "Tabs") {
+        const tabsData = {
+          componentType: "tabs",
+          htmltailwind: htmltailwind,
+          tabCount: selectedNode.getPluginData("tabCount") || "",
+          tabLabels: selectedNode.getPluginData("tabLabels") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          containerBgColor: selectedNode.getPluginData("containerBgColor") || "",
+          activeBgColor: selectedNode.getPluginData("activeBgColor") || "",
+          activeTextColor: selectedNode.getPluginData("activeTextColor") || "",
+          inactiveTextColor: selectedNode.getPluginData("inactiveTextColor") || "",
+          tabPadding: selectedNode.getPluginData("tabPadding") || "",
+          tabBorderRadius: selectedNode.getPluginData("tabBorderRadius") || "",
+          tabGap: selectedNode.getPluginData("tabGap") || "",
+          containerPadding: selectedNode.getPluginData("containerPadding") || "",
+          panelContents: selectedNode.getPluginData("panelContents") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+          tabsWidth: selectedNode.getPluginData("tabsWidth") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(tabsData));
+      } else {
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", htmltailwind || "");
+      }
     } else {
       emit<SelectionChangeHandler>("SELECTION_CHANGE", "");
     }
@@ -184,7 +430,223 @@ export default function () {
     if (selection.length > 0) {
       const selectedNode = selection[0];
       const htmltailwind = selectedNode.getPluginData("htmltailwind");
-      emit<SelectionChangeHandler>("SELECTION_CHANGE", htmltailwind || "");
+
+      // Check if this is a button component
+      if (htmltailwind && selectedNode.name === "Button") {
+        // Get all stored data
+        const buttonData = {
+          htmltailwind: htmltailwind,
+          color: selectedNode.getPluginData("color") || "",
+          label: selectedNode.getPluginData("label") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          borderWidth: selectedNode.getPluginData("borderWidth") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          hoverTextColor: selectedNode.getPluginData("hoverTextColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          focusBorderColor: selectedNode.getPluginData("focusBorderColor") || "",
+          focusRingSize: selectedNode.getPluginData("focusRingSize") || "",
+          activeBgColor: selectedNode.getPluginData("activeBgColor") || "",
+          activeShadowSize: selectedNode.getPluginData("activeShadowSize") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+          transitionEasing: selectedNode.getPluginData("transitionEasing") || "",
+          transitionDelay: selectedNode.getPluginData("transitionDelay") || "",
+          hoverScaleType: selectedNode.getPluginData("hoverScaleType") || "",
+          hoverOpacity: selectedNode.getPluginData("hoverOpacity") || undefined,
+          hoverScale: selectedNode.getPluginData("hoverScale") || undefined,
+          hoverScaleDuration: selectedNode.getPluginData("hoverScaleDuration") || undefined,
+          hoverTranslateX: selectedNode.getPluginData("hoverTranslateX") || undefined,
+          hoverRotate: selectedNode.getPluginData("hoverRotate") || undefined,
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(buttonData));
+      } else if (htmltailwind && selectedNode.name === "Checkbox") {
+        // Get all stored checkbox data
+        const checkboxData = {
+          htmltailwind: htmltailwind,
+          headingLabel: selectedNode.getPluginData("headingLabel") || "",
+          headingFontSize: selectedNode.getPluginData("headingFontSize") || "",
+          headingColor: selectedNode.getPluginData("headingColor") || "",
+          checkboxLabel: selectedNode.getPluginData("checkboxLabel") || "",
+          checkboxCount: selectedNode.getPluginData("checkboxCount") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          checkboxSize: selectedNode.getPluginData("checkboxSize") || "",
+          borderWidth: selectedNode.getPluginData("borderWidth") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
+          checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
+          uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
+          gapBetweenCheckboxLabel: selectedNode.getPluginData("gapBetweenCheckboxLabel") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(checkboxData));
+      } else if (htmltailwind && selectedNode.name === "Radio Button") {
+        const radioData = {
+          componentType: "radio-button",
+          htmltailwind: htmltailwind,
+          headingLabel: selectedNode.getPluginData("headingLabel") || "",
+          headingFontSize: selectedNode.getPluginData("headingFontSize") || "",
+          headingColor: selectedNode.getPluginData("headingColor") || "",
+          radioLabels: selectedNode.getPluginData("radioLabels") || "",
+          radioCount: selectedNode.getPluginData("radioCount") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          checkedColor: selectedNode.getPluginData("checkedColor") || "",
+          layoutDirection: selectedNode.getPluginData("layoutDirection") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(radioData));
+      } else if (htmltailwind && selectedNode.name === "Text Field") {
+        // Get all stored text field data
+        const textFieldData = {
+          htmltailwind: htmltailwind,
+          label: selectedNode.getPluginData("label") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || selectedNode.getPluginData("fontSize") || "",
+          placeholder: selectedNode.getPluginData("placeholder") || "",
+          width: selectedNode.getPluginData("width") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          outlineColor: selectedNode.getPluginData("outlineColor") || "",
+          inputPadding: selectedNode.getPluginData("inputPadding") || "",
+          wrapperPadding: selectedNode.getPluginData("wrapperPadding") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || selectedNode.getPluginData("ringColor") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(textFieldData));
+      } else if (htmltailwind && selectedNode.name === "Progress Indicator") {
+        const progressData = {
+          componentType: "progress-indicator",
+          htmltailwind: htmltailwind,
+          progressValue: selectedNode.getPluginData("progressValue") || "",
+          progressType: selectedNode.getPluginData("progressType") || "",
+          width: selectedNode.getPluginData("width") || "",
+          height: selectedNode.getPluginData("height") || "",
+          progressColor: selectedNode.getPluginData("progressColor") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          percentageTextColor: selectedNode.getPluginData("percentageTextColor") || "",
+          percentageMargin: selectedNode.getPluginData("percentageMargin") || "",
+          showPercentage: selectedNode.getPluginData("showPercentage") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(progressData));
+      } else if (htmltailwind && selectedNode.name === "Data Table") {
+        const dataTableData = {
+          componentType: "data-table",
+          htmltailwind: htmltailwind,
+          columns: selectedNode.getPluginData("columns") || "",
+          rows: selectedNode.getPluginData("rows") || "",
+          headerBgColor: selectedNode.getPluginData("headerBgColor") || "",
+          headerTextColor: selectedNode.getPluginData("headerTextColor") || "",
+          rowBgColor: selectedNode.getPluginData("rowBgColor") || "",
+          stripedRowBgColor: selectedNode.getPluginData("stripedRowBgColor") || "",
+          rowTextColor: selectedNode.getPluginData("rowTextColor") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          stripedRows: selectedNode.getPluginData("stripedRows") || "",
+          textAlignment: selectedNode.getPluginData("textAlignment") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(dataTableData));
+      } else if (htmltailwind && selectedNode.name === "Tooltip") {
+        const tooltipData = {
+          componentType: "tooltip",
+          htmltailwind: htmltailwind,
+          tooltipText: selectedNode.getPluginData("tooltipText") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          textColor: selectedNode.getPluginData("textColor") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          marginBottom: selectedNode.getPluginData("marginBottom") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(tooltipData));
+      } else if (htmltailwind && selectedNode.name === "Alert Banner") {
+        const alertBannerData = {
+          componentType: "alert-banner",
+          htmltailwind: htmltailwind,
+          alertType: selectedNode.getPluginData("alertType") || "",
+          title: selectedNode.getPluginData("title") || "",
+          message: selectedNode.getPluginData("message") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          width: selectedNode.getPluginData("width") || "",
+          height: selectedNode.getPluginData("height") || "",
+          padding: selectedNode.getPluginData("padding") || "",
+          iconSize: selectedNode.getPluginData("iconSize") || "",
+          titleFontSize: selectedNode.getPluginData("titleFontSize") || "",
+          titleColor: selectedNode.getPluginData("titleColor") || "",
+          messageFontSize: selectedNode.getPluginData("messageFontSize") || "",
+          messageColor: selectedNode.getPluginData("messageColor") || "",
+          borderWidth: selectedNode.getPluginData("borderWidth") || "",
+          borderColor: selectedNode.getPluginData("borderColor") || "",
+          bgColor: selectedNode.getPluginData("bgColor") || "",
+          hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
+          hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
+          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(alertBannerData));
+      } else if (htmltailwind && selectedNode.name === "Switch") {
+        const switchData = {
+          componentType: "switch",
+          htmltailwind: htmltailwind,
+          switchCount: selectedNode.getPluginData("switchCount") || "",
+          switchLabels: selectedNode.getPluginData("switchLabels") || "",
+          containerWidth: selectedNode.getPluginData("containerWidth") || "",
+          headlineText: selectedNode.getPluginData("headlineText") || "",
+          headlineColor: selectedNode.getPluginData("headlineColor") || "",
+          headlineFontSize: selectedNode.getPluginData("headlineFontSize") || "",
+          labelColor: selectedNode.getPluginData("labelColor") || "",
+          labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          switchWidth: selectedNode.getPluginData("switchWidth") || "",
+          switchHeight: selectedNode.getPluginData("switchHeight") || "",
+          toggleSize: selectedNode.getPluginData("toggleSize") || "",
+          borderRadius: selectedNode.getPluginData("borderRadius") || "",
+          uncheckedBorderColor: selectedNode.getPluginData("uncheckedBorderColor") || "",
+          uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
+          checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
+          checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
+          toggleBgColor: selectedNode.getPluginData("toggleBgColor") || "",
+          defaultCheckedStates: selectedNode.getPluginData("defaultCheckedStates") || "",
+          disabledStates: selectedNode.getPluginData("disabledStates") || "",
+          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
+          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(switchData));
+      } else if (htmltailwind && selectedNode.name === "Tabs") {
+        const tabsData = {
+          componentType: "tabs",
+          htmltailwind: htmltailwind,
+          tabCount: selectedNode.getPluginData("tabCount") || "",
+          tabLabels: selectedNode.getPluginData("tabLabels") || "",
+          fontSize: selectedNode.getPluginData("fontSize") || "",
+          containerBgColor: selectedNode.getPluginData("containerBgColor") || "",
+          activeBgColor: selectedNode.getPluginData("activeBgColor") || "",
+          activeTextColor: selectedNode.getPluginData("activeTextColor") || "",
+          inactiveTextColor: selectedNode.getPluginData("inactiveTextColor") || "",
+          tabPadding: selectedNode.getPluginData("tabPadding") || "",
+          tabBorderRadius: selectedNode.getPluginData("tabBorderRadius") || "",
+          tabGap: selectedNode.getPluginData("tabGap") || "",
+          containerPadding: selectedNode.getPluginData("containerPadding") || "",
+          panelContents: selectedNode.getPluginData("panelContents") || "",
+          transitionType: selectedNode.getPluginData("transitionType") || "",
+          tabsWidth: selectedNode.getPluginData("tabsWidth") || "",
+        };
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(tabsData));
+      } else {
+        emit<SelectionChangeHandler>("SELECTION_CHANGE", htmltailwind || "");
+      }
     } else {
       emit<SelectionChangeHandler>("SELECTION_CHANGE", "");
     }
@@ -367,6 +829,7 @@ export default function () {
     component.setPluginData("checkedBgColor", checkedBgColor);
     component.setPluginData("checkedBorderColor", checkedBorderColor);
     component.setPluginData("uncheckedBgColor", uncheckedBgColor);
+    component.setPluginData("gapBetweenCheckboxLabel", gapBetweenCheckboxLabel);
     component.setPluginData("hoverBorderColor", hoverBorderColor);
     component.setPluginData("hoverBgColor", hoverBgColor);
     component.setPluginData("focusRingWidth", focusRingWidth);
@@ -416,86 +879,103 @@ export default function () {
       const labelText = figma.createText();
       labelText.characters = label;
       labelText.fontName = { family: "Inter", style: "Regular" };
-      labelText.fontSize = Number(fontSize) || 16;
-      labelText.fills = [{ type: "SOLID", color: hexToRgb(labelColor || "#222222") }];
+      // Gunakan fontSize (yang sebenarnya labelFontSize dari TextFieldCreator)
+      labelText.fontSize = Number(fontSize) || 14;
+      labelText.fills = [{ type: "SOLID", color: hexToRgb(labelColor || "#111827") }];
       labelText.name = "Label";
       component.appendChild(labelText);
     }
 
-    // Parse width dan height
-    let inputWidth = 240; // default
-    let inputHeight = 40; // default
-
+    // Parse width untuk wrapper frame
+    let wrapperWidth: number | undefined = undefined;
     if (width) {
       const widthMatch = width.match(/(\d+)/);
-      if (widthMatch) inputWidth = Number(widthMatch[1]);
-    }
-    if (height) {
-      const heightMatch = height.match(/(\d+)/);
-      if (heightMatch) inputHeight = Number(heightMatch[1]);
+      if (widthMatch) wrapperWidth = Number(widthMatch[1]);
     }
 
     // Parse padding untuk input field
-    let paddingLeft = 0;
+    // Format padding: "wrapperPadding,inputPadding" dari TextFieldCreator
+    // wrapperPadding untuk paddingLeft, inputPadding untuk paddingTop/Bottom
+    let paddingLeft = 12; // default wrapperPadding
     let paddingRight = 0;
-    let paddingTop = 0;
-    let paddingBottom = 0;
+    let paddingTop = 6; // default inputPadding
+    let paddingBottom = 6; // default inputPadding
 
     if (padding) {
       const paddingValues = padding.split(",").map((val: string) => parseInt(val.trim().replace("px", ""), 10));
-      if (paddingValues.length === 1 && !isNaN(paddingValues[0])) {
+      if (paddingValues.length >= 2 && !isNaN(paddingValues[0]) && !isNaN(paddingValues[1])) {
+        // paddingValues[0] = wrapperPadding (untuk paddingLeft)
+        // paddingValues[1] = inputPadding (untuk paddingTop dan Bottom)
         paddingLeft = paddingValues[0];
-        paddingRight = paddingValues[0];
-        paddingTop = paddingValues[0];
-        paddingBottom = paddingValues[0];
-      } else if (paddingValues.length === 2 && !isNaN(paddingValues[0]) && !isNaN(paddingValues[1])) {
-        paddingLeft = paddingValues[0];
-        paddingRight = paddingValues[0];
         paddingTop = paddingValues[1];
         paddingBottom = paddingValues[1];
+        paddingRight = paddingValues[1]; // pr dari input padding
+      } else if (paddingValues.length >= 1 && !isNaN(paddingValues[0])) {
+        // Fallback jika hanya satu nilai
+        paddingTop = paddingValues[0];
+        paddingBottom = paddingValues[0];
+        paddingLeft = paddingValues[0] * 2;
+        paddingRight = paddingValues[0] * 2;
       }
     }
 
-    // Buat frame untuk input field dengan autolayout dan padding
+    // Buat wrapper frame (sesuai struktur HTML dengan wrapper div)
+    const wrapperFrame = figma.createFrame();
+    wrapperFrame.name = "Input Wrapper";
+    wrapperFrame.layoutMode = "HORIZONTAL";
+    if (wrapperWidth) {
+      wrapperFrame.counterAxisSizingMode = "FIXED";
+      wrapperFrame.primaryAxisSizingMode = "FIXED";
+      wrapperFrame.resize(wrapperWidth, 40); // Default height 40
+    } else {
+      wrapperFrame.counterAxisSizingMode = "AUTO";
+      wrapperFrame.primaryAxisSizingMode = "AUTO";
+    }
+    wrapperFrame.primaryAxisAlignItems = "MIN";
+    wrapperFrame.counterAxisAlignItems = "CENTER";
+    wrapperFrame.paddingLeft = paddingLeft; // wrapperPadding
+    wrapperFrame.paddingRight = 0;
+    wrapperFrame.paddingTop = 0;
+    wrapperFrame.paddingBottom = 0;
+    wrapperFrame.fills = [{ type: "SOLID", color: hexToRgb(bgColor || "#FFFFFF") }];
+    wrapperFrame.cornerRadius = Number(borderRadius) || 6;
+
+    // Set outline/border pada wrapper (sesuai struktur HTML)
+    if (outlineWidth && Number(outlineWidth) > 0) {
+      wrapperFrame.strokes = [{ type: "SOLID", color: hexToRgb(outlineColor || "#D1D5DB") }];
+      wrapperFrame.strokeWeight = Number(outlineWidth);
+    }
+
+    // Buat frame untuk input field di dalam wrapper
     const inputFrame = figma.createFrame();
     inputFrame.name = "Input Field";
     inputFrame.layoutMode = "HORIZONTAL";
-    inputFrame.counterAxisSizingMode = "FIXED";
-    inputFrame.primaryAxisSizingMode = "FIXED";
-    inputFrame.primaryAxisAlignItems = "CENTER"; // Center horizontal
-    inputFrame.counterAxisAlignItems = "CENTER"; // Center vertical
-    inputFrame.resize(inputWidth, inputHeight);
-    inputFrame.cornerRadius = Number(borderRadius) || 4;
-    inputFrame.fills = [{ type: "SOLID", color: hexToRgb(bgColor || "#FFFFFF") }];
-    inputFrame.paddingLeft = paddingLeft;
+    inputFrame.counterAxisSizingMode = "AUTO";
+    inputFrame.primaryAxisSizingMode = "AUTO";
+    inputFrame.primaryAxisAlignItems = "MIN";
+    inputFrame.counterAxisAlignItems = "CENTER";
+    inputFrame.paddingLeft = paddingRight; // pr dari input padding
     inputFrame.paddingRight = paddingRight;
     inputFrame.paddingTop = paddingTop;
     inputFrame.paddingBottom = paddingBottom;
+    inputFrame.fills = [];
 
-    // Set outline/border jika ada
-    if (outlineWidth && Number(outlineWidth) > 0) {
-      inputFrame.strokes = [{ type: "SOLID", color: hexToRgb(outlineColor || "#D1D5DB") }];
-      inputFrame.strokeWeight = Number(outlineWidth);
-    }
-
-    // Buat placeholder text di dalam input (jika ada placeholder)
+    // Buat placeholder text di dalam input frame (jika ada placeholder)
     if (placeholder) {
       const placeholderText = figma.createText();
       placeholderText.characters = placeholder;
       placeholderText.fontName = { family: "Inter", style: "Regular" };
-      placeholderText.fontSize = Number(fontSize) || 16;
+      // Gunakan fontSize (labelFontSize) untuk placeholder juga
+      placeholderText.fontSize = Number(fontSize) || 14;
       placeholderText.fills = [{ type: "SOLID", color: { r: 0.5, g: 0.5, b: 0.5 }, opacity: 0.5 }]; // Gray dengan opacity untuk placeholder
       placeholderText.name = "Placeholder";
-      placeholderText.layoutAlign = "INHERIT"; // Mengikuti alignment dari parent frame
+      placeholderText.layoutAlign = "INHERIT";
       placeholderText.constraints = { horizontal: "MIN", vertical: "MIN" };
       placeholderText.layoutPositioning = "AUTO";
-      // Set text alignment untuk center horizontal dan vertical
-      placeholderText.textAlignHorizontal = "CENTER";
-      placeholderText.textAlignVertical = "CENTER";
       inputFrame.appendChild(placeholderText);
     }
 
-    // Set shadow effect jika ada
+    // Set shadow effect pada wrapper jika ada
     if (shadow) {
       const effects: Effect[] = [];
       // Parse shadow format seperti "0_2px_12px_rgba(0,0,0,0.08)"
@@ -510,11 +990,14 @@ export default function () {
           blendMode: "NORMAL",
         });
       }
-      inputFrame.effects = effects;
+      wrapperFrame.effects = effects;
     }
 
-    // Tambahkan input frame ke component
-    component.appendChild(inputFrame);
+    // Susun struktur: wrapper -> input frame -> placeholder text
+    wrapperFrame.appendChild(inputFrame);
+
+    // Tambahkan wrapper frame ke component
+    component.appendChild(wrapperFrame);
 
     // Simpan data plugin
     const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
@@ -525,18 +1008,44 @@ export default function () {
     component.setPluginData("label", label || "");
     component.setPluginData("labelColor", labelColor || "");
     component.setPluginData("fontSize", fontSize || "");
+    component.setPluginData("labelFontSize", fontSize || ""); // Alias untuk kompatibilitas
     component.setPluginData("placeholder", placeholder || "");
     component.setPluginData("width", width || "");
+    // Simpan width untuk reload
     component.setPluginData("height", height || "");
     component.setPluginData("bgColor", bgColor || "");
     component.setPluginData("borderRadius", borderRadius || "");
     component.setPluginData("outlineWidth", outlineWidth || "");
     component.setPluginData("outlineColor", outlineColor || "");
     component.setPluginData("padding", padding || "");
+    // Parse padding untuk menyimpan inputPadding dan wrapperPadding
+    if (padding) {
+      const paddingValues = padding.split(",").map((val: string) => val.trim().replace("px", ""));
+      const wrapperPaddingValue = paddingValues[0];
+      const inputPaddingValue = paddingValues[1];
+
+      if (wrapperPaddingValue && !isNaN(Number(wrapperPaddingValue))) {
+        component.setPluginData("wrapperPadding", wrapperPaddingValue);
+      } else {
+        component.setPluginData("wrapperPadding", "12");
+      }
+
+      if (inputPaddingValue && !isNaN(Number(inputPaddingValue))) {
+        component.setPluginData("inputPadding", inputPaddingValue);
+      } else if (wrapperPaddingValue && !isNaN(Number(wrapperPaddingValue))) {
+        component.setPluginData("inputPadding", wrapperPaddingValue);
+      } else {
+        component.setPluginData("inputPadding", "6");
+      }
+    } else {
+      component.setPluginData("wrapperPadding", "12");
+      component.setPluginData("inputPadding", "6");
+    }
     component.setPluginData("shadow", shadow || "");
     component.setPluginData("hoverBgColor", hoverBgColor || "");
     component.setPluginData("activeRingWidth", activeRingWidth || "");
     component.setPluginData("ringColor", ringColor || "");
+    component.setPluginData("focusRingColor", ringColor || ""); // Alias untuk kompatibilitas
     component.setPluginData("transitionType", transitionType || "");
     component.setPluginData("labelGap", labelGap || "8");
 
@@ -548,8 +1057,8 @@ export default function () {
     figma.notify("✅ Text Field berhasil dibuat!");
   });
 
-  on("CREATE_TOOLTIP", async props => {
-    const { tooltipText, buttonText, position, fontSize, bgColor, textColor, borderRadius, padding, buttonBgColor, buttonTextColor, buttonHoverBgColor, buttonFocusRingColor, htmltailwind } = props;
+  on<CreateTooltipHandler>("CREATE_TOOLTIP", async props => {
+    const { tooltipText, bgColor, textColor, fontSize, padding, borderRadius, marginBottom, htmltailwind } = props;
 
     try {
       await figma.loadFontAsync({ family: "Inter", style: "Regular" });
@@ -558,67 +1067,22 @@ export default function () {
       return;
     }
 
-    // Parse padding
-    let paddingTop = 8;
-    let paddingBottom = 8;
-    let paddingLeft = 12;
-    let paddingRight = 12;
-
-    if (padding) {
-      const paddingValues = padding.split(",").map((val: string) => parseInt(val.trim().replace("px", ""), 10));
-      if (paddingValues.length === 2 && !isNaN(paddingValues[0]) && !isNaN(paddingValues[1])) {
-        paddingTop = paddingValues[0];
-        paddingBottom = paddingValues[0];
-        paddingLeft = paddingValues[1];
-        paddingRight = paddingValues[1];
-      }
-    }
-
-    // Parse fontSize
+    // Parse values
     const fontSizeValue = Number(fontSize.replace(/px/gi, "").trim()) || 14;
+    const paddingY = padding.split(",")[0]?.trim().replace(/px/gi, "") || "8";
+    const paddingX = padding.split(",")[1]?.trim().replace(/px/gi, "") || "12";
+    const paddingXValue = Number(paddingX) || 12;
+    const paddingYValue = Number(paddingY) || 8;
     const borderRadiusValue = Number(borderRadius.replace(/px/gi, "").trim()) || 8;
+    const marginBottomValue = Number(marginBottom.replace(/px/gi, "").trim()) || 16;
 
-    // Buat komponen utama dengan status component
+    // Buat komponen tooltip
     const component = figma.createComponent();
     component.name = "Tooltip";
-    component.layoutMode = "HORIZONTAL";
-    component.counterAxisSizingMode = "AUTO";
-    component.primaryAxisSizingMode = "AUTO";
-    component.paddingLeft = 0;
-    component.paddingRight = 0;
-    component.paddingTop = 0;
-    component.paddingBottom = 0;
-    component.itemSpacing = 0;
+    component.layoutMode = "NONE"; // Tidak menggunakan layout mode agar bisa absolute positioning
     component.fills = [];
 
-    // Buat button trigger
-    const buttonFrame = figma.createFrame();
-    buttonFrame.name = "Button";
-    buttonFrame.layoutMode = "HORIZONTAL";
-    buttonFrame.counterAxisSizingMode = "AUTO";
-    buttonFrame.primaryAxisSizingMode = "AUTO";
-    buttonFrame.primaryAxisAlignItems = "CENTER";
-    buttonFrame.counterAxisAlignItems = "CENTER";
-    buttonFrame.paddingLeft = 20;
-    buttonFrame.paddingRight = 20;
-    buttonFrame.paddingTop = 10;
-    buttonFrame.paddingBottom = 10;
-    buttonFrame.cornerRadius = 8;
-    buttonFrame.fills = [{ type: "SOLID", color: hexToRgb(buttonBgColor || "#1D4ED8") }];
-    buttonFrame.itemSpacing = 0;
-
-    const buttonTextNode = figma.createText();
-    buttonTextNode.characters = buttonText;
-    buttonTextNode.fontName = { family: "Inter", style: "Regular" };
-    buttonTextNode.fontSize = 14;
-    buttonTextNode.fills = [{ type: "SOLID", color: hexToRgb(buttonTextColor || "#FFFFFF") }];
-    buttonTextNode.layoutAlign = "INHERIT";
-    buttonTextNode.constraints = { horizontal: "MIN", vertical: "MIN" };
-    buttonTextNode.layoutPositioning = "AUTO";
-
-    buttonFrame.appendChild(buttonTextNode);
-
-    // Buat tooltip box
+    // Buat tooltip frame
     const tooltipFrame = figma.createFrame();
     tooltipFrame.name = "Tooltip";
     tooltipFrame.layoutMode = "HORIZONTAL";
@@ -626,16 +1090,19 @@ export default function () {
     tooltipFrame.primaryAxisSizingMode = "AUTO";
     tooltipFrame.primaryAxisAlignItems = "CENTER";
     tooltipFrame.counterAxisAlignItems = "CENTER";
-    tooltipFrame.paddingLeft = paddingLeft;
-    tooltipFrame.paddingRight = paddingRight;
-    tooltipFrame.paddingTop = paddingTop;
-    tooltipFrame.paddingBottom = paddingBottom;
+    tooltipFrame.paddingLeft = paddingXValue;
+    tooltipFrame.paddingRight = paddingXValue;
+    tooltipFrame.paddingTop = paddingYValue;
+    tooltipFrame.paddingBottom = paddingYValue;
     tooltipFrame.cornerRadius = borderRadiusValue;
     tooltipFrame.fills = [{ type: "SOLID", color: hexToRgb(bgColor || "#111827") }];
     tooltipFrame.itemSpacing = 0;
+    tooltipFrame.x = 0;
+    tooltipFrame.y = 0;
 
+    // Buat text node untuk tooltip
     const tooltipTextNode = figma.createText();
-    tooltipTextNode.characters = tooltipText;
+    tooltipTextNode.characters = tooltipText || "Click Me";
     tooltipTextNode.fontName = { family: "Inter", style: "Regular" };
     tooltipTextNode.fontSize = fontSizeValue;
     tooltipTextNode.fills = [{ type: "SOLID", color: hexToRgb(textColor || "#FFFFFF") }];
@@ -644,50 +1111,43 @@ export default function () {
     tooltipTextNode.layoutPositioning = "AUTO";
 
     tooltipFrame.appendChild(tooltipTextNode);
+    component.appendChild(tooltipFrame);
 
-    // Susun komponen berdasarkan posisi
-    if (position === "top") {
-      component.layoutMode = "VERTICAL";
-      component.itemSpacing = 8;
-      component.appendChild(tooltipFrame);
-      component.appendChild(buttonFrame);
-    } else if (position === "bottom") {
-      component.layoutMode = "VERTICAL";
-      component.itemSpacing = 8;
-      component.appendChild(buttonFrame);
-      component.appendChild(tooltipFrame);
-    } else if (position === "left") {
-      component.layoutMode = "HORIZONTAL";
-      component.itemSpacing = 8;
-      component.appendChild(tooltipFrame);
-      component.appendChild(buttonFrame);
-    } else {
-      // right atau default
-      component.layoutMode = "HORIZONTAL";
-      component.itemSpacing = 8;
-      component.appendChild(buttonFrame);
-      component.appendChild(tooltipFrame);
-    }
+    // Buat arrow tooltip (kotak kecil yang di-rotate 45 derajat)
+    const arrowFrame = figma.createFrame();
+    arrowFrame.name = "Arrow";
+    arrowFrame.resize(8, 8);
+    arrowFrame.fills = [{ type: "SOLID", color: hexToRgb(bgColor || "#111827") }];
+    arrowFrame.cornerRadius = 0;
+    arrowFrame.rotation = 45; // Rotate 45 derajat
+    // Posisi arrow: center horizontal, di bawah tooltip dengan offset -4px
+    arrowFrame.x = tooltipFrame.width / 2 - 4; // Center horizontally
+    arrowFrame.y = tooltipFrame.height - 2; // Di bawah tooltip, offset -4px untuk overlap
+
+    // Tambahkan arrow sebagai sibling dari tooltipFrame
+    component.appendChild(arrowFrame);
+
+    // Resize component agar sesuai dengan ukuran tooltipFrame + arrow
+    // Hitung bounds dari semua child untuk mendapatkan ukuran yang tepat
+    const componentWidth = tooltipFrame.width;
+    // Arrow berada di y = tooltipFrame.height - 2, dengan tinggi 8px
+    // Jadi arrow bottom = (tooltipFrame.height - 2) + 8 = tooltipFrame.height + 6
+    const arrowBottom = arrowFrame.y + arrowFrame.height;
+    const componentHeight = Math.max(tooltipFrame.height, arrowBottom);
+
+    component.resize(componentWidth, componentHeight);
 
     // Simpan data plugin
     const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
-    component.setPluginData("tooltipProps", JSON.stringify(props));
-
-    // Store styling data
     component.setPluginData("tooltipText", tooltipText || "");
-    component.setPluginData("buttonText", buttonText || "");
-    component.setPluginData("position", position || "top");
-    component.setPluginData("fontSize", fontSize || "14");
     component.setPluginData("bgColor", bgColor || "#111827");
     component.setPluginData("textColor", textColor || "#FFFFFF");
+    component.setPluginData("fontSize", fontSize || "14");
+    component.setPluginData("padding", padding || "8,12");
     component.setPluginData("borderRadius", borderRadius || "8");
-    component.setPluginData("padding", padding || "8px,12px");
-    component.setPluginData("buttonBgColor", buttonBgColor || "#1D4ED8");
-    component.setPluginData("buttonTextColor", buttonTextColor || "#FFFFFF");
-    component.setPluginData("buttonHoverBgColor", buttonHoverBgColor || "#1E40AF");
-    component.setPluginData("buttonFocusRingColor", buttonFocusRingColor || "#60A5FA");
+    component.setPluginData("marginBottom", marginBottom || "16");
 
     // Tambahkan ke canvas dan seleksi
     figma.currentPage.appendChild(component);
@@ -1161,7 +1621,6 @@ export default function () {
           return {
             border: "#BFDBFE", // blue-200
             bg: "#EFF6FF", // blue-50
-            iconColor: "#2563EB", // blue-600
             titleColor: "#1E3A8A", // blue-900
             messageColor: "#1E40AF", // blue-800
           };
@@ -1169,7 +1628,6 @@ export default function () {
           return {
             border: "#BBF7D0", // green-200
             bg: "#F0FDF4", // green-50
-            iconColor: "#16A34A", // green-600
             titleColor: "#14532D", // green-900
             messageColor: "#166534", // green-800
           };
@@ -1177,7 +1635,6 @@ export default function () {
           return {
             border: "#FECACA", // red-200
             bg: "#FEF2F2", // red-50
-            iconColor: "#DC2626", // red-600
             titleColor: "#7F1D1D", // red-900
             messageColor: "#991B1B", // red-800
           };
@@ -1185,7 +1642,6 @@ export default function () {
           return {
             border: "#BFDBFE",
             bg: "#EFF6FF",
-            iconColor: "#2563EB",
             titleColor: "#1E3A8A",
             messageColor: "#1E40AF",
           };
@@ -1198,24 +1654,22 @@ export default function () {
     const finalBorderColor = borderColor || defaultColors.border;
     const finalTitleColor = titleColor || defaultColors.titleColor;
     const finalMessageColor = messageColor || defaultColors.messageColor;
-    const finalIconColor = defaultColors.iconColor;
 
     const borderRadiusValue = Number(borderRadius) || 6;
     const paddingValue = Number(padding) || 16;
     const borderWidthValue = Number(borderWidth) || 1;
-    const iconSizeValue = Number(iconSize) || 16;
     const titleFontSizeValue = Number(titleFontSize) || 14;
     const messageFontSizeValue = Number(messageFontSize) || 14;
 
     // Buat component utama
     const component = figma.createComponent();
     component.name = "Alert Banner";
-    component.layoutMode = "HORIZONTAL";
-    component.counterAxisSizingMode = width ? "FIXED" : "AUTO";
-    component.primaryAxisSizingMode = width ? "FIXED" : "AUTO";
+    component.layoutMode = "VERTICAL";
+    component.primaryAxisSizingMode = "AUTO"; // Height auto
+    component.counterAxisSizingMode = width ? "FIXED" : "AUTO"; // Width fixed jika diberikan
     component.primaryAxisAlignItems = "MIN";
     component.counterAxisAlignItems = "MIN";
-    component.itemSpacing = 12; // gap-3
+    component.itemSpacing = 4; // gap-1 (space-y-1)
     component.paddingLeft = paddingValue;
     component.paddingRight = paddingValue;
     component.paddingTop = paddingValue;
@@ -1225,137 +1679,6 @@ export default function () {
     component.strokes = [{ type: "SOLID", color: hexToRgb(finalBorderColor) }];
     component.strokeWeight = borderWidthValue;
 
-    // Set width and height if provided
-    if (width) {
-      component.resize(Number(width), component.height);
-    }
-    if (height && width) {
-      component.resize(Number(width), Number(height));
-    }
-
-    // Buat icon SVG berdasarkan alert type
-    let iconNode: SceneNode;
-
-    if (alertType === "information") {
-      // Info icon: circle dengan i (titik di atas, garis di bawah)
-      const iconFrame = figma.createFrame();
-      iconFrame.name = "Icon";
-      iconFrame.resize(iconSizeValue, iconSizeValue);
-      iconFrame.fills = [];
-
-      // Circle
-      const circle = figma.createEllipse();
-      circle.resize(iconSizeValue, iconSizeValue);
-      circle.fills = [];
-      circle.strokes = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      circle.strokeWeight = 2;
-
-      // Titik di atas (rectangle kecil)
-      const dot = figma.createRectangle();
-      dot.resize(2, 2);
-      dot.x = iconSizeValue / 2 - 1;
-      dot.y = iconSizeValue / 2 - 6;
-      dot.fills = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      dot.cornerRadius = 1;
-
-      // Garis vertikal di bawah (rectangle tipis)
-      const line = figma.createRectangle();
-      line.resize(2, 4);
-      line.x = iconSizeValue / 2 - 1;
-      line.y = iconSizeValue / 2 + 2;
-      line.fills = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      line.cornerRadius = 0;
-
-      iconFrame.appendChild(circle);
-      iconFrame.appendChild(dot);
-      iconFrame.appendChild(line);
-      iconNode = iconFrame;
-    } else if (alertType === "success") {
-      // Success icon: checkmark circle
-      const iconFrame = figma.createFrame();
-      iconFrame.name = "Icon";
-      iconFrame.resize(iconSizeValue, iconSizeValue);
-      iconFrame.fills = [];
-
-      // Circle
-      const circle = figma.createEllipse();
-      circle.resize(iconSizeValue, iconSizeValue);
-      circle.fills = [];
-      circle.strokes = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      circle.strokeWeight = 2;
-
-      // Checkmark menggunakan vector path
-      const checkPath = figma.createVector();
-      const centerX = iconSizeValue / 2;
-      const centerY = iconSizeValue / 2;
-      checkPath.vectorPaths = [
-        {
-          windingRule: "NONZERO",
-          data: `M ${centerX - 4} ${centerY} L ${centerX - 1} ${centerY + 3} L ${centerX + 4} ${centerY - 2}`,
-        },
-      ];
-      checkPath.fills = [];
-      checkPath.strokes = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      checkPath.strokeWeight = 2;
-      checkPath.strokeCap = "ROUND";
-      checkPath.strokeJoin = "ROUND";
-
-      iconFrame.appendChild(circle);
-      iconFrame.appendChild(checkPath);
-      iconNode = iconFrame;
-    } else {
-      // Error icon: circle dengan tanda seru (titik di atas, garis di bawah)
-      const iconFrame = figma.createFrame();
-      iconFrame.name = "Icon";
-      iconFrame.resize(iconSizeValue, iconSizeValue);
-      iconFrame.fills = [];
-
-      // Circle
-      const circle = figma.createEllipse();
-      circle.resize(iconSizeValue, iconSizeValue);
-      circle.fills = [];
-      circle.strokes = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      circle.strokeWeight = 2;
-
-      // Titik di atas (rectangle kecil)
-      const dot = figma.createRectangle();
-      dot.resize(2, 2);
-      dot.x = iconSizeValue / 2 - 1;
-      dot.y = iconSizeValue / 2 - 6;
-      dot.fills = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      dot.cornerRadius = 1;
-
-      // Garis vertikal di bawah (rectangle tipis)
-      const line = figma.createRectangle();
-      line.resize(2, 4);
-      line.x = iconSizeValue / 2 - 1;
-      line.y = iconSizeValue / 2 + 2;
-      line.fills = [{ type: "SOLID", color: hexToRgb(finalIconColor) }];
-      line.cornerRadius = 0;
-
-      iconFrame.appendChild(circle);
-      iconFrame.appendChild(dot);
-      iconFrame.appendChild(line);
-      iconNode = iconFrame;
-    }
-
-    // Set icon constraints
-    iconNode.constraints = { horizontal: "MIN", vertical: "MIN" };
-    component.appendChild(iconNode);
-
-    // Buat frame untuk content (title + message)
-    const contentFrame = figma.createFrame();
-    contentFrame.name = "Content";
-    contentFrame.layoutMode = "VERTICAL";
-    contentFrame.counterAxisSizingMode = "AUTO";
-    contentFrame.primaryAxisSizingMode = "AUTO";
-    contentFrame.itemSpacing = 4; // space-y-1
-    contentFrame.fills = [];
-    contentFrame.paddingLeft = 0;
-    contentFrame.paddingRight = 0;
-    contentFrame.paddingTop = 0;
-    contentFrame.paddingBottom = 0;
-
     // Buat title text
     const titleText = figma.createText();
     titleText.characters = title;
@@ -1363,9 +1686,10 @@ export default function () {
     titleText.fontSize = titleFontSizeValue;
     titleText.fills = [{ type: "SOLID", color: hexToRgb(finalTitleColor) }];
     titleText.name = "Title";
-    titleText.layoutAlign = "INHERIT";
-    titleText.constraints = { horizontal: "MIN", vertical: "MIN" };
     titleText.layoutPositioning = "AUTO";
+    titleText.layoutAlign = "STRETCH";
+    titleText.constraints = { horizontal: "STRETCH", vertical: "MIN" };
+    titleText.textAutoResize = "HEIGHT";
 
     // Buat message text
     const messageText = figma.createText();
@@ -1374,13 +1698,22 @@ export default function () {
     messageText.fontSize = messageFontSizeValue;
     messageText.fills = [{ type: "SOLID", color: hexToRgb(finalMessageColor) }];
     messageText.name = "Message";
-    messageText.layoutAlign = "INHERIT";
-    messageText.constraints = { horizontal: "MIN", vertical: "MIN" };
     messageText.layoutPositioning = "AUTO";
+    messageText.layoutAlign = "STRETCH";
+    messageText.constraints = { horizontal: "STRETCH", vertical: "MIN" };
+    messageText.textAutoResize = "HEIGHT";
+    messageText.textAlignHorizontal = "JUSTIFIED";
 
-    contentFrame.appendChild(titleText);
-    contentFrame.appendChild(messageText);
-    component.appendChild(contentFrame);
+    component.appendChild(titleText);
+    component.appendChild(messageText);
+
+    // Set width setelah semua children ditambahkan
+    // Auto layout akan menghitung height secara otomatis
+    if (width) {
+      const targetWidth = Number(width);
+      // Resize width, height akan dihitung otomatis oleh auto layout
+      component.resize(targetWidth, component.height || 100);
+    }
 
     // Simpan data plugin
     const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
@@ -1418,6 +1751,485 @@ export default function () {
     figma.notify(`✅ Alert Banner berhasil dibuat!`);
   });
 
+  on<CreateProgressIndicatorHandler>("CREATE_PROGRESS_INDICATOR", async props => {
+    const { progressValue, progressType, width, height, progressColor, bgColor, borderRadius, percentageTextColor, percentageMargin, showPercentage, htmltailwind } = props;
+
+    try {
+      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+    } catch (error) {
+      figma.notify("Gagal memuat font 'Inter Regular': " + error);
+      return;
+    }
+
+    // Parse values
+    const progressValueNum = Number(progressValue) || 60;
+    const widthValue = Number(width) || 300;
+    const heightValue = Number(height) || 12;
+    const borderRadiusValue = Number(borderRadius) || 9999;
+    const progressRgb = hexToRgb(progressColor);
+    const bgRgb = hexToRgb(bgColor);
+    const percentageTextRgb = hexToRgb(percentageTextColor || "#111827");
+
+    // Buat component utama
+    const component = figma.createComponent();
+    component.name = "Progress Indicator";
+    component.layoutMode = "HORIZONTAL";
+    component.counterAxisSizingMode = "AUTO";
+    component.primaryAxisSizingMode = "AUTO";
+    component.primaryAxisAlignItems = "CENTER";
+    component.counterAxisAlignItems = "CENTER";
+    const marginValue = Number(percentageMargin) || 12;
+    component.itemSpacing = showPercentage === "yes" ? marginValue : 0;
+    component.paddingLeft = 0;
+    component.paddingRight = 0;
+    component.paddingTop = 0;
+    component.paddingBottom = 0;
+    component.fills = [];
+
+    // Progress Bar
+    const barContainer = figma.createFrame();
+    barContainer.name = "Progress Bar Container";
+    barContainer.layoutMode = "HORIZONTAL";
+    barContainer.counterAxisSizingMode = "FIXED";
+    barContainer.primaryAxisSizingMode = "FIXED";
+    barContainer.resize(widthValue, heightValue);
+    barContainer.cornerRadius = borderRadiusValue;
+    barContainer.fills = [{ type: "SOLID", color: bgRgb }];
+    barContainer.clipsContent = true;
+
+    // Progress fill
+    const progressFill = figma.createFrame();
+    progressFill.name = "Progress Fill";
+    progressFill.layoutMode = "HORIZONTAL";
+    progressFill.counterAxisSizingMode = "FIXED";
+    progressFill.primaryAxisSizingMode = "FIXED";
+    const fillWidth = (widthValue * progressValueNum) / 100;
+    progressFill.resize(fillWidth, heightValue);
+    progressFill.cornerRadius = borderRadiusValue;
+    progressFill.fills = [{ type: "SOLID", color: progressRgb }];
+    progressFill.x = 0;
+    progressFill.y = 0;
+
+    barContainer.appendChild(progressFill);
+    component.appendChild(barContainer);
+
+    // Percentage text jika diperlukan
+    if (showPercentage === "yes") {
+      const percentageText = figma.createText();
+      percentageText.characters = `${progressValue}%`;
+      percentageText.fontName = { family: "Inter", style: "Regular" };
+      percentageText.fontSize = 14;
+      percentageText.fills = [{ type: "SOLID", color: percentageTextRgb }];
+      percentageText.layoutAlign = "INHERIT";
+      percentageText.constraints = { horizontal: "MIN", vertical: "MIN" };
+      percentageText.layoutPositioning = "AUTO";
+      component.appendChild(percentageText);
+    }
+
+    // Simpan data plugin
+    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    component.setPluginData("id", componentId);
+    component.setPluginData("htmltailwind", htmltailwind || "");
+
+    // Store styling data
+    component.setPluginData("progressValue", progressValue);
+    component.setPluginData("progressType", progressType);
+    component.setPluginData("width", width);
+    component.setPluginData("height", height);
+    component.setPluginData("progressColor", progressColor);
+    component.setPluginData("bgColor", bgColor);
+    component.setPluginData("borderRadius", borderRadius);
+    component.setPluginData("percentageTextColor", percentageTextColor);
+    component.setPluginData("percentageMargin", percentageMargin);
+    component.setPluginData("showPercentage", showPercentage);
+
+    // Tambahkan ke canvas dan seleksi
+    figma.currentPage.appendChild(component);
+    figma.viewport.scrollAndZoomIntoView([component]);
+    figma.currentPage.selection = [component];
+
+    figma.notify(`✅ Progress Indicator berhasil dibuat!`);
+  });
+
+  on<CreateDataTableHandler>("CREATE_DATA_TABLE", async props => {
+    const { columns, rows, headerBgColor, headerTextColor, rowBgColor, stripedRowBgColor, rowTextColor, borderColor, fontSize, padding, stripedRows, textAlignment, htmltailwind } = props;
+
+    try {
+      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+    } catch (error) {
+      figma.notify("Gagal memuat font 'Inter': " + error);
+      return;
+    }
+
+    // Parse values
+    const columnList = columns
+      .split(",")
+      .map(c => c.trim())
+      .filter(c => c.length > 0);
+    const rowCount = parseInt(rows) || 3;
+    const fontSizeValue = Number(fontSize) || 14;
+
+    // Parse padding
+    let paddingTop = 12;
+    let paddingBottom = 12;
+    let paddingLeft = 16;
+    let paddingRight = 16;
+
+    if (padding) {
+      const paddingValues = padding.split(",").map((val: string) => parseInt(val.trim().replace("px", ""), 10));
+      if (paddingValues.length === 2 && !isNaN(paddingValues[0]) && !isNaN(paddingValues[1])) {
+        paddingTop = paddingValues[0];
+        paddingBottom = paddingValues[0];
+        paddingLeft = paddingValues[1];
+        paddingRight = paddingValues[1];
+      }
+    }
+
+    // Convert colors to RGB
+    const headerBgRgb = hexToRgb(headerBgColor);
+    const headerTextRgb = hexToRgb(headerTextColor);
+    const rowBgRgb = hexToRgb(rowBgColor);
+    const stripedRowBgRgb = hexToRgb(stripedRowBgColor);
+    const rowTextRgb = hexToRgb(rowTextColor);
+    const borderRgb = hexToRgb(borderColor);
+
+    // Validasi kolom
+    if (columnList.length === 0) {
+      figma.notify("❌ Error: Minimal harus ada 1 kolom!");
+      return;
+    }
+
+    // Hitung ukuran table
+    const columnWidth = 200; // Default width per column
+    const totalWidth = columnList.length * columnWidth;
+    const estimatedRowHeight = paddingTop + paddingBottom + fontSizeValue + 10; // Padding + font + margin
+    const estimatedHeight = (rowCount + 1) * estimatedRowHeight; // +1 untuk header row
+
+    // Buat component utama untuk table
+    const component = figma.createComponent();
+    component.name = "Data Table";
+    component.layoutMode = "VERTICAL";
+    component.counterAxisSizingMode = "AUTO"; // AUTO untuk height (akan mengikuti children)
+    component.primaryAxisSizingMode = "FIXED"; // FIXED untuk width
+    component.itemSpacing = 0;
+    component.paddingLeft = 0;
+    component.paddingRight = 0;
+    component.paddingTop = 0;
+    component.paddingBottom = 0;
+    component.fills = [];
+    component.resize(totalWidth, estimatedHeight); // Set initial size
+
+    // Buat frame untuk header row
+    const headerRow = figma.createFrame();
+    headerRow.name = "Header Row";
+    headerRow.layoutMode = "HORIZONTAL";
+    headerRow.counterAxisSizingMode = "AUTO"; // AUTO untuk height
+    headerRow.primaryAxisSizingMode = "FIXED"; // FIXED untuk width (sesuai dengan component)
+    headerRow.primaryAxisAlignItems = "MIN"; // LEFT alignment seperti preview
+    headerRow.counterAxisAlignItems = "CENTER";
+    headerRow.itemSpacing = 0;
+    headerRow.paddingLeft = 0;
+    headerRow.paddingRight = 0;
+    headerRow.paddingTop = 0;
+    headerRow.paddingBottom = 0;
+    headerRow.fills = [{ type: "SOLID", color: headerBgRgb }];
+    // Border di semua sisi seperti preview
+    headerRow.strokes = [{ type: "SOLID", color: borderRgb }];
+    headerRow.strokeWeight = 1;
+    headerRow.strokeAlign = "INSIDE";
+    headerRow.resize(totalWidth, estimatedRowHeight); // Set initial size
+
+    // Mapping untuk alignment
+    const alignmentMap: { [key: string]: "MIN" | "CENTER" | "MAX" } = {
+      left: "MIN",
+      center: "CENTER",
+      right: "MAX",
+    };
+    const textAlignMap: { [key: string]: "LEFT" | "CENTER" | "RIGHT" } = {
+      left: "LEFT",
+      center: "CENTER",
+      right: "RIGHT",
+    };
+
+    // Buat header cells
+    columnList.forEach((col, idx) => {
+      const headerCell = figma.createFrame();
+      headerCell.name = `Header ${col}`;
+      headerCell.layoutMode = "VERTICAL"; // VERTICAL untuk menampung text dengan benar
+      headerCell.counterAxisSizingMode = "FIXED";
+      headerCell.primaryAxisSizingMode = "FIXED";
+      headerCell.resize(columnWidth, estimatedRowHeight); // Set size fixed
+      // Set alignment berdasarkan textAlignment
+      headerCell.primaryAxisAlignItems = alignmentMap[textAlignment] || "MIN";
+      headerCell.counterAxisAlignItems = "CENTER";
+      headerCell.itemSpacing = 0;
+      headerCell.paddingLeft = paddingLeft;
+      headerCell.paddingRight = paddingRight;
+      headerCell.paddingTop = paddingTop;
+      headerCell.paddingBottom = paddingBottom;
+      headerCell.fills = [];
+      // Border di semua sisi seperti preview (border-collapse effect)
+      headerCell.strokes = [{ type: "SOLID", color: borderRgb }];
+      headerCell.strokeWeight = 1;
+      headerCell.strokeAlign = "INSIDE";
+
+      const headerText = figma.createText();
+      headerText.characters = col;
+      headerText.fontName = { family: "Inter", style: "Medium" };
+      headerText.fontSize = fontSizeValue;
+      headerText.fills = [{ type: "SOLID", color: headerTextRgb }];
+      headerText.layoutAlign = "STRETCH"; // STRETCH untuk mengisi width cell
+      headerText.constraints = { horizontal: "STRETCH", vertical: "MIN" };
+      headerText.layoutPositioning = "AUTO";
+      // Set text alignment
+      headerText.textAlignHorizontal = textAlignMap[textAlignment] || "LEFT";
+
+      // Tambahkan text ke cell SEBELUM menambahkan cell ke row
+      headerCell.appendChild(headerText);
+      headerRow.appendChild(headerCell);
+    });
+
+    component.appendChild(headerRow);
+
+    // Buat data rows
+    for (let i = 0; i < rowCount; i++) {
+      const dataRow = figma.createFrame();
+      dataRow.name = `Row ${i + 1}`;
+      dataRow.layoutMode = "HORIZONTAL";
+      dataRow.counterAxisSizingMode = "AUTO"; // AUTO untuk height
+      dataRow.primaryAxisSizingMode = "FIXED"; // FIXED untuk width (sesuai dengan component)
+      dataRow.primaryAxisAlignItems = "MIN"; // LEFT alignment seperti preview
+      dataRow.counterAxisAlignItems = "CENTER";
+      dataRow.itemSpacing = 0;
+      dataRow.paddingLeft = 0;
+      dataRow.paddingRight = 0;
+      dataRow.paddingTop = 0;
+      dataRow.paddingBottom = 0;
+      dataRow.resize(totalWidth, estimatedRowHeight); // Set initial size
+
+      // Striped rows
+      const isStriped = stripedRows === "yes" && i % 2 === 1;
+      dataRow.fills = [{ type: "SOLID", color: isStriped ? stripedRowBgRgb : rowBgRgb }];
+      // Border di semua sisi seperti preview (border-collapse effect)
+      dataRow.strokes = [{ type: "SOLID", color: borderRgb }];
+      dataRow.strokeWeight = 1;
+      dataRow.strokeAlign = "INSIDE";
+
+      // Buat data cells
+      columnList.forEach((_, colIdx) => {
+        const dataCell = figma.createFrame();
+        dataCell.name = `Cell ${i + 1}-${colIdx + 1}`;
+        dataCell.layoutMode = "VERTICAL"; // VERTICAL untuk menampung text dengan benar
+        dataCell.counterAxisSizingMode = "FIXED";
+        dataCell.primaryAxisSizingMode = "FIXED";
+        dataCell.resize(columnWidth, estimatedRowHeight); // Set size fixed
+        // Set alignment berdasarkan textAlignment
+        dataCell.primaryAxisAlignItems = alignmentMap[textAlignment] || "MIN";
+        dataCell.counterAxisAlignItems = "CENTER";
+        dataCell.itemSpacing = 0;
+        dataCell.paddingLeft = paddingLeft;
+        dataCell.paddingRight = paddingRight;
+        dataCell.paddingTop = paddingTop;
+        dataCell.paddingBottom = paddingBottom;
+        dataCell.fills = [];
+        // Border di semua sisi seperti preview (border-collapse effect)
+        dataCell.strokes = [{ type: "SOLID", color: borderRgb }];
+        dataCell.strokeWeight = 1;
+        dataCell.strokeAlign = "INSIDE";
+
+        const cellText = figma.createText();
+        cellText.characters = "Data";
+        cellText.fontName = { family: "Inter", style: "Regular" };
+        cellText.fontSize = fontSizeValue;
+        cellText.fills = [{ type: "SOLID", color: rowTextRgb }];
+        cellText.layoutAlign = "STRETCH"; // STRETCH untuk mengisi width cell
+        cellText.constraints = { horizontal: "STRETCH", vertical: "MIN" };
+        cellText.layoutPositioning = "AUTO";
+        // Set text alignment
+        cellText.textAlignHorizontal = textAlignMap[textAlignment] || "LEFT";
+
+        // Tambahkan text ke cell SEBELUM menambahkan cell ke row
+        dataCell.appendChild(cellText);
+        dataRow.appendChild(dataCell);
+      });
+
+      component.appendChild(dataRow);
+    }
+
+    // Simpan data plugin
+    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    component.setPluginData("id", componentId);
+    component.setPluginData("htmltailwind", htmltailwind || "");
+
+    // Store styling data
+    component.setPluginData("columns", columns);
+    component.setPluginData("rows", rows);
+    component.setPluginData("headerBgColor", headerBgColor);
+    component.setPluginData("headerTextColor", headerTextColor);
+    component.setPluginData("rowBgColor", rowBgColor);
+    component.setPluginData("stripedRowBgColor", stripedRowBgColor);
+    component.setPluginData("rowTextColor", rowTextColor);
+    component.setPluginData("borderColor", borderColor);
+    component.setPluginData("fontSize", fontSize);
+    component.setPluginData("padding", padding);
+    component.setPluginData("stripedRows", stripedRows);
+    component.setPluginData("textAlignment", textAlignment);
+
+    // Komponen sudah memiliki ukuran yang valid dari resize di atas
+
+    // Tambahkan ke canvas dan seleksi
+    figma.currentPage.appendChild(component);
+    figma.viewport.scrollAndZoomIntoView([component]);
+    figma.currentPage.selection = [component];
+
+    figma.notify(`✅ Data Table berhasil dibuat (${columnList.length} kolom, ${rowCount} baris)!`);
+  });
+
+  on<CreateRadioButtonHandler>("CREATE_RADIO_BUTTON", async props => {
+    const { headingLabel, headingFontSize, headingColor, radioLabels, radioCount, labelColor, labelFontSize, checkedColor, layoutDirection, hoverBorderColor, hoverBgColor, transitionType, htmltailwind } = props;
+
+    try {
+      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+    } catch (error) {
+      figma.notify("Gagal memuat font 'Inter': " + error);
+      return;
+    }
+
+    // Buat component
+    const component = figma.createComponent();
+    component.name = "Radio Button";
+    component.layoutMode = layoutDirection === "horizontal" ? "HORIZONTAL" : "VERTICAL";
+    component.counterAxisSizingMode = "AUTO";
+    component.primaryAxisSizingMode = "AUTO";
+    component.itemSpacing = layoutDirection === "horizontal" ? 12 : 12;
+    component.paddingLeft = 0;
+    component.paddingRight = 0;
+    component.paddingTop = 0;
+    component.paddingBottom = 0;
+    component.fills = [];
+
+    // Buat heading text di atas
+    const headingText = figma.createText();
+    headingText.characters = headingLabel;
+    headingText.fontName = { family: "Inter", style: "Medium" };
+    headingText.fontSize = Number(headingFontSize) || 18;
+    headingText.fills = [{ type: "SOLID", color: hexToRgb(headingColor) }];
+    headingText.name = "Heading";
+
+    // Buat container untuk heading dan radio buttons
+    const container = figma.createFrame();
+    container.name = "Radio Button Container";
+    container.layoutMode = "VERTICAL";
+    container.counterAxisSizingMode = "AUTO";
+    container.primaryAxisSizingMode = "AUTO";
+    container.itemSpacing = 16;
+    container.fills = [];
+
+    container.appendChild(headingText);
+
+    // Buat form frame untuk radio buttons
+    const formFrame = figma.createFrame();
+    formFrame.name = "Form";
+    formFrame.layoutMode = layoutDirection === "horizontal" ? "HORIZONTAL" : "VERTICAL";
+    formFrame.counterAxisSizingMode = "AUTO";
+    formFrame.primaryAxisSizingMode = "AUTO";
+    formFrame.itemSpacing = 12;
+    formFrame.fills = [];
+
+    // Parse labels
+    const count = parseInt(radioCount) || 1;
+    const labels = radioLabels
+      .split(",")
+      .map(l => l.trim())
+      .slice(0, count);
+
+    // Buat multiple radio buttons
+    for (let i = 0; i < labels.length; i++) {
+      // Buat frame untuk radio + label inline
+      const radioRow = figma.createFrame();
+      radioRow.name = `Radio ${i + 1}`;
+      radioRow.layoutMode = "HORIZONTAL";
+      radioRow.counterAxisSizingMode = "AUTO";
+      radioRow.primaryAxisSizingMode = "AUTO";
+      radioRow.itemSpacing = 8; // space-x-2 = 8px
+      radioRow.fills = [];
+
+      // Buat frame untuk radio button (untuk menampung outer dan inner circle)
+      const radioFrame = figma.createFrame();
+      radioFrame.name = "Radio Button";
+      radioFrame.resize(16, 16);
+      radioFrame.fills = [];
+      radioFrame.clipsContent = true;
+
+      // Buat radio button circle (default size: 16px = w-4 h-4)
+      const radioCircle = figma.createEllipse();
+      radioCircle.name = "Radio Circle";
+      radioCircle.resize(16, 16);
+      radioCircle.fills = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }]; // white background
+      radioCircle.strokes = [{ type: "SOLID", color: { r: 0.82, g: 0.82, b: 0.82 } }]; // border-gray-300
+      radioCircle.strokeWeight = 1;
+      radioFrame.appendChild(radioCircle);
+
+      // Buat inner circle untuk checked state (jika i === 0, set as checked)
+      if (i === 0) {
+        const innerCircle = figma.createEllipse();
+        innerCircle.name = "Inner Circle";
+        innerCircle.resize(8, 8);
+        innerCircle.fills = [{ type: "SOLID", color: hexToRgb(checkedColor) }];
+        innerCircle.x = 4;
+        innerCircle.y = 4;
+        radioFrame.appendChild(innerCircle);
+      }
+
+      // Buat label text
+      const labelText = figma.createText();
+      labelText.characters = labels[i];
+      labelText.fontName = { family: "Inter", style: "Regular" };
+      labelText.fontSize = Number(labelFontSize) || 14;
+      labelText.fills = [{ type: "SOLID", color: hexToRgb(labelColor) }];
+      labelText.name = "Label";
+
+      // Susun radio row
+      radioRow.appendChild(radioFrame);
+      radioRow.appendChild(labelText);
+
+      // Tambahkan radio row ke form frame
+      formFrame.appendChild(radioRow);
+    }
+
+    container.appendChild(formFrame);
+    component.appendChild(container);
+
+    // Simpan data plugin
+    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    component.setPluginData("id", componentId);
+    component.setPluginData("htmltailwind", htmltailwind || "");
+    component.setPluginData("radioButtonProps", JSON.stringify(props));
+
+    // Store styling data
+    component.setPluginData("headingLabel", headingLabel);
+    component.setPluginData("headingFontSize", headingFontSize);
+    component.setPluginData("headingColor", headingColor);
+    component.setPluginData("radioLabels", radioLabels);
+    component.setPluginData("radioCount", radioCount);
+    component.setPluginData("labelColor", labelColor);
+    component.setPluginData("labelFontSize", labelFontSize);
+    component.setPluginData("checkedColor", checkedColor);
+    component.setPluginData("layoutDirection", layoutDirection);
+    component.setPluginData("hoverBorderColor", hoverBorderColor);
+    component.setPluginData("hoverBgColor", hoverBgColor);
+    component.setPluginData("transitionType", transitionType);
+
+    // Tambahkan ke canvas dan seleksi
+    figma.currentPage.appendChild(component);
+    figma.viewport.scrollAndZoomIntoView([component]);
+    figma.currentPage.selection = [component];
+
+    figma.notify(`✅ Radio Button berhasil dibuat (${labels.length} radio)!`);
+  });
+
   // Fungsi bantu konversi HEX ke RGB Figma
   function hexToRgb(hex: string) {
     let c = hex.replace("#", "");
@@ -1434,5 +2246,5 @@ export default function () {
     };
   }
 
-  showUI({ width: 1200, height: 600 });
+  showUI({ width: 1200, height: 700 });
 }

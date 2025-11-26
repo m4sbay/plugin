@@ -1,6 +1,6 @@
 import { render } from "@create-figma-plugin/ui";
 import { h } from "preact";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { Dashboard } from "./components/Dashboard";
 import { ComponentList } from "./components/ComponentList";
 import { ButtonCreator } from "./components/ButtonCreator";
@@ -17,9 +17,21 @@ import { DataTableCreator } from "./components/DataTableCreator";
 
 function Plugin() {
   const [page, setPage] = useState <"dashboard" | "component-list" | "button-creator" | "checkbox-creator" | "text-field-creator" | "radio-button" | "tabs-creator" | "switch-creator" | "alert-banner-creator" | "tooltip-creator" | "progress-indicator-creator" | "data-table-creator">("dashboard");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) {
+      return;
+    }
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const updateMode = () => setIsDarkMode(media.matches);
+    updateMode();
+    media.addEventListener("change", updateMode);
+    return () => media.removeEventListener("change", updateMode);
+  }, []);
 
   if (page === "dashboard") {
-    return <Dashboard onStart={() => setPage("component-list")} />;
+    return <Dashboard onStart={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "component-list") {
     return (
@@ -37,38 +49,39 @@ function Plugin() {
           if (name === "Data Table") setPage("data-table-creator");
         }}
         onBack={() => setPage("dashboard")}
+        isDark={isDarkMode}
       />
     );
   }
   if (page === "button-creator") {
-    return <ButtonCreator onBack={() => setPage("component-list")} />;
+    return <ButtonCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "checkbox-creator") {
-    return <CheckboxCreator onBack={() => setPage("component-list")} />;
+    return <CheckboxCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "text-field-creator") {
-    return <TextFieldCreator onBack={() => setPage("component-list")} />;
+    return <TextFieldCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "radio-button") {
-    return <RadioButton onBack={() => setPage("component-list")} />;
+    return <RadioButton onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "tabs-creator") {
-    return <TabsCreator onBack={() => setPage("component-list")} />;
+    return <TabsCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "switch-creator") {
-    return <SwitchCreator onBack={() => setPage("component-list")} />;
+    return <SwitchCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "alert-banner-creator") {
-    return <AlertBannerCreator onBack={() => setPage("component-list")} />;
+    return <AlertBannerCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "tooltip-creator") {
-    return <TooltipCreator onBack={() => setPage("component-list")} />;
+    return <TooltipCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "progress-indicator-creator") {
-    return <ProgressIndicatorCreator onBack={() => setPage("component-list")} />;
+    return <ProgressIndicatorCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
   if (page === "data-table-creator") {
-    return <DataTableCreator onBack={() => setPage("component-list")} />;
+    return <DataTableCreator onBack={() => setPage("component-list")} isDark={isDarkMode} />;
   }
 
   return null;
