@@ -16,12 +16,11 @@
     "dev": "build-figma-plugin --typecheck --watch"
   },
   "figma-plugin": {
-    "editorType": [
-      "figma"
-    ],
+    "editorType": ["figma"],
     "id": "iTailwind",
     "name": "iTailwind",
     "main": "src/main.ts",
     "ui": "src/ui.tsx"
   }
 }
+

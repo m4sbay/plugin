@@ -22,6 +22,7 @@ export function ComponentList({ onSelectComponent, onBack, isDark = false }: Com
   return (
     <div
       style={{
+
         padding: "48px 70px",
         minHeight: "100vh",
         background,
@@ -62,6 +63,7 @@ export function ComponentList({ onSelectComponent, onBack, isDark = false }: Com
             <div
               key={name}
               style={{
+                
                 display: "flex",
                 justifyContent: "center",
                 ...(shouldCenter && {
@@ -71,6 +73,8 @@ export function ComponentList({ onSelectComponent, onBack, isDark = false }: Com
             >
               <Button
                 style={{
+                  cursor: "pointer",
+                  hover: "primaryButton",
                   fontSize: 26,
                   fontWeight: 400,
                   borderRadius: 16,

@@ -42,6 +42,8 @@ export function Dashboard({ onStart, isDark = false }: DashboardProps) {
           justifyContent: "center",
           minHeight: 60,
           boxShadow: buttonShadow,
+          className: "primaryButton",
+          cursor: "pointer",
         }}
         fullWidth={false}
         onClick={onStart}

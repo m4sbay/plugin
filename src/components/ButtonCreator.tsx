@@ -185,6 +185,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
     // Calculate padding - default 10px jika kosong
     let paddingStyle = "10px";
+    let widthStyle = "";
     if (padding) {
       const parts = padding
         .split(",")
@@ -194,10 +195,22 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
       if (values.length === 1) {
         // Hanya satu nilai (lebar atau tinggi saja)
-        paddingStyle = `${values[0]}px`;
+        if (values[0] === 100) {
+          widthStyle = "100%";
+          paddingStyle = "10px";
+        } else {
+          paddingStyle = `${values[0]}px`;
+        }
       } else if (values.length === 2) {
-        // Dua nilai (lebar, tinggi) - format: py px
-        paddingStyle = `${values[1]}px ${values[0]}px`;
+        // Dua nilai (sumbu x, sumbu y)
+        if (values[0] === 100) {
+          // Jika sumbu x = 100, gunakan width 100% dan padding hanya untuk sumbu y
+          widthStyle = "100%";
+          paddingStyle = `${values[1]}px`;
+        } else {
+          // Format normal: py px
+          paddingStyle = `${values[1]}px ${values[0]}px`;
+        }
       }
     }
 
@@ -231,7 +244,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     }
 
     // Build inline styles (tanpa transform hover - hanya untuk kondisi normal)
-    const styles = {
+    const styles: Record<string, string> = {
       backgroundColor: `#${cleanHexColor}`,
       color: `#${cleanHexLabelColor}`,
       borderRadius: `${defaultBorderRadius}px`,
@@ -246,6 +259,12 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       justifyContent: "center",
       outline: "none",
     };
+
+    // Jika widthStyle di-set (sumbu x = 100), tambahkan width dan ubah display menjadi flex
+    if (widthStyle) {
+      styles.width = widthStyle;
+      styles.display = "flex";
+    }
 
     // Convert styles object to string
     const styleString = Object.entries(styles)
@@ -377,6 +396,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       const defaultBorderColor = borderColor || "#000000";
 
       let tailwindPadding = "p-[10px]"; // default
+      let tailwindWidth = ""; // untuk w-full jika sumbu x = 100
       if (padding) {
         const parts = padding
           .split(",")
@@ -386,10 +406,22 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
         if (values.length === 1) {
           // Hanya satu nilai (lebar atau tinggi saja)
-          tailwindPadding = `p-[${values[0]}px]`;
+          if (values[0] === 100) {
+            tailwindWidth = "w-full";
+            tailwindPadding = "p-[10px]";
+          } else {
+            tailwindPadding = `p-[${values[0]}px]`;
+          }
         } else if (values.length === 2) {
-          // Dua nilai (lebar, tinggi) - format: py px
-          tailwindPadding = `py-[${values[1]}px] px-[${values[0]}px]`;
+          // Dua nilai (sumbu x, sumbu y)
+          if (values[0] === 100) {
+            // Jika sumbu x = 100, gunakan w-full dan padding hanya untuk sumbu y
+            tailwindWidth = "w-full";
+            tailwindPadding = `py-[${values[1]}px]`;
+          } else {
+            // Format normal: py px
+            tailwindPadding = `py-[${values[1]}px] px-[${values[0]}px]`;
+          }
         }
       }
 
@@ -397,7 +429,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       const cleanHexLabelColor = defaultHexLabelColor.replace("#", "");
 
       // Base classes
-      let classes = `bg-[#${cleanHexColor}] rounded-[${defaultBorderRadius}px] text-[${defaultFontSize}px] ${tailwindPadding} text-[#${cleanHexLabelColor}] cursor-pointer`;
+      let classes = `bg-[#${cleanHexColor}] rounded-[${defaultBorderRadius}px] text-[${defaultFontSize}px] ${tailwindWidth ? tailwindWidth + " " : ""}${tailwindPadding} text-[#${cleanHexLabelColor}] cursor-pointer`;
 
       // Border styling
       if (defaultBorderWidth > 0) {
@@ -803,7 +835,25 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             }}
           >
             {previewHtml ? (
-              <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+              <div
+                style={{
+                  width: (() => {
+                    // Cek apakah sumbu x = 100
+                    if (padding) {
+                      const parts = padding
+                        .split(",")
+                        .map(val => val.trim())
+                        .filter(val => val !== "");
+                      const values = parts.map(val => parseInt(val, 10)).filter(val => !isNaN(val));
+                      if (values.length >= 1 && values[0] === 100) {
+                        return "100%";
+                      }
+                    }
+                    return "auto";
+                  })(),
+                }}
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              />
             ) : (
               <Text>
                 <Muted>Preview akan muncul di sini...</Muted>

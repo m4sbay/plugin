@@ -5,6 +5,14 @@
   border-radius: 4px;
 }
 
+.primaryButton {
+  background: #189eff;
+  color: #fff;
+}
+.primaryButton:hover {
+  background: #0f7cd9; /* warna hover */
+}
+
 /* Tailwind CSS for live preview */
 .preview-container {
   font-family: Inter, system-ui, sans-serif;

@@ -118,6 +118,7 @@ export default function () {
       component.paddingTop = paddingTop;
       component.paddingBottom = paddingBottom;
       component.itemSpacing = 0;
+      
 
       const text = figma.createText();
       text.characters = label;

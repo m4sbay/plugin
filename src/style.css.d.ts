@@ -5,6 +5,7 @@ declare const styles: {
   readonly "equal-columns": string;
   readonly "preview-button": string;
   readonly "preview-container": string;
+  readonly "primaryButton": string;
   readonly "section-divider": string;
   readonly "sticky-preview": string;
 };

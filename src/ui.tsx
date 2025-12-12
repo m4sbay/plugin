@@ -30,6 +30,7 @@ function Plugin() {
     return () => media.removeEventListener("change", updateMode);
   }, []);
 
+
   if (page === "dashboard") {
     return <Dashboard onStart={() => setPage("component-list")} isDark={isDarkMode} />;
   }
