@@ -31,6 +31,9 @@ function customConvertHexColorToRgbColor(hex: string): { r: number; g: number; b
 }
 
 export default function () {
+  // Dipanggil dari UI ButtonCreator.tsx ketika pengguna menekan tombol "Buat".
+  // Menerima seluruh properti styling (statis & dinamis), membuat komponen Button di Figma,
+  // menyimpan nilai-nilai tersebut di pluginData (agar bisa direload), lalu menaruh komponen di canvas.
   on<CreateButtonHandler>(
     "CREATE_BUTTON",
     async (
@@ -118,7 +121,6 @@ export default function () {
       component.paddingTop = paddingTop;
       component.paddingBottom = paddingBottom;
       component.itemSpacing = 0;
-      
 
       const text = figma.createText();
       text.characters = label;
@@ -195,6 +197,9 @@ export default function () {
     }
   );
 
+  // Event dari UI (ButtonCreator) untuk memuat ulang data saat selection berubah di canvas.
+  // Jika node terpilih adalah Button, seluruh styling dibaca dari pluginData dan dikirim ke UI
+  // supaya form ButtonCreator terisi otomatis.
   on<SelectionChangeHandler>("SELECTION_CHANGE", () => {
     const selection = figma.currentPage.selection;
     if (selection.length > 0) {
@@ -426,6 +431,8 @@ export default function () {
     figma.closePlugin();
   });
 
+  // Listener global Figma: ketika user mengganti seleksi di canvas, data Button (jika ada)
+  // diambil dari pluginData dan dikirim ke UI agar state di ButtonCreator tetap sinkron.
   figma.on("selectionchange", () => {
     const selection = figma.currentPage.selection;
     if (selection.length > 0) {
@@ -465,6 +472,7 @@ export default function () {
         emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(buttonData));
       } else if (htmltailwind && selectedNode.name === "Checkbox") {
         // Get all stored checkbox data
+
         const checkboxData = {
           htmltailwind: htmltailwind,
           headingLabel: selectedNode.getPluginData("headingLabel") || "",
@@ -662,6 +670,7 @@ export default function () {
     component.layoutMode = "VERTICAL";
     component.counterAxisSizingMode = "AUTO";
     component.primaryAxisSizingMode = "AUTO";
+    component.counterAxisAlignItems = "CENTER";
     component.itemSpacing = 8;
     component.paddingLeft = 0;
     component.paddingRight = 0;
@@ -718,23 +727,19 @@ export default function () {
 
   on("CREATE_CHECKBOX", async props => {
     const {
-      headingLabel,
-      headingFontSize,
-      headingColor,
       checkboxLabel,
-      checkboxCount,
+      checkboxDescription,
       labelColor,
       labelFontSize,
+      descriptionColor,
+      descriptionFontSize,
       checkboxSize,
-      borderWidth,
       borderRadius,
-      borderColor,
       checkedBgColor,
-      checkedBorderColor,
       uncheckedBgColor,
       gapBetweenCheckboxLabel,
-      hoverBorderColor,
-      hoverBgColor,
+      checkmarkSize,
+      checkmarkColor,
       focusRingWidth,
       focusRingColor,
       transitionType,
@@ -755,58 +760,69 @@ export default function () {
     component.layoutMode = "VERTICAL";
     component.counterAxisSizingMode = "AUTO";
     component.primaryAxisSizingMode = "AUTO";
-    component.itemSpacing = 12;
+    component.itemSpacing = 4;
     component.paddingLeft = 0;
     component.paddingRight = 0;
     component.paddingTop = 0;
     component.paddingBottom = 0;
     component.fills = [];
 
-    // Buat heading text di atas
-    const headingText = figma.createText();
-    headingText.characters = headingLabel;
-    headingText.fontName = { family: "Inter", style: "Medium" };
-    headingText.fontSize = Number(headingFontSize) || 16;
-    headingText.fills = [{ type: "SOLID", color: hexToRgb(headingColor) }];
-    headingText.name = "Heading";
+    // Baris checkbox + label
+    const row = figma.createFrame();
+    row.name = "Checkbox Row";
+    row.layoutMode = "HORIZONTAL";
+    row.counterAxisSizingMode = "AUTO";
+    row.primaryAxisSizingMode = "AUTO";
+    row.itemSpacing = Number(gapBetweenCheckboxLabel) || 8;
+    row.fills = [];
+    row.counterAxisAlignItems = "CENTER";
 
-    component.appendChild(headingText);
+    // Checkbox
+    const checkboxBox = figma.createRectangle();
+    checkboxBox.name = "Checkbox Box";
+    const size = Number(checkboxSize) || 20;
+    checkboxBox.resize(size, size);
+    checkboxBox.cornerRadius = Number(borderRadius) || 4;
+    checkboxBox.fills = [{ type: "SOLID", color: customConvertHexColorToRgbColor(uncheckedBgColor) || { r: 1, g: 1, b: 1 } }];
+    checkboxBox.strokes = [];
 
-    // Buat multiple checkbox sesuai checkboxCount
-    const count = parseInt(checkboxCount) || 1;
-    for (let i = 0; i < count; i++) {
-      // Buat frame untuk checkbox + label inline
-      const checkboxRow = figma.createFrame();
-      checkboxRow.name = `Checkbox ${i + 1}`;
-      checkboxRow.layoutMode = "HORIZONTAL";
-      checkboxRow.counterAxisSizingMode = "AUTO";
-      checkboxRow.primaryAxisSizingMode = "AUTO";
-      checkboxRow.itemSpacing = Number(gapBetweenCheckboxLabel) || 8;
-      checkboxRow.fills = [];
+    // Label
+    const labelText = figma.createText();
+    labelText.characters = checkboxLabel || "Checkbox";
+    labelText.fontName = { family: "Inter", style: "Medium" };
+    labelText.fontSize = Number(labelFontSize) || 14;
+    labelText.fills = [{ type: "SOLID", color: customConvertHexColorToRgbColor(labelColor) || { r: 1, g: 1, b: 1 } }];
+    labelText.name = "Label";
 
-      // Buat checkbox box
-      const checkboxBox = figma.createRectangle();
-      checkboxBox.name = "Checkbox Box";
-      checkboxBox.resize(Number(checkboxSize) || 20, Number(checkboxSize) || 20);
-      checkboxBox.cornerRadius = Number(borderRadius) || 4;
-      checkboxBox.fills = [{ type: "SOLID", color: hexToRgb(uncheckedBgColor) }];
-      checkboxBox.strokes = [{ type: "SOLID", color: hexToRgb(borderColor) }];
-      checkboxBox.strokeWeight = Number(borderWidth) || 2;
+    row.appendChild(checkboxBox);
+    row.appendChild(labelText);
 
-      // Buat label inline (setelah checkbox)
-      const inlineLabel = figma.createText();
-      inlineLabel.characters = count > 1 ? `${checkboxLabel} ${i + 1}` : checkboxLabel;
-      inlineLabel.fontName = { family: "Inter", style: "Regular" };
-      inlineLabel.fontSize = Number(labelFontSize) || 14;
-      inlineLabel.fills = [{ type: "SOLID", color: hexToRgb(labelColor) }];
-      inlineLabel.name = "Label";
+    component.appendChild(row);
 
-      // Susun checkbox row
-      checkboxRow.appendChild(checkboxBox);
-      checkboxRow.appendChild(inlineLabel);
+    // Deskripsi (optional) dengan indent sama gap
+    if (checkboxDescription) {
+      const descFrame = figma.createFrame();
+      descFrame.name = "Description Container";
+      descFrame.layoutMode = "HORIZONTAL";
+      descFrame.counterAxisSizingMode = "AUTO";
+      descFrame.primaryAxisSizingMode = "AUTO";
+      descFrame.fills = [];
+      const gapPx = Number(gapBetweenCheckboxLabel) || 0;
+      const sizePx = Number(checkboxSize) || 20;
+      descFrame.paddingLeft = gapPx + sizePx;
+      descFrame.paddingRight = 0;
+      descFrame.paddingTop = 0;
+      descFrame.paddingBottom = 0;
 
-      // Tambahkan checkbox row ke component
-      component.appendChild(checkboxRow);
+      const descriptionText = figma.createText();
+      descriptionText.characters = checkboxDescription;
+      descriptionText.fontName = { family: "Inter", style: "Regular" };
+      descriptionText.fontSize = Number(descriptionFontSize) || 14;
+      descriptionText.fills = [{ type: "SOLID", color: customConvertHexColorToRgbColor(descriptionColor) || { r: 0.61, g: 0.64, b: 0.69 } }];
+      descriptionText.name = "Description";
+
+      descFrame.appendChild(descriptionText);
+      component.appendChild(descFrame);
     }
 
     // Simpan data plugin
@@ -816,23 +832,19 @@ export default function () {
     component.setPluginData("checkboxProps", JSON.stringify(props));
 
     // Store styling data
-    component.setPluginData("headingLabel", headingLabel);
-    component.setPluginData("headingFontSize", headingFontSize);
-    component.setPluginData("headingColor", headingColor);
-    component.setPluginData("checkboxLabel", checkboxLabel);
-    component.setPluginData("checkboxCount", checkboxCount);
+    component.setPluginData("checkboxLabel", checkboxLabel || "");
+    component.setPluginData("checkboxDescription", checkboxDescription || "");
     component.setPluginData("labelColor", labelColor);
     component.setPluginData("labelFontSize", labelFontSize);
+    component.setPluginData("descriptionColor", descriptionColor);
+    component.setPluginData("descriptionFontSize", descriptionFontSize);
     component.setPluginData("checkboxSize", checkboxSize);
-    component.setPluginData("borderWidth", borderWidth);
     component.setPluginData("borderRadius", borderRadius);
-    component.setPluginData("borderColor", borderColor);
     component.setPluginData("checkedBgColor", checkedBgColor);
-    component.setPluginData("checkedBorderColor", checkedBorderColor);
     component.setPluginData("uncheckedBgColor", uncheckedBgColor);
     component.setPluginData("gapBetweenCheckboxLabel", gapBetweenCheckboxLabel);
-    component.setPluginData("hoverBorderColor", hoverBorderColor);
-    component.setPluginData("hoverBgColor", hoverBgColor);
+    component.setPluginData("checkmarkSize", checkmarkSize);
+    component.setPluginData("checkmarkColor", checkmarkColor);
     component.setPluginData("focusRingWidth", focusRingWidth);
     component.setPluginData("focusRingColor", focusRingColor);
     component.setPluginData("transitionType", transitionType);
@@ -842,11 +854,11 @@ export default function () {
     figma.viewport.scrollAndZoomIntoView([component]);
     figma.currentPage.selection = [component];
 
-    figma.notify(`✅ Checkbox berhasil dibuat (${count} checkbox)!`);
+    figma.notify("✅ Checkbox berhasil dibuat!");
   });
 
   on("CREATE_TEXT_FIELD", async props => {
-    const { label, labelColor, fontSize, placeholder, width, height, bgColor, borderRadius, outlineWidth, outlineColor, padding, shadow, hoverBgColor, activeRingWidth, ringColor, transitionType, labelGap, htmltailwind } = props;
+    const { label, labelColor, fontSize, placeholder, width, height, bgColor, borderRadius, borderColor, paddingX, paddingY, gap, inputTextColor, focusRingColor, htmltailwind } = props;
 
     try {
       await figma.loadFontAsync({ family: "Inter", style: "Regular" });
@@ -855,10 +867,10 @@ export default function () {
       return;
     }
 
-    // Parse labelGap untuk jarak antara label dan input
-    let gapValue = 8; // default
-    if (labelGap) {
-      const gapMatch = labelGap.match(/(\d+)/);
+    // Parse gap untuk jarak antara label dan input
+    let gapValue = 12; // default
+    if (gap) {
+      const gapMatch = gap.match(/(\d+)/);
       if (gapMatch) gapValue = Number(gapMatch[1]);
     }
 
@@ -880,93 +892,66 @@ export default function () {
       const labelText = figma.createText();
       labelText.characters = label;
       labelText.fontName = { family: "Inter", style: "Regular" };
-      // Gunakan fontSize (yang sebenarnya labelFontSize dari TextFieldCreator)
       labelText.fontSize = Number(fontSize) || 14;
-      labelText.fills = [{ type: "SOLID", color: hexToRgb(labelColor || "#111827") }];
+      const labelRgb = customConvertHexColorToRgbColor(labelColor || "#64748B");
+      if (labelRgb) {
+        labelText.fills = [{ type: "SOLID", color: labelRgb }];
+      } else {
+        labelText.fills = [{ type: "SOLID", color: { r: 0.39, g: 0.45, b: 0.55 } }]; // Default slate-500
+      }
       labelText.name = "Label";
       component.appendChild(labelText);
     }
 
-    // Parse width untuk wrapper frame
-    let wrapperWidth: number | undefined = undefined;
+    // Parse width untuk input frame
+    let inputWidth: number | undefined = undefined;
     if (width) {
       const widthMatch = width.match(/(\d+)/);
-      if (widthMatch) wrapperWidth = Number(widthMatch[1]);
+      if (widthMatch) inputWidth = Number(widthMatch[1]);
     }
 
-    // Parse padding untuk input field
-    // Format padding: "wrapperPadding,inputPadding" dari TextFieldCreator
-    // wrapperPadding untuk paddingLeft, inputPadding untuk paddingTop/Bottom
-    let paddingLeft = 12; // default wrapperPadding
-    let paddingRight = 0;
-    let paddingTop = 6; // default inputPadding
-    let paddingBottom = 6; // default inputPadding
+    // Parse padding
+    const paddingXValue = paddingX ? Number(paddingX.replace(/px/gi, "").trim()) || 12 : 12;
+    const paddingYValue = paddingY ? Number(paddingY.replace(/px/gi, "").trim()) || 8 : 8;
 
-    if (padding) {
-      const paddingValues = padding.split(",").map((val: string) => parseInt(val.trim().replace("px", ""), 10));
-      if (paddingValues.length >= 2 && !isNaN(paddingValues[0]) && !isNaN(paddingValues[1])) {
-        // paddingValues[0] = wrapperPadding (untuk paddingLeft)
-        // paddingValues[1] = inputPadding (untuk paddingTop dan Bottom)
-        paddingLeft = paddingValues[0];
-        paddingTop = paddingValues[1];
-        paddingBottom = paddingValues[1];
-        paddingRight = paddingValues[1]; // pr dari input padding
-      } else if (paddingValues.length >= 1 && !isNaN(paddingValues[0])) {
-        // Fallback jika hanya satu nilai
-        paddingTop = paddingValues[0];
-        paddingBottom = paddingValues[0];
-        paddingLeft = paddingValues[0] * 2;
-        paddingRight = paddingValues[0] * 2;
-      }
-    }
-
-    // Buat wrapper frame (sesuai struktur HTML dengan wrapper div)
-    const wrapperFrame = figma.createFrame();
-    wrapperFrame.name = "Input Wrapper";
-    wrapperFrame.layoutMode = "HORIZONTAL";
-    if (wrapperWidth) {
-      wrapperFrame.counterAxisSizingMode = "FIXED";
-      wrapperFrame.primaryAxisSizingMode = "FIXED";
-      wrapperFrame.resize(wrapperWidth, 40); // Default height 40
-    } else {
-      wrapperFrame.counterAxisSizingMode = "AUTO";
-      wrapperFrame.primaryAxisSizingMode = "AUTO";
-    }
-    wrapperFrame.primaryAxisAlignItems = "MIN";
-    wrapperFrame.counterAxisAlignItems = "CENTER";
-    wrapperFrame.paddingLeft = paddingLeft; // wrapperPadding
-    wrapperFrame.paddingRight = 0;
-    wrapperFrame.paddingTop = 0;
-    wrapperFrame.paddingBottom = 0;
-    wrapperFrame.fills = [{ type: "SOLID", color: hexToRgb(bgColor || "#FFFFFF") }];
-    wrapperFrame.cornerRadius = Number(borderRadius) || 6;
-
-    // Set outline/border pada wrapper (sesuai struktur HTML)
-    if (outlineWidth && Number(outlineWidth) > 0) {
-      wrapperFrame.strokes = [{ type: "SOLID", color: hexToRgb(outlineColor || "#D1D5DB") }];
-      wrapperFrame.strokeWeight = Number(outlineWidth);
-    }
-
-    // Buat frame untuk input field di dalam wrapper
+    // Buat input frame (tanpa wrapper, langsung dengan border)
     const inputFrame = figma.createFrame();
     inputFrame.name = "Input Field";
     inputFrame.layoutMode = "HORIZONTAL";
-    inputFrame.counterAxisSizingMode = "AUTO";
-    inputFrame.primaryAxisSizingMode = "AUTO";
+    if (inputWidth) {
+      inputFrame.counterAxisSizingMode = "FIXED";
+      inputFrame.primaryAxisSizingMode = "FIXED";
+      inputFrame.resize(inputWidth, 40); // Default height 40
+    } else {
+      inputFrame.counterAxisSizingMode = "AUTO";
+      inputFrame.primaryAxisSizingMode = "AUTO";
+    }
     inputFrame.primaryAxisAlignItems = "MIN";
     inputFrame.counterAxisAlignItems = "CENTER";
-    inputFrame.paddingLeft = paddingRight; // pr dari input padding
-    inputFrame.paddingRight = paddingRight;
-    inputFrame.paddingTop = paddingTop;
-    inputFrame.paddingBottom = paddingBottom;
-    inputFrame.fills = [];
+    inputFrame.paddingLeft = paddingXValue;
+    inputFrame.paddingRight = paddingXValue;
+    inputFrame.paddingTop = paddingYValue;
+    inputFrame.paddingBottom = paddingYValue;
+    const bgRgb = customConvertHexColorToRgbColor(bgColor || "#FFFFFF");
+    if (bgRgb) {
+      inputFrame.fills = [{ type: "SOLID", color: bgRgb }];
+    } else {
+      inputFrame.fills = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }]; // Default white
+    }
+    inputFrame.cornerRadius = Number(borderRadius) || 8;
+
+    // Set border pada input frame
+    const borderRgb = customConvertHexColorToRgbColor(borderColor || "#CBD5E1");
+    if (borderRgb) {
+      inputFrame.strokes = [{ type: "SOLID", color: borderRgb }];
+      inputFrame.strokeWeight = 1;
+    }
 
     // Buat placeholder text di dalam input frame (jika ada placeholder)
     if (placeholder) {
       const placeholderText = figma.createText();
       placeholderText.characters = placeholder;
       placeholderText.fontName = { family: "Inter", style: "Regular" };
-      // Gunakan fontSize (labelFontSize) untuk placeholder juga
       placeholderText.fontSize = Number(fontSize) || 14;
       placeholderText.fills = [{ type: "SOLID", color: { r: 0.5, g: 0.5, b: 0.5 }, opacity: 0.5 }]; // Gray dengan opacity untuk placeholder
       placeholderText.name = "Placeholder";
@@ -976,29 +961,8 @@ export default function () {
       inputFrame.appendChild(placeholderText);
     }
 
-    // Set shadow effect pada wrapper jika ada
-    if (shadow) {
-      const effects: Effect[] = [];
-      // Parse shadow format seperti "0_2px_12px_rgba(0,0,0,0.08)"
-      const shadowMatch = shadow.match(/(\d+)[px]*\s+(\d+)[px]*\s+(\d+)[px]*/);
-      if (shadowMatch) {
-        effects.push({
-          type: "DROP_SHADOW",
-          color: { r: 0, g: 0, b: 0, a: 0.08 },
-          offset: { x: Number(shadowMatch[1]) || 0, y: Number(shadowMatch[2]) || 2 },
-          radius: Number(shadowMatch[3]) || 12,
-          visible: true,
-          blendMode: "NORMAL",
-        });
-      }
-      wrapperFrame.effects = effects;
-    }
-
-    // Susun struktur: wrapper -> input frame -> placeholder text
-    wrapperFrame.appendChild(inputFrame);
-
-    // Tambahkan wrapper frame ke component
-    component.appendChild(wrapperFrame);
+    // Tambahkan input frame ke component
+    component.appendChild(inputFrame);
 
     // Simpan data plugin
     const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
@@ -1012,43 +976,15 @@ export default function () {
     component.setPluginData("labelFontSize", fontSize || ""); // Alias untuk kompatibilitas
     component.setPluginData("placeholder", placeholder || "");
     component.setPluginData("width", width || "");
-    // Simpan width untuk reload
     component.setPluginData("height", height || "");
     component.setPluginData("bgColor", bgColor || "");
     component.setPluginData("borderRadius", borderRadius || "");
-    component.setPluginData("outlineWidth", outlineWidth || "");
-    component.setPluginData("outlineColor", outlineColor || "");
-    component.setPluginData("padding", padding || "");
-    // Parse padding untuk menyimpan inputPadding dan wrapperPadding
-    if (padding) {
-      const paddingValues = padding.split(",").map((val: string) => val.trim().replace("px", ""));
-      const wrapperPaddingValue = paddingValues[0];
-      const inputPaddingValue = paddingValues[1];
-
-      if (wrapperPaddingValue && !isNaN(Number(wrapperPaddingValue))) {
-        component.setPluginData("wrapperPadding", wrapperPaddingValue);
-      } else {
-        component.setPluginData("wrapperPadding", "12");
-      }
-
-      if (inputPaddingValue && !isNaN(Number(inputPaddingValue))) {
-        component.setPluginData("inputPadding", inputPaddingValue);
-      } else if (wrapperPaddingValue && !isNaN(Number(wrapperPaddingValue))) {
-        component.setPluginData("inputPadding", wrapperPaddingValue);
-      } else {
-        component.setPluginData("inputPadding", "6");
-      }
-    } else {
-      component.setPluginData("wrapperPadding", "12");
-      component.setPluginData("inputPadding", "6");
-    }
-    component.setPluginData("shadow", shadow || "");
-    component.setPluginData("hoverBgColor", hoverBgColor || "");
-    component.setPluginData("activeRingWidth", activeRingWidth || "");
-    component.setPluginData("ringColor", ringColor || "");
-    component.setPluginData("focusRingColor", ringColor || ""); // Alias untuk kompatibilitas
-    component.setPluginData("transitionType", transitionType || "");
-    component.setPluginData("labelGap", labelGap || "8");
+    component.setPluginData("borderColor", borderColor || "");
+    component.setPluginData("paddingX", paddingX || "");
+    component.setPluginData("paddingY", paddingY || "");
+    component.setPluginData("gap", gap || "");
+    component.setPluginData("inputTextColor", inputTextColor || "");
+    component.setPluginData("focusRingColor", focusRingColor || "");
 
     // Tambahkan ke canvas dan seleksi
     figma.currentPage.appendChild(component);
@@ -1158,8 +1094,15 @@ export default function () {
     figma.notify("✅ Tooltip berhasil dibuat!");
   });
 
+  // Helper function untuk normalize hex color (pastikan ada # di depan)
+  function normalizeHex(color: string): string {
+    if (!color) return "#000000";
+    const cleanColor = color.replace("#", "").toUpperCase();
+    return `#${cleanColor}`;
+  }
+
   on<CreateTabsHandler>("CREATE_TABS", async props => {
-    const { tabCount, tabLabels, fontSize, containerBgColor, activeBgColor, activeTextColor, inactiveTextColor, tabPadding, tabBorderRadius, tabGap, containerPadding, panelContents, transitionType, tabsWidth, htmltailwind } = props;
+    const { tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabPadding, tabGap, htmltailwind } = props;
 
     try {
       await figma.loadFontAsync({ family: "Inter", style: "Regular" });
@@ -1171,170 +1114,79 @@ export default function () {
 
     // Parse values
     const labels = tabLabels.split(",").map(l => l.trim());
-    const contents = panelContents.split(",").map(c => c.trim());
     const tabCountNum = parseInt(tabCount) || labels.length;
-    const py = tabPadding.split(",")[0]?.trim() || "6";
-    const px = tabPadding.split(",")[1]?.trim() || "24";
-    const borderRadius = parseFloat(tabBorderRadius) || 9999;
-    const gap = parseFloat(tabGap) || 4;
-    const containerPad = parseFloat(containerPadding) || 4;
+    const py = parseFloat(tabPadding) || 12;
+    const gap = parseFloat(tabGap) || 16;
     const fontSizeValue = parseFloat(fontSize) || 14;
-    const tabsWidthValue = tabsWidth ? parseFloat(tabsWidth) : null;
 
-    // Buat component utama
+    // Normalize hex colors dan konversi ke RGB
+    const activeTextHex = normalizeHex(activeTextColor);
+    const activeBorderHex = normalizeHex(activeBorderColor);
+    const inactiveTextHex = normalizeHex(inactiveTextColor);
+
+    const activeTextRgb = hexToRgb(activeTextHex);
+    const activeBorderRgb = hexToRgb(activeBorderHex);
+    const inactiveTextRgb = hexToRgb(inactiveTextHex);
+
+    // Buat component utama dengan layout HORIZONTAL (flex)
     const component = figma.createComponent();
     component.name = "Tabs";
-    component.layoutMode = "VERTICAL";
+    component.layoutMode = "HORIZONTAL";
     component.counterAxisSizingMode = "AUTO";
     component.primaryAxisSizingMode = "AUTO";
-    component.itemSpacing = 4;
+    component.itemSpacing = gap;
     component.paddingLeft = 0;
     component.paddingRight = 0;
     component.paddingTop = 0;
     component.paddingBottom = 0;
-    component.primaryAxisAlignItems = "CENTER";
+    component.primaryAxisAlignItems = "MIN";
     component.counterAxisAlignItems = "CENTER";
     component.fills = [];
 
-    // Buat frame untuk tabs container
-    const tabsContainer = figma.createFrame();
-    tabsContainer.name = "Tabs Container";
-    tabsContainer.layoutMode = "HORIZONTAL";
-    tabsContainer.counterAxisSizingMode = "AUTO";
-    tabsContainer.primaryAxisSizingMode = "AUTO";
-    tabsContainer.primaryAxisAlignItems = "CENTER";
-    tabsContainer.counterAxisAlignItems = "CENTER";
-    tabsContainer.itemSpacing = gap;
-    tabsContainer.paddingLeft = containerPad;
-    tabsContainer.paddingRight = containerPad;
-    tabsContainer.paddingTop = containerPad;
-    tabsContainer.paddingBottom = containerPad;
-    tabsContainer.fills = [{ type: "SOLID", color: hexToRgb(containerBgColor) }];
-    tabsContainer.cornerRadius = 9999; // rounded-full
-
-    // Buat tabs
+    // Buat tabs dengan border-bottom style
     for (let i = 0; i < tabCountNum && i < labels.length; i++) {
+      const isActive = i === 0;
       const tabFrame = figma.createFrame();
       tabFrame.name = `Tab ${i + 1}`;
-      tabFrame.layoutMode = "HORIZONTAL";
+      tabFrame.layoutMode = "VERTICAL";
       tabFrame.counterAxisSizingMode = "AUTO";
       tabFrame.primaryAxisSizingMode = "AUTO";
-      tabFrame.layoutGrow = 1;
-      tabFrame.layoutAlign = "STRETCH";
       tabFrame.primaryAxisAlignItems = "CENTER";
       tabFrame.counterAxisAlignItems = "CENTER";
-      tabFrame.paddingLeft = parseFloat(px);
-      tabFrame.paddingRight = parseFloat(px);
-      tabFrame.paddingTop = parseFloat(py);
-      tabFrame.paddingBottom = parseFloat(py);
-      tabFrame.fills = i === 0 ? [{ type: "SOLID", color: hexToRgb(activeBgColor) }] : [];
-      tabFrame.cornerRadius = borderRadius;
-      tabFrame.effects =
-        i === 0
-          ? [
-              {
-                type: "DROP_SHADOW",
-                color: { r: 0, g: 0, b: 0, a: 0.05 },
-                offset: { x: 0, y: 1 },
-                radius: 2,
-                visible: true,
-                blendMode: "NORMAL",
-              },
-              {
-                type: "DROP_SHADOW",
-                color: { r: 0, g: 0, b: 0, a: 0.1 },
-                offset: { x: 0, y: 1 },
-                radius: 3,
-                visible: true,
-                blendMode: "NORMAL",
-              },
-            ]
-          : [];
+      tabFrame.itemSpacing = 0;
+      tabFrame.paddingLeft = 0;
+      tabFrame.paddingRight = 0;
+      tabFrame.paddingTop = py;
+      tabFrame.paddingBottom = 0;
+      tabFrame.fills = [];
 
       // Buat text untuk tab
       const tabText = figma.createText();
       tabText.characters = labels[i] || `Tab ${i + 1}`;
-      tabText.fontName = { family: "Inter", style: i === 0 ? "Medium" : "Regular" };
+      tabText.fontName = { family: "Inter", style: isActive ? "Medium" : "Regular" };
       tabText.fontSize = fontSizeValue;
       tabText.fills = [
         {
           type: "SOLID",
-          color: hexToRgb(i === 0 ? activeTextColor : inactiveTextColor),
+          color: isActive ? activeTextRgb : inactiveTextRgb,
         },
       ];
       tabText.name = "Label";
 
+      // Buat border bottom (2px rectangle)
+      const borderBottom = figma.createRectangle();
+      borderBottom.name = "Border Bottom";
+      borderBottom.resize(100, 2); // Width akan di-resize nanti, height = 2px
+      borderBottom.fills = isActive ? [{ type: "SOLID", color: activeBorderRgb }] : [];
+      borderBottom.cornerRadius = 0;
+
       tabFrame.appendChild(tabText);
-      tabsContainer.appendChild(tabFrame);
+      tabFrame.appendChild(borderBottom);
+      component.appendChild(tabFrame);
+
+      // Set border width sama dengan text width setelah text dibuat
+      borderBottom.resize(tabText.width, 2);
     }
-
-    // Set width setelah tabs dibuat (height sudah tersedia)
-    if (tabsWidthValue) {
-      tabsContainer.resize(tabsWidthValue, tabsContainer.height);
-    }
-
-    // Set lebar tab yang sama untuk semua tabs (membagi lebar container secara merata)
-    // Hitung lebar yang tersedia setelah padding dan gap
-    const availableWidth = tabsContainer.width - containerPad * 2 - gap * (tabCountNum - 1);
-    const equalTabWidth = availableWidth / tabCountNum;
-
-    // Set lebar setiap tab secara manual
-    for (let i = 0; i < tabsContainer.children.length; i++) {
-      const tabFrame = tabsContainer.children[i] as FrameNode;
-      if (tabFrame.type === "FRAME") {
-        tabFrame.primaryAxisSizingMode = "FIXED";
-        tabFrame.resize(equalTabWidth, tabFrame.height);
-      }
-    }
-
-    component.appendChild(tabsContainer);
-
-    // Buat frame untuk panels
-    const panelsContainer = figma.createFrame();
-    panelsContainer.name = "Panels";
-    panelsContainer.layoutMode = "VERTICAL";
-    panelsContainer.counterAxisSizingMode = "AUTO";
-    panelsContainer.primaryAxisSizingMode = "AUTO";
-    panelsContainer.itemSpacing = 0;
-    panelsContainer.fills = [];
-    panelsContainer.paddingLeft = 0;
-    panelsContainer.paddingRight = 0;
-    panelsContainer.paddingTop = 0;
-    panelsContainer.paddingBottom = 0;
-
-    // Buat panel pertama (aktif)
-    if (contents.length > 0) {
-      const panelFrame = figma.createFrame();
-      panelFrame.name = "Panel 1";
-      panelFrame.layoutMode = "VERTICAL";
-      panelFrame.counterAxisSizingMode = "AUTO";
-      panelFrame.primaryAxisSizingMode = "AUTO";
-      panelFrame.primaryAxisAlignItems = "CENTER";
-      panelFrame.counterAxisAlignItems = "CENTER";
-      panelFrame.fills = [];
-      panelFrame.paddingLeft = 0;
-      panelFrame.paddingRight = 0;
-      panelFrame.paddingTop = 12;
-      panelFrame.paddingBottom = 12;
-
-      const panelText = figma.createText();
-      panelText.characters = contents[0] || "Panel content";
-      panelText.fontName = { family: "Inter", style: "Regular" };
-      panelText.fontSize = 14;
-      panelText.fills = [{ type: "SOLID", color: hexToRgb("#64748b") }];
-      panelText.textAlignHorizontal = "CENTER";
-      panelText.textAutoResize = "HEIGHT";
-      panelText.autoRename = false;
-      panelText.name = "Content";
-      panelText.layoutAlign = "STRETCH";
-      panelText.layoutGrow = 1;
-      panelText.constraints = { horizontal: "CENTER", vertical: "CENTER" };
-
-      panelFrame.appendChild(panelText);
-      panelsContainer.appendChild(panelFrame);
-    }
-
-    component.appendChild(panelsContainer);
 
     // Simpan data plugin
     const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
@@ -1346,17 +1198,13 @@ export default function () {
     component.setPluginData("tabCount", tabCount);
     component.setPluginData("tabLabels", tabLabels);
     component.setPluginData("fontSize", fontSize);
-    component.setPluginData("containerBgColor", containerBgColor);
-    component.setPluginData("activeBgColor", activeBgColor);
     component.setPluginData("activeTextColor", activeTextColor);
+    component.setPluginData("activeBorderColor", activeBorderColor);
     component.setPluginData("inactiveTextColor", inactiveTextColor);
+    component.setPluginData("hoverTextColor", hoverTextColor);
+    component.setPluginData("hoverBorderColor", hoverBorderColor);
     component.setPluginData("tabPadding", tabPadding);
-    component.setPluginData("tabBorderRadius", tabBorderRadius);
     component.setPluginData("tabGap", tabGap);
-    component.setPluginData("containerPadding", containerPadding);
-    component.setPluginData("panelContents", panelContents);
-    component.setPluginData("transitionType", transitionType);
-    component.setPluginData("tabsWidth", tabsWidth || "");
 
     // Tambahkan ke canvas dan seleksi
     figma.currentPage.appendChild(component);
@@ -1412,7 +1260,16 @@ export default function () {
     const borderRadiusValue = Number(borderRadius) || 9999;
     const labelFontSizeValue = Number(labelFontSize) || 14;
     const headlineFontSizeValue = Number(headlineFontSize) || 18;
-    const containerWidthValue = containerWidth ? Number(containerWidth) : null;
+    // Handle containerWidth: jika "100%" gunakan lebar viewport atau default 600px, jika angka gunakan angka tersebut
+    let containerWidthValue: number | null = null;
+    if (containerWidth === "100%") {
+      // Gunakan lebar viewport jika tersedia, atau default 600px
+      const viewportWidth = figma.viewport.bounds.width;
+      containerWidthValue = viewportWidth > 0 ? viewportWidth : 600;
+    } else if (containerWidth) {
+      const parsed = Number(containerWidth);
+      containerWidthValue = !isNaN(parsed) ? parsed : null;
+    }
 
     // Buat component utama (container/card)
     const component = figma.createComponent();
@@ -2088,56 +1945,79 @@ export default function () {
   });
 
   on<CreateRadioButtonHandler>("CREATE_RADIO_BUTTON", async props => {
-    const { headingLabel, headingFontSize, headingColor, radioLabels, radioCount, labelColor, labelFontSize, checkedColor, layoutDirection, hoverBorderColor, hoverBgColor, transitionType, htmltailwind } = props;
+    const {
+      headingLabel,
+      headingFontSize,
+      headingFontWeight,
+      headingColor,
+      radioLabels,
+      radioCount,
+      labelColor,
+      labelFontSize,
+      labelFontWeight,
+      labelFontWeightChecked,
+      labelColorChecked,
+      checkedColor,
+      gapBetweenItems,
+      gapBetweenRadioAndLabel,
+      radioSize,
+      borderWidth,
+      defaultBorderColor,
+      hoverBorderColor,
+      innerDotSize,
+      transitionDuration,
+      htmltailwind,
+    } = props;
 
     try {
       await figma.loadFontAsync({ family: "Inter", style: "Regular" });
       await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+      await figma.loadFontAsync({ family: "Inter", style: "SemiBold" });
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter': " + error);
+      return;
+    }
+
+    // Parse values
+    const gapValue = Number(gapBetweenItems.replace(/px/gi, "").trim()) || 16;
+    const gapRadioLabel = Number(gapBetweenRadioAndLabel.replace(/px/gi, "").trim()) || 12;
+    const radioSizeValue = Number(radioSize.replace(/px/gi, "").trim()) || 20;
+    const borderWidthValue = Number(borderWidth.replace(/px/gi, "").trim()) || 2;
+    const innerDotSizeValue = Number(innerDotSize.replace(/px/gi, "").trim()) || 10;
+
+    // Convert hex colors to RGB
+    const headingRgb = customConvertHexColorToRgbColor(headingColor);
+    const defaultBorderRgb = customConvertHexColorToRgbColor(defaultBorderColor);
+    const checkedRgb = customConvertHexColorToRgbColor(checkedColor);
+    const labelRgb = customConvertHexColorToRgbColor(labelColor);
+    const labelCheckedRgb = customConvertHexColorToRgbColor(labelColorChecked);
+
+    if (!headingRgb || !defaultBorderRgb || !checkedRgb || !labelRgb || !labelCheckedRgb) {
+      figma.notify("Warna tidak valid");
       return;
     }
 
     // Buat component
     const component = figma.createComponent();
     component.name = "Radio Button";
-    component.layoutMode = layoutDirection === "horizontal" ? "HORIZONTAL" : "VERTICAL";
+    component.layoutMode = "VERTICAL";
     component.counterAxisSizingMode = "AUTO";
     component.primaryAxisSizingMode = "AUTO";
-    component.itemSpacing = layoutDirection === "horizontal" ? 12 : 12;
+    component.itemSpacing = gapValue;
     component.paddingLeft = 0;
     component.paddingRight = 0;
     component.paddingTop = 0;
     component.paddingBottom = 0;
     component.fills = [];
 
-    // Buat heading text di atas
+    // Buat heading text
     const headingText = figma.createText();
     headingText.characters = headingLabel;
-    headingText.fontName = { family: "Inter", style: "Medium" };
-    headingText.fontSize = Number(headingFontSize) || 18;
-    headingText.fills = [{ type: "SOLID", color: hexToRgb(headingColor) }];
+    headingText.fontName = { family: "Inter", style: Number(headingFontWeight) >= 600 ? "SemiBold" : "Medium" };
+    headingText.fontSize = Number(headingFontSize) || 14;
+    headingText.fills = [{ type: "SOLID", color: headingRgb }];
     headingText.name = "Heading";
-
-    // Buat container untuk heading dan radio buttons
-    const container = figma.createFrame();
-    container.name = "Radio Button Container";
-    container.layoutMode = "VERTICAL";
-    container.counterAxisSizingMode = "AUTO";
-    container.primaryAxisSizingMode = "AUTO";
-    container.itemSpacing = 16;
-    container.fills = [];
-
-    container.appendChild(headingText);
-
-    // Buat form frame untuk radio buttons
-    const formFrame = figma.createFrame();
-    formFrame.name = "Form";
-    formFrame.layoutMode = layoutDirection === "horizontal" ? "HORIZONTAL" : "VERTICAL";
-    formFrame.counterAxisSizingMode = "AUTO";
-    formFrame.primaryAxisSizingMode = "AUTO";
-    formFrame.itemSpacing = 12;
-    formFrame.fills = [];
+    component.appendChild(headingText);
 
     // Parse labels
     const count = parseInt(radioCount) || 1;
@@ -2148,60 +2028,62 @@ export default function () {
 
     // Buat multiple radio buttons
     for (let i = 0; i < labels.length; i++) {
+      const isChecked = i === 0;
+
       // Buat frame untuk radio + label inline
       const radioRow = figma.createFrame();
       radioRow.name = `Radio ${i + 1}`;
       radioRow.layoutMode = "HORIZONTAL";
       radioRow.counterAxisSizingMode = "AUTO";
       radioRow.primaryAxisSizingMode = "AUTO";
-      radioRow.itemSpacing = 8; // space-x-2 = 8px
+      radioRow.itemSpacing = gapRadioLabel;
       radioRow.fills = [];
 
-      // Buat frame untuk radio button (untuk menampung outer dan inner circle)
+      // Buat frame untuk radio button
       const radioFrame = figma.createFrame();
       radioFrame.name = "Radio Button";
-      radioFrame.resize(16, 16);
+      radioFrame.resize(radioSizeValue, radioSizeValue);
       radioFrame.fills = [];
       radioFrame.clipsContent = true;
 
-      // Buat radio button circle (default size: 16px = w-4 h-4)
+      // Buat radio button circle
       const radioCircle = figma.createEllipse();
       radioCircle.name = "Radio Circle";
-      radioCircle.resize(16, 16);
+      radioCircle.resize(radioSizeValue, radioSizeValue);
       radioCircle.fills = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }]; // white background
-      radioCircle.strokes = [{ type: "SOLID", color: { r: 0.82, g: 0.82, b: 0.82 } }]; // border-gray-300
-      radioCircle.strokeWeight = 1;
+      radioCircle.strokes = [{ type: "SOLID", color: isChecked ? checkedRgb : defaultBorderRgb }];
+      radioCircle.strokeWeight = borderWidthValue;
       radioFrame.appendChild(radioCircle);
 
-      // Buat inner circle untuk checked state (jika i === 0, set as checked)
-      if (i === 0) {
+      // Buat inner circle untuk checked state
+      if (isChecked) {
         const innerCircle = figma.createEllipse();
         innerCircle.name = "Inner Circle";
-        innerCircle.resize(8, 8);
-        innerCircle.fills = [{ type: "SOLID", color: hexToRgb(checkedColor) }];
-        innerCircle.x = 4;
-        innerCircle.y = 4;
+        innerCircle.resize(innerDotSizeValue, innerDotSizeValue);
+        innerCircle.fills = [{ type: "SOLID", color: checkedRgb }];
+        innerCircle.x = (radioSizeValue - innerDotSizeValue) / 2;
+        innerCircle.y = (radioSizeValue - innerDotSizeValue) / 2;
         radioFrame.appendChild(innerCircle);
       }
 
       // Buat label text
       const labelText = figma.createText();
       labelText.characters = labels[i];
-      labelText.fontName = { family: "Inter", style: "Regular" };
+      labelText.fontName = {
+        family: "Inter",
+        style: isChecked && Number(labelFontWeightChecked) >= 600 ? "SemiBold" : Number(labelFontWeight) >= 500 ? "Medium" : "Regular",
+      };
       labelText.fontSize = Number(labelFontSize) || 14;
-      labelText.fills = [{ type: "SOLID", color: hexToRgb(labelColor) }];
+      labelText.fills = [{ type: "SOLID", color: isChecked ? labelCheckedRgb : labelRgb }];
       labelText.name = "Label";
 
       // Susun radio row
       radioRow.appendChild(radioFrame);
       radioRow.appendChild(labelText);
 
-      // Tambahkan radio row ke form frame
-      formFrame.appendChild(radioRow);
+      // Tambahkan radio row ke component
+      component.appendChild(radioRow);
     }
-
-    container.appendChild(formFrame);
-    component.appendChild(container);
 
     // Simpan data plugin
     const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
@@ -2212,16 +2094,24 @@ export default function () {
     // Store styling data
     component.setPluginData("headingLabel", headingLabel);
     component.setPluginData("headingFontSize", headingFontSize);
+    component.setPluginData("headingFontWeight", headingFontWeight);
     component.setPluginData("headingColor", headingColor);
     component.setPluginData("radioLabels", radioLabels);
     component.setPluginData("radioCount", radioCount);
     component.setPluginData("labelColor", labelColor);
     component.setPluginData("labelFontSize", labelFontSize);
+    component.setPluginData("labelFontWeight", labelFontWeight);
+    component.setPluginData("labelFontWeightChecked", labelFontWeightChecked);
+    component.setPluginData("labelColorChecked", labelColorChecked);
     component.setPluginData("checkedColor", checkedColor);
-    component.setPluginData("layoutDirection", layoutDirection);
+    component.setPluginData("gapBetweenItems", gapBetweenItems);
+    component.setPluginData("gapBetweenRadioAndLabel", gapBetweenRadioAndLabel);
+    component.setPluginData("radioSize", radioSize);
+    component.setPluginData("borderWidth", borderWidth);
+    component.setPluginData("defaultBorderColor", defaultBorderColor);
     component.setPluginData("hoverBorderColor", hoverBorderColor);
-    component.setPluginData("hoverBgColor", hoverBgColor);
-    component.setPluginData("transitionType", transitionType);
+    component.setPluginData("innerDotSize", innerDotSize);
+    component.setPluginData("transitionDuration", transitionDuration);
 
     // Tambahkan ke canvas dan seleksi
     figma.currentPage.appendChild(component);

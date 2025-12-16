@@ -1,4 +1,4 @@
-import { Button, Columns, Container, Dropdown, Muted, Text, Textbox, TextboxNumeric, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Muted, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
@@ -35,8 +35,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [borderWidth, setBorderWidth] = useState<number | null>(0);
   const [borderColor, setBorderColor] = useState("");
   const [htmltailwind, setHtmltailwind] = useState("");
-  const [colorError, setColorError] = useState("");
-  const [labelColorError, setLabelColorError] = useState("#171717");
 
   // Dynamic styling properties
   const [hoverTextColor, setHoverTextColor] = useState("#FFFFFF");
@@ -46,7 +44,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [focusRingSize, setFocusRingSize] = useState<number | null>(2);
   const [activeBgColor, setActiveBgColor] = useState("#525252");
   const [activeShadowSize, setActiveShadowSize] = useState<number | null>(4);
-  const [transitionDuration, setTransitionDuration] = useState<number | null>(150);
   const [transitionEasing, setTransitionEasing] = useState("ease-in-out");
   const [transitionDelay, setTransitionDelay] = useState<number | null>(0);
   const [transitionType, setTransitionType] = useState("normal");
@@ -59,22 +56,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
   // Live preview state
   const [previewHtml, setPreviewHtml] = useState("");
-
-  // Transition options for dropdown
-  const transitionOptions = [
-    { value: "none", text: "Tidak ada transisi" },
-    { value: "fast", text: "Transisi Cepat (150ms)" },
-    { value: "normal", text: "Transisi Normal (300ms)" },
-    { value: "slow", text: "Transisi Lambat (500ms)" },
-  ];
-
-  // Hover scale options for dropdown
-  const hoverScaleOptions = [
-    { value: "none", text: "Tidak ada skala" },
-    { value: "small", text: "Skala Kecil (105%)" },
-    { value: "medium", text: "Skala Sedang (110%)" },
-    { value: "large", text: "Skala Besar (115%)" },
-  ];
 
   // Get transition duration based on type
   const getTransitionDuration = (type: string): number => {
@@ -114,59 +95,9 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     }
     if (!/^#[0-9A-F]{6}$/.test(cleaned)) {
       console.log(`Invalid color: ${hex} -> Using default #000000`);
-      setColorError("Warna tidak valid, menggunakan default");
       return "#000000";
     }
-    setColorError("");
     return cleaned;
-  };
-
-  const handleColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    console.log(`Color picker changed: ${e.target.value} -> ${newColor}`);
-    setColor(newColor);
-  };
-
-  const handleLabelColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    console.log(`Label color picker changed: ${e.target.value} -> ${newColor}`);
-    setLabelColor(newColor);
-    if (!/^#[0-9A-F]{6}$/.test(newColor)) {
-      setLabelColorError("Warna label tidak valid, menggunakan default");
-    } else {
-      setLabelColorError("");
-    }
-  };
-
-  // Dynamic styling handlers
-  const handleHoverTextColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    setHoverTextColor(newColor);
-  };
-
-  const handleHoverBgColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    setHoverBgColor(newColor);
-  };
-
-  const handleHoverBorderColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    setHoverBorderColor(newColor);
-  };
-
-  const handleFocusBorderColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    setFocusBorderColor(newColor);
-  };
-
-  const handleActiveBgColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    setActiveBgColor(newColor);
-  };
-
-  const handleBorderColorChange = (e: any) => {
-    const newColor = cleanHexColor(e.target.value);
-    setBorderColor(newColor);
   };
 
   // Convert Tailwind classes to inline styles for preview

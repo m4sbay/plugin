@@ -1,4 +1,4 @@
-import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect } from "preact/hooks";
@@ -23,62 +23,58 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
   // State Style Statis
-  const [headingLabel, setHeadingLabel] = useState("Radio Button");
-  const [headingFontSize, setHeadingFontSize] = useState("18");
+  const [headingLabel, setHeadingLabel] = useState("Select Role");
+  const [headingFontSize, setHeadingFontSize] = useState("14");
+  const [headingFontWeight, setHeadingFontWeight] = useState("600");
   const [headingColor, setHeadingColor] = useState("#00BCFF");
-  const [radioLabels, setRadioLabels] = useState("Default option,Comfortable option,Compact option");
-  const [radioCount, setRadioCount] = useState("3");
+  const [radioLabels, setRadioLabels] = useState("UI Designer,Frontend Developer");
+  const [radioCount, setRadioCount] = useState("2");
   const [labelColor, setLabelColor] = useState("#00BCFF");
   const [labelFontSize, setLabelFontSize] = useState("14");
+  const [labelFontWeight, setLabelFontWeight] = useState("500");
+  const [labelFontWeightChecked, setLabelFontWeightChecked] = useState("600");
+  const [labelColorChecked, setLabelColorChecked] = useState("#4F46E5");
   const [checkedColor, setCheckedColor] = useState("#4F46E5");
-  const [layoutDirection, setLayoutDirection] = useState("vertical");
+  const [gapBetweenItems, setGapBetweenItems] = useState("16");
+  const [gapBetweenRadioAndLabel, setGapBetweenRadioAndLabel] = useState("12");
+  const [radioSize, setRadioSize] = useState("20");
+  const [borderWidth, setBorderWidth] = useState("2");
+  const [defaultBorderColor, setDefaultBorderColor] = useState("#CBD5E1");
+  const [innerDotSize, setInnerDotSize] = useState("10");
 
   // State Style Dinamis
-  const [hoverBorderColor, setHoverBorderColor] = useState("#4F46E5");
-  const [hoverBgColor, setHoverBgColor] = useState("#EEF2FF");
-
-  // Transisi
-  const [transitionType, setTransitionType] = useState("normal");
-  const transitionOptions = [
-    { value: "none", text: "Tanpa Transisi" },
-    { value: "fast", text: "Cepat (150ms)" },
-    { value: "normal", text: "Normal (300ms)" },
-    { value: "slow", text: "Lambat (500ms)" },
-  ];
-
-  // Layout options
-  const layoutOptions = [
-    { value: "vertical", text: "Menurun" },
-    { value: "horizontal", text: "Mendatar" },
-  ];
+  const [hoverBorderColor, setHoverBorderColor] = useState("#818CF8");
+  const [transitionDuration, setTransitionDuration] = useState("200");
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
+  // Helper function untuk normalize hex color (pastikan ada # di depan)
+  const normalizeHex = useCallback((color: string): string => {
+    if (!color) return "#000000";
+    const cleanColor = color.replace("#", "").toUpperCase();
+    return `#${cleanColor}`;
+  }, []);
+
   // Generate Tailwind code
   const generateCode = useCallback(() => {
-    const transitionClass = transitionType !== "none" ? ` transition-all duration-[${transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300}ms]` : "";
+    // Parse values
+    const gapValue = gapBetweenItems.replace(/px/gi, "").trim() || "16";
+    const gapRadioLabel = gapBetweenRadioAndLabel.replace(/px/gi, "").trim() || "12";
+    const radioSizeValue = radioSize.replace(/px/gi, "").trim() || "20";
+    const borderWidthValue = borderWidth.replace(/px/gi, "").trim() || "2";
+    const innerDotSizeValue = innerDotSize.replace(/px/gi, "").trim() || "10";
+    const headingSize = headingFontSize.replace(/px/gi, "").trim() || "14";
+    const labelSize = labelFontSize.replace(/px/gi, "").trim() || "14";
+    const transitionMs = transitionDuration.replace(/ms/gi, "").trim() || "200";
 
-    // Classes untuk radio button (default size: w-4 h-4 = 16px, gap: space-x-2 = 8px)
-    // Menggunakan appearance-none untuk menghilangkan styling default browser
-    const radioClasses = `
-      appearance-none
-      w-4 h-4
-      rounded-full
-      border border-gray-300
-      bg-white
-      checked:border-[${checkedColor}]
-      hover:border-[${hoverBorderColor}]
-      hover:bg-[${hoverBgColor}]
-      focus:outline-none
-      cursor-pointer
-      ${transitionClass}
-    `
-      .trim()
-      .replace(/\s+/g, " ");
-
-    const headingStyle = `text-[${headingFontSize}px] font-semibold mb-4`;
-    const headingInlineStyle = `color:${headingColor};font-size:${headingFontSize}px;font-weight:600;`;
+    // Normalize hex colors
+    const headingColorHex = normalizeHex(headingColor);
+    const defaultBorderColorHex = normalizeHex(defaultBorderColor);
+    const hoverBorderColorHex = normalizeHex(hoverBorderColor);
+    const checkedColorHex = normalizeHex(checkedColor);
+    const labelColorHex = normalizeHex(labelColor);
+    const labelColorCheckedHex = normalizeHex(labelColorChecked);
 
     const count = parseInt(radioCount) || 1;
     const labels = radioLabels
@@ -86,56 +82,50 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
       .map(l => l.trim())
       .slice(0, count);
 
-    // Layout container class untuk form
-    const layoutClass = layoutDirection === "horizontal" ? "flex flex-row space-x-3" : "space-y-3";
+    // Generate heading
+    const heading = `<p class="text-[${headingSize}px] font-[${headingFontWeight}] text-[${headingColorHex}]">${headingLabel}</p>`;
 
-    // CSS untuk custom radio button dengan inner circle saat checked
-    const customRadioCSS = `
-      input[type="radio"] {
-        position: relative;
-      }
-      input[type="radio"]:checked {
-        background-color: ${checkedColor};
-        border-color: ${checkedColor};
-      }
-      input[type="radio"]:checked::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: white;
-      }
-    `;
-
+    // Generate radio items
     const radioItems = labels
       .map(
-        (label, i) =>
-          `        <label class="flex items-center space-x-2 cursor-pointer">
-          <input type="radio" name="radio-option" value="option-${i + 1}" class="${radioClasses}" ${i === 0 ? "checked" : ""} />
-          <span style="color:${labelColor};font-size:${labelFontSize}px;">${label}</span>
-        </label>`
+        (label, i) => `  <label class="flex items-center gap-[${gapRadioLabel}px] cursor-pointer group">
+    <input type="radio" name="role_clean" class="peer sr-only" ${i === 0 ? "checked" : ""} />
+    <div class="flex items-center justify-center w-[${radioSizeValue}px] h-[${radioSizeValue}px] rounded-[50%] border-[${borderWidthValue}px] border-[${defaultBorderColorHex}] group-hover:border-[${hoverBorderColorHex}] peer-checked:border-[${checkedColorHex}] transition-colors duration-[${transitionMs}ms] after:content-[''] after:w-[${innerDotSizeValue}px] after:h-[${innerDotSizeValue}px] after:rounded-[50%] after:bg-[${checkedColorHex}] after:scale-[0] peer-checked:after:scale-[1] after:transition-transform after:duration-[${transitionMs}ms]"></div>
+    <span class="text-[${labelSize}px] font-[${labelFontWeight}] text-[${labelColorHex}] transition-colors duration-[${transitionMs}ms] peer-checked:text-[${labelColorCheckedHex}] peer-checked:font-[${labelFontWeightChecked}]">${label}</span>
+  </label>`
       )
-      .join("\n");
+      .join("\n\n");
 
-    const html = `
-    <div>
-    <!-- Radio Button -->
-  <style>
-    ${customRadioCSS}
-  </style>
-  <h2 class="${headingStyle}" style="${headingInlineStyle}">${headingLabel}</h2>
-  <form class="${layoutClass}">
+    const html = `<div class="space-y-[${gapValue}px]">
+${heading}
 ${radioItems}
-  </form>
-  </div>`;
+</div>`;
 
     setHtmltailwind(html);
     return html;
-  }, [headingLabel, headingFontSize, headingColor, radioLabels, radioCount, labelColor, labelFontSize, checkedColor, layoutDirection, hoverBorderColor, hoverBgColor, transitionType]);
+  }, [
+    headingLabel,
+    headingFontSize,
+    headingFontWeight,
+    headingColor,
+    radioLabels,
+    radioCount,
+    labelColor,
+    labelFontSize,
+    labelFontWeight,
+    labelFontWeightChecked,
+    labelColorChecked,
+    checkedColor,
+    gapBetweenItems,
+    gapBetweenRadioAndLabel,
+    radioSize,
+    borderWidth,
+    defaultBorderColor,
+    innerDotSize,
+    hoverBorderColor,
+    transitionDuration,
+    normalizeHex,
+  ]);
 
   useEffect(() => {
     generateCode();
@@ -150,17 +140,25 @@ ${radioItems}
         const parsed = JSON.parse(data);
         if (parsed?.componentType === "radio-button") {
           if (parsed.headingLabel !== undefined) setHeadingLabel(parsed.headingLabel || "");
-          if (parsed.headingFontSize !== undefined) setHeadingFontSize(parsed.headingFontSize || "18");
-          if (parsed.headingColor !== undefined) setHeadingColor(parsed.headingColor || "#00BCFF");
+          if (parsed.headingFontSize !== undefined) setHeadingFontSize(parsed.headingFontSize || "14");
+          if (parsed.headingFontWeight !== undefined) setHeadingFontWeight(parsed.headingFontWeight || "600");
+          if (parsed.headingColor !== undefined) setHeadingColor(parsed.headingColor || "#334155");
           if (parsed.radioLabels !== undefined) setRadioLabels(parsed.radioLabels || "");
-          if (parsed.radioCount !== undefined) setRadioCount(parsed.radioCount || "1");
-          if (parsed.labelColor !== undefined) setLabelColor(parsed.labelColor || "#00BCFF");
+          if (parsed.radioCount !== undefined) setRadioCount(parsed.radioCount || "2");
+          if (parsed.labelColor !== undefined) setLabelColor(parsed.labelColor || "#64748B");
           if (parsed.labelFontSize !== undefined) setLabelFontSize(parsed.labelFontSize || "14");
+          if (parsed.labelFontWeight !== undefined) setLabelFontWeight(parsed.labelFontWeight || "500");
+          if (parsed.labelFontWeightChecked !== undefined) setLabelFontWeightChecked(parsed.labelFontWeightChecked || "600");
+          if (parsed.labelColorChecked !== undefined) setLabelColorChecked(parsed.labelColorChecked || "#4F46E5");
           if (parsed.checkedColor !== undefined) setCheckedColor(parsed.checkedColor || "#4F46E5");
-          if (parsed.layoutDirection !== undefined) setLayoutDirection(parsed.layoutDirection || "vertical");
-          if (parsed.hoverBorderColor !== undefined) setHoverBorderColor(parsed.hoverBorderColor || "#4F46E5");
-          if (parsed.hoverBgColor !== undefined) setHoverBgColor(parsed.hoverBgColor || "#EEF2FF");
-          if (parsed.transitionType !== undefined) setTransitionType(parsed.transitionType || "normal");
+          if (parsed.gapBetweenItems !== undefined) setGapBetweenItems(parsed.gapBetweenItems || "16");
+          if (parsed.gapBetweenRadioAndLabel !== undefined) setGapBetweenRadioAndLabel(parsed.gapBetweenRadioAndLabel || "12");
+          if (parsed.radioSize !== undefined) setRadioSize(parsed.radioSize || "20");
+          if (parsed.borderWidth !== undefined) setBorderWidth(parsed.borderWidth || "2");
+          if (parsed.defaultBorderColor !== undefined) setDefaultBorderColor(parsed.defaultBorderColor || "#CBD5E1");
+          if (parsed.hoverBorderColor !== undefined) setHoverBorderColor(parsed.hoverBorderColor || "#818CF8");
+          if (parsed.innerDotSize !== undefined) setInnerDotSize(parsed.innerDotSize || "10");
+          if (parsed.transitionDuration !== undefined) setTransitionDuration(parsed.transitionDuration || "200");
           if (parsed.htmltailwind !== undefined) setHtmltailwind(parsed.htmltailwind || "");
         }
       } catch (error) {
@@ -195,16 +193,24 @@ ${radioItems}
     emit("CREATE_RADIO_BUTTON", {
       headingLabel,
       headingFontSize,
+      headingFontWeight,
       headingColor,
       radioLabels,
       radioCount,
       labelColor,
       labelFontSize,
+      labelFontWeight,
+      labelFontWeightChecked,
+      labelColorChecked,
       checkedColor,
-      layoutDirection,
+      gapBetweenItems,
+      gapBetweenRadioAndLabel,
+      radioSize,
+      borderWidth,
+      defaultBorderColor,
       hoverBorderColor,
-      hoverBgColor,
-      transitionType,
+      innerDotSize,
+      transitionDuration,
       htmltailwind,
     });
   };
@@ -247,29 +253,32 @@ ${radioItems}
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
 
           <VerticalSpace space="small" />
-          <InputField label="Heading Radio Button :" value={headingLabel} onChange={setHeadingLabel} placeholder="Contoh: Radio Button" />
-          <InputField label="Ukuran font heading (px) :" value={headingFontSize} onChange={setHeadingFontSize} placeholder="Contoh: 18" />
+          <InputField label="Heading Radio Button :" value={headingLabel} onChange={setHeadingLabel} placeholder="Contoh: Select Role" />
+          <InputField label="Ukuran font heading (px) :" value={headingFontSize} onChange={setHeadingFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
+          <InputField label="Font weight heading :" value={headingFontWeight} onChange={setHeadingFontWeight} placeholder="Contoh: 600 (akan menjadi font-[600])" />
           <ColorPicker label="Warna heading :" value={headingColor} onChange={setHeadingColor} />
-          <InputField label="Jumlah Radio :" value={radioCount} onChange={setRadioCount} placeholder="Contoh: 3" />
-          <InputField label="Label Radio (pisahkan dengan koma) :" value={radioLabels} onChange={setRadioLabels} placeholder="Contoh: Default option,Comfortable option,Compact option" />
-
-          <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
-          <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14" />
+          <InputField label="Gap antar radio button (px) :" value={gapBetweenItems} onChange={setGapBetweenItems} placeholder="Contoh: 16 (akan menjadi space-y-[16px])" />
+          <InputField label="Jumlah Radio :" value={radioCount} onChange={setRadioCount} placeholder="Contoh: 2" />
+          <InputField label="Label Radio (pisahkan dengan koma) :" value={radioLabels} onChange={setRadioLabels} placeholder="Contoh: UI Designer,Frontend Developer" />
+          <InputField label="Gap antara radio dan label (px) :" value={gapBetweenRadioAndLabel} onChange={setGapBetweenRadioAndLabel} placeholder="Contoh: 12 (akan menjadi gap-[12px])" />
+          <InputField label="Ukuran radio button (px) :" value={radioSize} onChange={setRadioSize} placeholder="Contoh: 20 (akan menjadi w-[20px] h-[20px])" />
+          <InputField label="Border width (px) :" value={borderWidth} onChange={setBorderWidth} placeholder="Contoh: 2 (akan menjadi border-[2px])" />
+          <ColorPicker label="Warna border default :" value={defaultBorderColor} onChange={setDefaultBorderColor} />
           <ColorPicker label="Warna checked :" value={checkedColor} onChange={setCheckedColor} />
-
-          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 10, color: theme.secondaryText }}>Layout :</Text>
-          <Dropdown options={layoutOptions} value={layoutDirection} onValueChange={setLayoutDirection} />
+          <InputField label="Ukuran inner dot (px) :" value={innerDotSize} onChange={setInnerDotSize} placeholder="Contoh: 10 (akan menjadi after:w-[10px] after:h-[10px])" />
+          <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
+          <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
+          <InputField label="Font weight label default :" value={labelFontWeight} onChange={setLabelFontWeight} placeholder="Contoh: 500 (akan menjadi font-[500])" />
+          <InputField label="Font weight label checked :" value={labelFontWeightChecked} onChange={setLabelFontWeightChecked} placeholder="Contoh: 600 (akan menjadi peer-checked:font-[600])" />
+          <ColorPicker label="Warna label saat checked :" value={labelColorChecked} onChange={setLabelColorChecked} />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
         <div style={{ flex: 1, minWidth: 260 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
-          <ColorPicker label="Border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
-          <ColorPicker label="Background saat hover :" value={hoverBgColor} onChange={setHoverBgColor} />
-
-          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: theme.secondaryText }}>Tipe transisi :</Text>
-          <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
+          <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
+          <InputField label="Durasi transisi (ms) :" value={transitionDuration} onChange={setTransitionDuration} placeholder="Contoh: 200 (akan menjadi duration-[200ms])" />
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
@@ -285,59 +294,62 @@ ${radioItems}
               padding: 24,
             }}
           >
-            {/* CSS untuk styling radio button di preview */}
-            <style>
-              {`
-                .radio-preview input[type="radio"] {
-                  appearance: none;
-                  width: 16px;
-                  height: 16px;
-                  border-radius: 50%;
-                  border: 1px solid #d1d5db;
-                  background-color: white;
-                  position: relative;
-                  cursor: pointer;
-                  transition: all ${transitionType === "none" ? "0ms" : transitionType === "fast" ? "150ms" : transitionType === "slow" ? "500ms" : "300ms"};
-                }
-                .radio-preview input[type="radio"]:checked {
-                  background-color: ${checkedColor};
-                  border-color: ${checkedColor};
-                }
-                .radio-preview input[type="radio"]:checked::after {
-                  content: "";
-                  position: absolute;
-                  top: 50%;
-                  left: 50%;
-                  transform: translate(-50%, -50%);
-                  width: 8px;
-                  height: 8px;
-                  border-radius: 50%;
-                  background-color: white;
-                }
-                .radio-preview input[type="radio"]:hover {
-                  border-color: ${hoverBorderColor};
-                  background-color: ${hoverBgColor};
-                }
-                .radio-preview input[type="radio"]:focus {
-                  outline: none;
-                }
-              `}
-            </style>
-            {/* Heading Radio Button */}
-            <Text style={{ display: "block", marginBottom: 16, color: headingColor, fontSize: `${headingFontSize}px`, fontWeight: 600 }}>{headingLabel}</Text>
+            <div style={{ display: "flex", flexDirection: "column", gap: `${gapBetweenItems.replace(/px/gi, "") || 16}px` }}>
+              {/* Heading */}
+              <p style={{ fontSize: `${headingFontSize.replace(/px/gi, "") || 14}px`, fontWeight: Number(headingFontWeight) || 600, color: headingColor, margin: 0 }}>{headingLabel}</p>
 
-            {/* Multiple Radio Buttons */}
-            <form
-              className="radio-preview"
-              style={{ display: layoutDirection === "horizontal" ? "flex" : "block", flexDirection: layoutDirection === "horizontal" ? "row" : "column", gap: layoutDirection === "horizontal" ? "12px" : "12px" }}
-            >
+              {/* Radio Buttons */}
               {labels.map((label, i) => (
-                <label key={i} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", marginBottom: layoutDirection === "vertical" ? "12px" : "0" }}>
-                  <input type="radio" name="radio-preview" defaultChecked={i === 0} />
-                  <span style={{ color: labelColor, fontSize: `${labelFontSize}px` }}>{label}</span>
+                <label key={i} style={{ display: "flex", alignItems: "center", gap: `${gapBetweenRadioAndLabel.replace(/px/gi, "") || 12}px`, cursor: "pointer" }}>
+                  <input type="radio" name="radio-preview" defaultChecked={i === 0} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: `${radioSize.replace(/px/gi, "") || 20}px`,
+                      height: `${radioSize.replace(/px/gi, "") || 20}px`,
+                      borderRadius: "50%",
+                      border: `${borderWidth.replace(/px/gi, "") || 2}px solid ${defaultBorderColor}`,
+                      position: "relative",
+                      transition: `border-color ${transitionDuration.replace(/ms/gi, "") || 200}ms`,
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = hoverBorderColor;
+                    }}
+                    onMouseLeave={e => {
+                      const radio = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      if (radio?.checked) {
+                        e.currentTarget.style.borderColor = checkedColor;
+                      } else {
+                        e.currentTarget.style.borderColor = defaultBorderColor;
+                      }
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${innerDotSize.replace(/px/gi, "") || 10}px`,
+                        height: `${innerDotSize.replace(/px/gi, "") || 10}px`,
+                        borderRadius: "50%",
+                        backgroundColor: checkedColor,
+                        transform: `scale(${i === 0 ? 1 : 0})`,
+                        transition: `transform ${transitionDuration.replace(/ms/gi, "") || 200}ms`,
+                      }}
+                    />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`,
+                      fontWeight: i === 0 ? Number(labelFontWeightChecked) || 600 : Number(labelFontWeight) || 500,
+                      color: i === 0 ? labelColorChecked : labelColor,
+                      transition: `color ${transitionDuration.replace(/ms/gi, "") || 200}ms, font-weight ${transitionDuration.replace(/ms/gi, "") || 200}ms`,
+                    }}
+                  >
+                    {label}
+                  </span>
                 </label>
               ))}
-            </form>
+            </div>
           </div>
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>

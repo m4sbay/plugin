@@ -24,30 +24,26 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     buttonShadow: isDark ? "0 10px 24px rgba(15, 23, 42, 0.55)" : "0 2px 8px rgba(0,0,0,0.04)",
   };
   // State Style Statis
-  const [headingLabel, setHeadingLabel] = useState("Checkbox");
-  const [headingFontSize, setHeadingFontSize] = useState("16");
-  const [headingColor, setHeadingColor] = useState("#00BCFF");
-  const [checkboxLabel, setCheckboxLabel] = useState("Accept Terms");
-  const [checkboxCount, setCheckboxCount] = useState("1");
-  const [labelColor, setLabelColor] = useState("#00BCFF");
+  const [checkboxLabel, setCheckboxLabel] = useState("Setuju");
+  const [checkboxDescription, setCheckboxDescription] = useState("Ya saya setuju dengan syarat dan ketentuan.");
+  const [labelColor, setLabelColor] = useState("#FFFFFF");
   const [labelFontSize, setLabelFontSize] = useState("14");
-  const [checkboxSize, setCheckboxSize] = useState("20");
-  const [borderWidth, setBorderWidth] = useState("2");
+  const [descriptionColor, setDescriptionColor] = useState("#9CA3AF");
+  const [descriptionFontSize, setDescriptionFontSize] = useState("14");
+  const [checkboxSize, setCheckboxSize] = useState("15");
   const [borderRadius, setBorderRadius] = useState("4");
-  const [borderColor, setBorderColor] = useState("#D1D5DB");
   const [checkedBgColor, setCheckedBgColor] = useState("#3B82F6");
-  const [checkedBorderColor, setCheckedBorderColor] = useState("#3B82F6");
   const [uncheckedBgColor, setUncheckedBgColor] = useState("#FFFFFF");
   const [gapBetweenCheckboxLabel, setGapBetweenCheckboxLabel] = useState("8");
+  const [checkmarkSize, setCheckmarkSize] = useState("12");
+  const [checkmarkColor, setCheckmarkColor] = useState("#FFFFFF");
 
   // State Style Dinamis
-  const [hoverBorderColor, setHoverBorderColor] = useState("#3B82F6");
-  const [hoverBgColor, setHoverBgColor] = useState("#EFF6FF");
-  const [focusRingWidth, setFocusRingWidth] = useState("2");
+  const [focusRingWidth, setFocusRingWidth] = useState("1");
   const [focusRingColor, setFocusRingColor] = useState("#3B82F6");
 
   // Transisi
-  const [transitionType, setTransitionType] = useState("normal");
+  const [transitionType, setTransitionType] = useState("none");
   const transitionOptions = [
     { value: "none", text: "Tanpa Transisi" },
     { value: "fast", text: "Cepat (150ms)" },
@@ -57,73 +53,85 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
+  const [checkedStates, setCheckedStates] = useState<boolean[]>([]);
+
+  // Helper function untuk normalize hex color (pastikan ada # di depan)
+  const normalizeHex = useCallback((color: string): string => {
+    if (!color) return "#000000";
+    const cleanColor = color.replace("#", "").toUpperCase();
+    return `#${cleanColor}`;
+  }, []);
 
   // Generate Tailwind code
   const generateCode = useCallback(() => {
-    const transitionClass = transitionType !== "none" ? ` transition-all duration-[${transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300}ms]` : "";
+    // Parse values
+    const checkboxSizeValue = checkboxSize.replace(/px/gi, "").trim() || "20";
+    const gapValue = gapBetweenCheckboxLabel.replace(/px/gi, "").trim();
+    const gapPx = gapValue ? Number(gapValue) || 0 : 0;
+    const checkboxSizePx = Number(checkboxSizeValue) || 20;
+    const descriptionIndent = checkboxSizePx + gapPx;
+    const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "4";
+    const checkmarkSizeValue = checkmarkSize.replace(/px/gi, "").trim() || "14";
+    const transitionMs = transitionType !== "none" ? (transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300) : 0;
 
-    // Classes untuk checkbox
-    const checkboxClasses = `
-    appearance-none
-    w-[${checkboxSize}px] h-[${checkboxSize}px] 
-    border-[${borderWidth}px] 
-    rounded-[${borderRadius}px] 
-    border-[${borderColor}]
-    bg-[${uncheckedBgColor}]
-    checked:bg-[${checkedBgColor}] 
-    checked:border-[${checkedBorderColor}]
-    hover:border-[${hoverBorderColor}] 
-    hover:bg-[${hoverBgColor}]
-    focus:outline-none
-    focus:ring-[${focusRingWidth}px] 
-    focus:ring-[${focusRingColor}]
-    focus:ring-offset-0
-    cursor-pointer
-    ${transitionClass}
-  `
-      .trim()
-      .replace(/\s+/g, " ");
+    // Normalize hex colors
+    const checkedBgColorHex = normalizeHex(checkedBgColor);
+    const checkmarkColorHex = normalizeHex(checkmarkColor);
+    const focusRingColorHex = normalizeHex(focusRingColor);
 
-    const headingStyle = `color:${headingColor};font-size:${headingFontSize}px;display:block;margin-bottom:12px;font-weight:500;`;
+    // Classes untuk checkbox input
+    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] focus:outline-none focus:ring-[${focusRingWidth}px] focus:ring-[${focusRingColorHex}] focus:ring-offset-0${
+      transitionMs > 0 ? ` duration-[${transitionMs}ms]` : ""
+    }`;
 
-    const count = parseInt(checkboxCount) || 1;
-    const checkboxItems = Array.from(
-      { length: count },
-      (_, i) =>
-        `  <label class="flex items-center gap-[${gapBetweenCheckboxLabel}px] cursor-pointer mb-2">
-    <input type="checkbox" class="${checkboxClasses}" />
-    <span style="color:${labelColor};font-size:${labelFontSize}px;">${checkboxLabel} ${count > 1 ? i + 1 : ""}</span>
-  </label>`
-    ).join("\n");
+    // Normalize colors untuk label dan deskripsi
+    const labelColorHex = normalizeHex(labelColor);
+    const descriptionColorHex = normalizeHex(descriptionColor);
 
-    const html = `<div class="checkbox-wrapper">
-  <label style="${headingStyle}">${headingLabel}</label>
-${checkboxItems}
+    const label = checkboxLabel || "Checkbox";
+    const description = checkboxDescription || "";
+
+    const checkboxItem = `  <div class="flex flex-col gap-[4px]">
+  <div class="inline-flex items-center">
+    <label class="flex items-center cursor-pointer relative">
+      <input type="checkbox" checked class="${checkboxClasses}" />
+      <span class="absolute text-[${checkmarkColorHex}] opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-[${checkmarkSizeValue}px] w-[${checkmarkSizeValue}px]" viewBox="0 0 20 20" fill="currentColor" stroke="currentColor" stroke-width="1">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+        </svg>
+      </span>
+    </label>
+    <div class="ml-[${gapBetweenCheckboxLabel}px]">
+      <span class="text-[${labelFontSize}px] font-medium text-[${labelColorHex}]">${label}</span>
+    </div>
+  </div>
+  ${description ? `<div class="ml-[${descriptionIndent}px]"><p class="text-[${descriptionFontSize}px] text-[${descriptionColorHex}]">${description}</p></div>` : ""}
+</div>`;
+
+    const html = `<div>
+${checkboxItem}
 </div>`;
 
     setHtmltailwind(html);
     return html;
   }, [
-    headingLabel,
-    headingFontSize,
-    headingColor,
     checkboxLabel,
-    checkboxCount,
+    checkboxDescription,
     labelColor,
     labelFontSize,
+    descriptionColor,
+    descriptionFontSize,
     checkboxSize,
-    borderWidth,
     borderRadius,
-    borderColor,
     checkedBgColor,
-    checkedBorderColor,
     uncheckedBgColor,
     gapBetweenCheckboxLabel,
-    hoverBorderColor,
-    hoverBgColor,
     focusRingWidth,
     focusRingColor,
     transitionType,
+    checkmarkSize,
+    checkmarkColor,
+    normalizeHex,
   ]);
 
   useEffect(() => {
@@ -140,26 +148,23 @@ ${checkboxItems}
           if (checkboxData.htmltailwind) {
             // Load all checkbox data
             setHtmltailwind(checkboxData.htmltailwind);
-            if (checkboxData.headingLabel) setHeadingLabel(checkboxData.headingLabel);
-            if (checkboxData.headingFontSize) setHeadingFontSize(checkboxData.headingFontSize);
-            if (checkboxData.headingColor) setHeadingColor(checkboxData.headingColor);
             if (checkboxData.checkboxLabel) setCheckboxLabel(checkboxData.checkboxLabel);
-            if (checkboxData.checkboxCount) setCheckboxCount(checkboxData.checkboxCount);
+            if (checkboxData.checkboxDescription) setCheckboxDescription(checkboxData.checkboxDescription);
             if (checkboxData.labelColor) setLabelColor(checkboxData.labelColor);
             if (checkboxData.labelFontSize) setLabelFontSize(checkboxData.labelFontSize);
             if (checkboxData.checkboxSize) setCheckboxSize(checkboxData.checkboxSize);
-            if (checkboxData.borderWidth) setBorderWidth(checkboxData.borderWidth);
             if (checkboxData.borderRadius) setBorderRadius(checkboxData.borderRadius);
-            if (checkboxData.borderColor) setBorderColor(checkboxData.borderColor);
             if (checkboxData.checkedBgColor) setCheckedBgColor(checkboxData.checkedBgColor);
-            if (checkboxData.checkedBorderColor) setCheckedBorderColor(checkboxData.checkedBorderColor);
             if (checkboxData.uncheckedBgColor) setUncheckedBgColor(checkboxData.uncheckedBgColor);
             if (checkboxData.gapBetweenCheckboxLabel) setGapBetweenCheckboxLabel(checkboxData.gapBetweenCheckboxLabel);
-            if (checkboxData.hoverBorderColor) setHoverBorderColor(checkboxData.hoverBorderColor);
-            if (checkboxData.hoverBgColor) setHoverBgColor(checkboxData.hoverBgColor);
             if (checkboxData.focusRingWidth) setFocusRingWidth(checkboxData.focusRingWidth);
             if (checkboxData.focusRingColor) setFocusRingColor(checkboxData.focusRingColor);
             if (checkboxData.transitionType) setTransitionType(checkboxData.transitionType);
+            if (checkboxData.checkmarkSize) setCheckmarkSize(checkboxData.checkmarkSize);
+            if (checkboxData.checkmarkColor) setCheckmarkColor(checkboxData.checkmarkColor);
+            if (checkboxData.checkboxDescriptions) setCheckboxDescription(checkboxData.checkboxDescriptions); // fallback lama
+            if (checkboxData.descriptionColor) setDescriptionColor(checkboxData.descriptionColor);
+            if (checkboxData.descriptionFontSize) setDescriptionFontSize(checkboxData.descriptionFontSize);
           }
         } catch (e) {
           // If not JSON, treat as plain htmltailwind string (for other components)
@@ -197,26 +202,22 @@ ${checkboxItems}
   // Emit ke Figma
   const handleCreateCheckbox = () => {
     emit("CREATE_CHECKBOX", {
-      headingLabel,
-      headingFontSize,
-      headingColor,
       checkboxLabel,
-      checkboxCount,
+      checkboxDescription,
       labelColor,
       labelFontSize,
       checkboxSize,
-      borderWidth,
       borderRadius,
-      borderColor,
       checkedBgColor,
-      checkedBorderColor,
       uncheckedBgColor,
       gapBetweenCheckboxLabel,
-      hoverBorderColor,
-      hoverBgColor,
       focusRingWidth,
       focusRingColor,
       transitionType,
+      checkmarkSize,
+      checkmarkColor,
+      descriptionColor,
+      descriptionFontSize,
       htmltailwind,
     });
   };
@@ -250,37 +251,29 @@ ${checkboxItems}
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
           <VerticalSpace space="small" />
 
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12 }}>Konten :</Text>
-          <InputField label="Heading Checkbox :" value={headingLabel} onChange={setHeadingLabel} placeholder="Contoh: Checkbox" />
-          <ColorPicker label="Warna heading :" value={headingColor} onChange={setHeadingColor} />
-          <InputField label="Ukuran font heading (px) :" value={headingFontSize} onChange={setHeadingFontSize} placeholder="Contoh: 16" />
-         
-          <InputField label="Jumlah Checkbox :" value={checkboxCount} onChange={setCheckboxCount} placeholder="Contoh: 1" />
-       
-          <InputField label="Label Checkbox :" value={checkboxLabel} onChange={setCheckboxLabel} placeholder="Contoh: Accept Terms" />
-        
+          <InputField label="Label Checkbox :" value={checkboxLabel} onChange={setCheckboxLabel} placeholder="Contoh: Offers" />
+
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14" />
 
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12 }}>Checkbox :</Text>
+          <InputField label="Deskripsi Checkbox :" value={checkboxDescription} onChange={setCheckboxDescription} placeholder="Contoh: Get notified when a candidate accepts or rejects an offer." />
+
+          <ColorPicker label="Warna deskripsi :" value={descriptionColor} onChange={setDescriptionColor} />
+          <InputField label="Ukuran font deskripsi (px) :" value={descriptionFontSize} onChange={setDescriptionFontSize} placeholder="Contoh: 14" />
+
           <InputField label="Ukuran checkbox (px) :" value={checkboxSize} onChange={setCheckboxSize} placeholder="Contoh: 20" />
-          <InputField label="Lebar border (px) :" value={borderWidth} onChange={setBorderWidth} placeholder="Contoh: 2" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 4" />
-          <ColorPicker label="Warna border (unchecked) :" value={borderColor} onChange={setBorderColor} />
           <ColorPicker label="Background (unchecked) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
           <ColorPicker label="Background (checked) :" value={checkedBgColor} onChange={setCheckedBgColor} />
-          <ColorPicker label="Border (checked) :" value={checkedBorderColor} onChange={setCheckedBorderColor} />
           <InputField label="Jarak checkbox-label (px) :" value={gapBetweenCheckboxLabel} onChange={setGapBetweenCheckboxLabel} placeholder="Contoh: 8" />
+          <InputField label="Ukuran checkmark (px) :" value={checkmarkSize} onChange={setCheckmarkSize} placeholder="Contoh: 14 (akan menjadi h-[14px] w-[14px])" />
+          <ColorPicker label="Warna checkmark :" value={checkmarkColor} onChange={setCheckmarkColor} />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
         <div style={{ flex: 1, minWidth: 260 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
-
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12 }}>Hover State :</Text>
-          <ColorPicker label="Border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
-          <ColorPicker label="Background saat hover :" value={hoverBgColor} onChange={setHoverBgColor} />
 
           <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12 }}>Focus State :</Text>
           <InputField label="Lebar ring focus (px) :" value={focusRingWidth} onChange={setFocusRingWidth} placeholder="Contoh: 2" />
@@ -303,29 +296,84 @@ ${checkboxItems}
               padding: 24,
             }}
           >
-            {/* Heading Checkbox */}
-            <Text style={{ display: "block", marginBottom: 12, color: headingColor, fontSize: `${headingFontSize}px`, fontWeight: 500 }}>{headingLabel}</Text>
+            {/* Single Checkbox Preview dengan Label dan Deskripsi */}
+            {(() => {
+              const label = checkboxLabel || "Checkbox";
+              const description = checkboxDescription || "";
 
-            {/* Multiple Checkboxes */}
-            {Array.from({ length: parseInt(checkboxCount) || 1 }, (_, i) => (
-              <label key={i} style={{ display: "flex", alignItems: "center", gap: `${gapBetweenCheckboxLabel}px`, cursor: "pointer", marginBottom: 8 }}>
-                <input
-                  type="checkbox"
-                  style={{
-                    width: `${checkboxSize}px`,
-                    height: `${checkboxSize}px`,
-                    border: `${borderWidth}px solid ${borderColor}`,
-                    borderRadius: `${borderRadius}px`,
-                    background: uncheckedBgColor,
-                    cursor: "pointer",
-                    accentColor: checkedBgColor,
-                  }}
-                />
-                <span style={{ color: labelColor, fontSize: `${labelFontSize}px` }}>
-                  {checkboxLabel} {parseInt(checkboxCount) > 1 ? i + 1 : ""}
-                </span>
-              </label>
-            ))}
+              // Initialize checked state if needed
+              if (checkedStates.length === 0) {
+                setCheckedStates([true]);
+              }
+
+              const isChecked = checkedStates[0] ?? true;
+
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4, width: "100%" }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", width: "100%" }}>
+                    <label style={{ display: "flex", alignItems: "center", cursor: "pointer", position: "relative" }}>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={e => {
+                          setCheckedStates([e.currentTarget.checked]);
+                        }}
+                        style={{
+                          width: `${checkboxSize.replace(/px/gi, "") || 20}px`,
+                          height: `${checkboxSize.replace(/px/gi, "") || 20}px`,
+                          borderRadius: `${borderRadius.replace(/px/gi, "") || 4}px`,
+                          background: isChecked ? checkedBgColor : uncheckedBgColor,
+                          cursor: "pointer",
+                          appearance: "none",
+                          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                          transition: "all 0.2s",
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1)";
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+                        }}
+                      />
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: "50%",
+                          left: "50%",
+                          transform: "translate(-50%, -50%)",
+                          color: checkmarkColor,
+                          opacity: isChecked ? 1 : 0,
+                          pointerEvents: "none",
+                          transition: "opacity 0.2s",
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{
+                            width: `${checkmarkSize.replace(/px/gi, "") || 14}px`,
+                            height: `${checkmarkSize.replace(/px/gi, "") || 14}px`,
+                          }}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          stroke="currentColor"
+                          strokeWidth="1"
+                        >
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                    </label>
+                    <div style={{ marginLeft: `${gapBetweenCheckboxLabel}px`, flex: 1 }}>
+                      <span style={{ color: labelColor, fontSize: `${labelFontSize}px`, fontWeight: 500, display: "block" }}>{label}</span>
+                    </div>
+                  </div>
+                  {description && (
+                    <div style={{ marginLeft: `${(Number(checkboxSize.replace(/px/gi, "")) || 20) + (Number(gapBetweenCheckboxLabel) || 0)}px` }}>
+                      <p style={{ color: descriptionColor, fontSize: `${descriptionFontSize}px`, marginTop: 0, marginBottom: 0 }}>{description}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
@@ -339,7 +387,6 @@ ${checkboxItems}
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
-
           </div>
           <div
             style={{
@@ -361,8 +408,8 @@ ${checkboxItems}
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-              {copied ? "Tersalin!" : "Copy"}
-            </Button>
+            {copied ? "Tersalin!" : "Copy"}
+          </Button>
         </div>
       </div>
     </div>

@@ -28,7 +28,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   const [headlineFontSize, setHeadlineFontSize] = useState("18");
   const [switchCount, setSwitchCount] = useState("1");
   const [switchLabels, setSwitchLabels] = useState("Airplane Mode");
-  const [containerWidth, setContainerWidth] = useState(""); // Lebar container/card
+  const [containerWidth, setContainerWidth] = useState("100%"); // Lebar container/card
   const [labelColor, setLabelColor] = useState("#00BCFF"); // slate-700
   const [labelFontSize, setLabelFontSize] = useState("14");
   const [switchWidth, setSwitchWidth] = useState("44"); // w-11 = 44px
@@ -99,9 +99,10 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   </div>`;
     }).join("\n");
 
-    const containerWidthStyle = containerWidth ? `width:${containerWidth}px;` : "";
+    const containerWidthClass = containerWidth === "100%" ? "w-full" : "";
+    const containerWidthStyle = containerWidth && containerWidth !== "100%" ? `width:${containerWidth}px;` : "";
     const headlineStyle = `color:${headlineColor};font-size:${headlineFontSize}px;`;
-    const html = `<section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"${containerWidth ? ` style="${containerWidthStyle}"` : ""}>
+    const html = `<section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm${containerWidthClass ? ` ${containerWidthClass}` : ""}"${containerWidthStyle ? ` style="${containerWidthStyle}"` : ""}>
   <h2 class="mb-4 font-semibold" style="${headlineStyle}">${headlineText}</h2>
 
 ${switchItems}
@@ -314,7 +315,7 @@ ${switchItems}
               minHeight: 120,
               marginBottom: 24,
               padding: 24,
-              width: containerWidth ? `${containerWidth}px` : "auto",
+              width: containerWidth === "100%" ? "100%" : containerWidth ? `${containerWidth}px` : "auto",
             }}
           >
             {/* Headline */}

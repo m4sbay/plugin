@@ -24,7 +24,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
   };
   // State untuk Progress Indicator
   const [progressValue, setProgressValue] = useState("50");
-  const [width, setWidth] = useState("150");
+  const [width, setWidth] = useState("100%");
   const [height, setHeight] = useState("12");
   const [progressColor, setProgressColor] = useState("#00BCFF");
   const [bgColor, setBgColor] = useState("#E5E7EB");
@@ -43,7 +43,8 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
 
   // Generate Tailwind code
   const generateCode = useCallback(() => {
-    const classes = `bg-[${bgColor}] rounded-[${borderRadius}px] w-[${width}px] h-[${height}px]`;
+    const isFullWidth = width.trim() === "100%";
+    const classes = isFullWidth ? `bg-[${bgColor}] rounded-[${borderRadius}px] w-full h-[${height}px]` : `bg-[${bgColor}] rounded-[${borderRadius}px] w-[${width}px] h-[${height}px]`;
     const innerClasses = `bg-[${progressColor}] h-full rounded-[${borderRadius}px] transition-all duration-300`;
     const marginValue = showPercentage === "yes" ? percentageMargin : "0";
     const percentage = showPercentage === "yes" ? `<span class="text-sm" style="color:${percentageTextColor}; margin-left:${marginValue}px">${progressValue}%</span>` : "";
@@ -192,10 +193,17 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
               alignItems: "center",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: width?.trim() === "100%" ? "flex-start" : "center",
+                width: width?.trim() === "100%" ? "100%" : "auto",
+              }}
+            >
               <div
                 style={{
-                  width: width ? `${width}px` : "300px",
+                  width: width?.trim() === "100%" ? "100%" : width ? `${width}px` : "300px",
                   height: height ? `${height}px` : "12px",
                   background: bgColor,
                   borderRadius: `${borderRadius}px`,

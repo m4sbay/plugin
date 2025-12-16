@@ -77,17 +77,13 @@ export interface CreateTabsHandler extends EventHandler {
     tabCount: string;
     tabLabels: string;
     fontSize: string;
-    containerBgColor: string;
-    activeBgColor: string;
     activeTextColor: string;
+    activeBorderColor: string;
     inactiveTextColor: string;
+    hoverTextColor: string;
+    hoverBorderColor: string;
     tabPadding: string;
-    tabBorderRadius: string;
     tabGap: string;
-    containerPadding: string;
-    panelContents: string;
-    transitionType: string;
-    tabsWidth: string;
     htmltailwind: string;
   }) => void;
 }
@@ -164,16 +160,24 @@ export interface CreateRadioButtonHandler extends EventHandler {
   handler: (props: {
     headingLabel: string;
     headingFontSize: string;
+    headingFontWeight: string;
     headingColor: string;
     radioLabels: string;
     radioCount: string;
     labelColor: string;
     labelFontSize: string;
+    labelFontWeight: string;
+    labelFontWeightChecked: string;
+    labelColorChecked: string;
     checkedColor: string;
-    layoutDirection: string;
+    gapBetweenItems: string;
+    gapBetweenRadioAndLabel: string;
+    radioSize: string;
+    borderWidth: string;
+    defaultBorderColor: string;
     hoverBorderColor: string;
-    hoverBgColor: string;
-    transitionType: string;
+    innerDotSize: string;
+    transitionDuration: string;
     htmltailwind: string;
   }) => void;
 }

@@ -24,24 +24,19 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
   };
   // State untuk Tabs - sesuai template HTML/Tailwind
   const [tabCount, setTabCount] = useState("3");
-  const [tabLabels, setTabLabels] = useState("Account,Password,Settings");
-  const [fontSize, setFontSize] = useState("14");
+  const [tabLabels, setTabLabels] = useState("Profile,Settings,Activity");
+  const [fontSize, setFontSize] = useState("14"); // arbitrary value untuk text-[value]px
 
-  // Warna sesuai template
-  const [containerBgColor, setContainerBgColor] = useState("#F1F5F9"); // slate-100
-  const [activeBgColor, setActiveBgColor] = useState("#FFFFFF"); // white
-  const [activeTextColor, setActiveTextColor] = useState("#0F172A"); // slate-900
-  const [inactiveTextColor, setInactiveTextColor] = useState("#475569"); // slate-600
+  // Warna sesuai template - menggunakan hex colors untuk arbitrary values
+  const [activeTextColor, setActiveTextColor] = useState("#4F46E5"); // text color untuk tab aktif (indigo-600)
+  const [activeBorderColor, setActiveBorderColor] = useState("#6366F1"); // border color untuk tab aktif (indigo-500)
+  const [inactiveTextColor, setInactiveTextColor] = useState("#64748B"); // text color untuk tab tidak aktif (slate-500)
+  const [hoverTextColor, setHoverTextColor] = useState("#334155"); // text color saat hover (slate-700)
+  const [hoverBorderColor, setHoverBorderColor] = useState("#CBD5E1"); // border color saat hover (slate-300)
 
-  // Styling
-  const [tabPadding, setTabPadding] = useState("6,24"); // py,px
-  const [tabBorderRadius, setTabBorderRadius] = useState("9999"); // rounded-full
-  const [tabGap, setTabGap] = useState("4"); // gap antar tab
-  const [containerPadding, setContainerPadding] = useState("4"); // padding container
-  const [tabsWidth, setTabsWidth] = useState("400"); // lebar tabs container (px)
-
-  // Panel contents
-  const [panelContents, setPanelContents] = useState("Make changes to your account here.,Change your password here.,Update your settings here.");
+  // Styling - menggunakan arbitrary values
+  const [tabPadding, setTabPadding] = useState("12"); // arbitrary value untuk py-[value]px
+  const [tabGap, setTabGap] = useState("16"); // arbitrary value untuk gap-[value]px
 
   // Transisi
   const [transitionType, setTransitionType] = useState("normal");
@@ -54,91 +49,54 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-  // Generate Tailwind code - hanya div tabs container dengan radio button pattern untuk fungsi tabs
+  // Helper function untuk normalize hex color (pastikan ada # di depan)
+  const normalizeHex = useCallback((color: string): string => {
+    if (!color) return "#000000";
+    // Hapus # jika ada, lalu tambahkan kembali
+    const cleanColor = color.replace("#", "").toUpperCase();
+    return `#${cleanColor}`;
+  }, []);
+
+  // Generate Tailwind code - border-bottom tabs (UI statis saja, hanya Tailwind classes dengan arbitrary values)
   const generateCode = useCallback(() => {
     const labels = tabLabels.split(",").map(l => l.trim());
-    const contents = panelContents.split(",").map(c => c.trim());
     const tabCountNum = parseInt(tabCount) || labels.length;
-    const gap = tabGap || "4";
-    const containerPad = containerPadding || "4";
-    const width = tabsWidth ? `w-[${tabsWidth}px]` : "w-full";
+    const gap = tabGap || "16";
+    const py = tabPadding || "12";
+    const textSize = fontSize || "14";
 
-    // Generate radio inputs (untuk state management - hidden)
-    const radioInputs = labels
-      .slice(0, tabCountNum)
-      .map((_, idx) => `<input type="radio" name="tabs" id="tab-${idx}" class="hidden" ${idx === 0 ? "checked" : ""}>`)
-      .join("\n    ");
+    // Normalize hex colors
+    const activeTextHex = normalizeHex(activeTextColor);
+    const activeBorderHex = normalizeHex(activeBorderColor);
+    const inactiveTextHex = normalizeHex(inactiveTextColor);
+    const hoverTextHex = normalizeHex(hoverTextColor);
+    const hoverBorderHex = normalizeHex(hoverBorderColor);
 
-    // Generate tab labels dengan class Tailwind
-    const tabLabelsHtml = labels
+    // Generate tab buttons dengan border-bottom style (menggunakan arbitrary values dengan hex)
+    const tabButtonsHtml = labels
       .slice(0, tabCountNum)
       .map((label, idx) => {
-        const py = tabPadding.split(",")[0]?.trim() || "6";
-        const px = tabPadding.split(",")[1]?.trim() || "24";
-        const borderRadius = tabBorderRadius || "9999";
-        const transition = transitionType !== "none" ? `transition-all duration-${transitionType === "fast" ? "150" : transitionType === "slow" ? "500" : "300"}` : "";
+        const isActive = idx === 0;
 
-        return `<label for="tab-${idx}" class="inline-flex items-center justify-center h-10 rounded-[${borderRadius}px] px-[${px}px] py-[${py}px] text-[${inactiveTextColor}] ${transition}">
-        ${label}
-      </label>`;
+        if (isActive) {
+          // Tab aktif: border-[#hex] text-[#hex] dengan arbitrary values
+          return `          <button class="py-[${py}px] border-b-2 border-[${activeBorderHex}] text-[${textSize}px] font-medium text-[${activeTextHex}]">${label}</button>`;
+        } else {
+          // Tab tidak aktif: border-transparent text-[#hex] dengan hover dan arbitrary values
+          return `          <button class="py-[${py}px] border-b-2 border-transparent text-[${textSize}px] font-medium text-[${inactiveTextHex}] hover:text-[${hoverTextHex}] hover:border-[${hoverBorderHex}]">${label}</button>`;
+        }
       })
-      .join("\n      ");
+      .join("\n\n");
 
-    // Generate panels
-    const panelsHtml = contents
-      .slice(0, tabCountNum)
-      .map(
-        (content, idx) =>
-          `<div id="panel-${idx}" class="tab-panel">
-        <p class="text-md text-slate-500 text-center">${content}</p>
-      </div>`
-      )
-      .join("\n      ");
-
-    // Generate CSS untuk active state dan panel visibility
-    const activeStateCSS = labels
-      .slice(0, tabCountNum)
-      .map((_, idx) => `#tab-${idx}:checked ~ .tabs-list label[for="tab-${idx}"]`)
-      .join(",\n    ");
-
-    const panelVisibilityCSS = labels
-      .slice(0, tabCountNum)
-      .map((_, idx) => `#tab-${idx}:checked ~ .tab-panels #panel-${idx}`)
-      .join(",\n    ");
-
-    // Hanya komponen div tabs container dengan radio button pattern
-    const html = `
-<div class="min-h-screen flex flex-col items-center justify-center">
-  <style>
-    .tab-panel { display: none; }
-    ${panelVisibilityCSS} { display: block; }
-    ${activeStateCSS} {
-      background-color: ${activeBgColor};
-      color: ${activeTextColor};
-      box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.1);
-      font-weight: 600;
-    }
-  </style>
-
-  <!-- Radio inputs untuk state management -->
-  ${radioInputs}
-
-  <!-- Tabs List Container -->
-  <div class="tabs-list grid grid-cols-${tabCountNum} ${width} bg-[${containerBgColor}] rounded-full p-[${containerPad}px] gap-[${gap}px] mb-[4px]">
-    ${tabLabelsHtml}
-  </div>
-
-  <!-- Panels Container -->
-  <div class="tab-panels text-center mt-4">
-    ${panelsHtml}
-  </div>
+    // HTML structure dengan border-bottom tabs (menggunakan arbitrary values)
+    const html = `<div class="flex gap-[${gap}px]">
+${tabButtonsHtml}
 </div>`;
 
     setHtmltailwind(html);
     return html;
-  }, [tabCount, tabLabels, fontSize, containerBgColor, activeBgColor, activeTextColor, inactiveTextColor, tabPadding, tabBorderRadius, tabGap, containerPadding, panelContents, transitionType, tabsWidth]);
+  }, [tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabPadding, tabGap, normalizeHex]);
 
   useEffect(() => {
     generateCode();
@@ -153,19 +111,16 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
         const parsed = JSON.parse(data);
         if (parsed?.componentType === "tabs") {
           if (parsed.tabCount !== undefined) setTabCount(parsed.tabCount || "3");
-          if (parsed.tabLabels !== undefined) setTabLabels(parsed.tabLabels || "Account,Password,Settings");
+          if (parsed.tabLabels !== undefined) setTabLabels(parsed.tabLabels || "Profile,Settings,Activity");
           if (parsed.fontSize !== undefined) setFontSize(parsed.fontSize || "14");
-          if (parsed.containerBgColor !== undefined) setContainerBgColor(parsed.containerBgColor || "#F1F5F9");
-          if (parsed.activeBgColor !== undefined) setActiveBgColor(parsed.activeBgColor || "#FFFFFF");
-          if (parsed.activeTextColor !== undefined) setActiveTextColor(parsed.activeTextColor || "#0F172A");
-          if (parsed.inactiveTextColor !== undefined) setInactiveTextColor(parsed.inactiveTextColor || "#475569");
-          if (parsed.tabPadding !== undefined) setTabPadding(parsed.tabPadding || "6,24");
-          if (parsed.tabBorderRadius !== undefined) setTabBorderRadius(parsed.tabBorderRadius || "9999");
-          if (parsed.tabGap !== undefined) setTabGap(parsed.tabGap || "4");
-          if (parsed.containerPadding !== undefined) setContainerPadding(parsed.containerPadding || "4");
-          if (parsed.panelContents !== undefined) setPanelContents(parsed.panelContents || "Make changes to your account here.,Change your password here.,Update your settings here.");
+          if (parsed.activeTextColor !== undefined) setActiveTextColor(parsed.activeTextColor || "#4F46E5");
+          if (parsed.activeBorderColor !== undefined) setActiveBorderColor(parsed.activeBorderColor || "#6366F1");
+          if (parsed.inactiveTextColor !== undefined) setInactiveTextColor(parsed.inactiveTextColor || "#64748B");
+          if (parsed.hoverTextColor !== undefined) setHoverTextColor(parsed.hoverTextColor || "#334155");
+          if (parsed.hoverBorderColor !== undefined) setHoverBorderColor(parsed.hoverBorderColor || "#CBD5E1");
+          if (parsed.tabPadding !== undefined) setTabPadding(parsed.tabPadding || "12");
+          if (parsed.tabGap !== undefined) setTabGap(parsed.tabGap || "16");
           if (parsed.transitionType !== undefined) setTransitionType(parsed.transitionType || "normal");
-          if (parsed.tabsWidth !== undefined) setTabsWidth(parsed.tabsWidth || "");
           if (parsed.htmltailwind !== undefined) setHtmltailwind(parsed.htmltailwind || "");
         }
       } catch (error) {
@@ -201,30 +156,20 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
       tabCount,
       tabLabels,
       fontSize,
-      containerBgColor,
-      activeBgColor,
       activeTextColor,
+      activeBorderColor,
       inactiveTextColor,
+      hoverTextColor,
+      hoverBorderColor,
       tabPadding,
-      tabBorderRadius,
       tabGap,
-      containerPadding,
-      panelContents,
-      transitionType,
-      tabsWidth,
       htmltailwind,
     });
   };
 
   const labels = tabLabels.split(",").map(l => l.trim());
-  const contents = panelContents.split(",").map(c => c.trim());
 
   const tabCountNum = parseInt(tabCount) || labels.length;
-  const py = tabPadding.split(",")[0]?.trim() || "6";
-  const px = tabPadding.split(",")[1]?.trim() || "24";
-  const borderRadius = tabBorderRadius || "9999";
-  const gap = tabGap || "4";
-  const containerPad = containerPadding || "4";
 
   return (
     <div
@@ -254,19 +199,14 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
           <VerticalSpace space="small" />
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
           <VerticalSpace space="small" />
-          <InputField label="Lebar tabs container (px) :" value={tabsWidth} onChange={setTabsWidth} placeholder="Contoh: 500 (tidak boleh kosong)" />
           <InputField label="Jumlah Tab :" value={tabCount} onChange={setTabCount} placeholder="Contoh: 3" />
-          <InputField label="Label Tab (pisahkan dengan koma) :" value={tabLabels} onChange={setTabLabels} placeholder="Contoh: Account,Password,Settings" />
-          <InputField label="Konten Panel (pisahkan dengan koma) :" value={panelContents} onChange={setPanelContents} placeholder="Contoh: Content 1,Content 2,Content 3" />
-          <InputField label="Ukuran teks (px):" value={fontSize} onChange={setFontSize} placeholder="Contoh: 14" />
-          <ColorPicker label="Warna background container :" value={containerBgColor} onChange={setContainerBgColor} />
-          <ColorPicker label="Warna background tab aktif :" value={activeBgColor} onChange={setActiveBgColor} />
+          <InputField label="Label Tab (pisahkan dengan koma) :" value={tabLabels} onChange={setTabLabels} placeholder="Contoh: Profile,Settings,Activity" />
+          <InputField label="Ukuran teks (px) :" value={fontSize} onChange={setFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
           <ColorPicker label="Warna teks tab aktif :" value={activeTextColor} onChange={setActiveTextColor} />
+          <ColorPicker label="Warna border tab aktif :" value={activeBorderColor} onChange={setActiveBorderColor} />
           <ColorPicker label="Warna teks tab tidak aktif :" value={inactiveTextColor} onChange={setInactiveTextColor} />
-          <InputField label="Padding tab (py,px) :" value={tabPadding} onChange={setTabPadding} placeholder="Contoh: 6,24" />
-          <InputField label="Border radius tab (px) :" value={tabBorderRadius} onChange={setTabBorderRadius} placeholder="Contoh: 9999 (rounded-full)" />
-          <InputField label="Gap antar tab (px) :" value={tabGap} onChange={setTabGap} placeholder="Contoh: 4" />
-          <InputField label="Padding container (px) :" value={containerPadding} onChange={setContainerPadding} placeholder="Contoh: 4" />
+          <InputField label="Padding vertikal tab (px) :" value={tabPadding} onChange={setTabPadding} placeholder="Contoh: 12 (akan menjadi py-[12px])" />
+          <InputField label="Gap antar tab (px) :" value={tabGap} onChange={setTabGap} placeholder="Contoh: 16 (akan menjadi gap-[16px])" />
 
           <div style={{ marginTop: 8 }}>
             <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, display: "block", color: theme.primaryText }}>Tipe Transisi :</Text>
@@ -274,7 +214,16 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
           </div>
         </div>
 
-        {/* Kolom 2: Live Preview & Kode */}
+        {/* Kolom 2: Style Dinamis */}
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
+          <VerticalSpace space="small" />
+          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
+          <VerticalSpace space="small" />
+          <ColorPicker label="Warna teks saat hover :" value={hoverTextColor} onChange={setHoverTextColor} />
+          <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
+        </div>
+
+        {/* Kolom 3: Live Preview & Kode */}
         <div style={{ flex: 1, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
@@ -294,62 +243,54 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
               overflow: "hidden",
             }}
           >
-            {/* Wrapper untuk tabs container agar bisa di-scroll jika melebihi lebar */}
+            {/* Preview Tabs Container - Flex Layout dengan Border Bottom */}
             <div
               style={{
                 width: "100%",
-                maxWidth: "100%",
-                overflowX: "auto",
-                overflowY: "visible",
                 display: "flex",
-                justifyContent: "center",
-                marginBottom: 4,
+                gap: `${tabGap || "16"}px`,
+                justifyContent: "flex-start",
+                borderBottom: `1px solid ${theme.panelBorder}`,
+                paddingBottom: 8,
               }}
             >
-              {/* Preview Tabs Container */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `repeat(${tabCountNum}, 1fr)`,
-                  width: tabsWidth ? `${tabsWidth}px` : "100%",
-                  minWidth: tabsWidth ? `${tabsWidth}px` : "100%",
-                  background: containerBgColor,
-                  borderRadius: 9999,
-                  padding: `${containerPad}px`,
-                  gap: `${gap}px`,
-                  boxSizing: "border-box",
-                  flexShrink: 0,
-                }}
-              >
-                {labels.slice(0, tabCountNum).map((label, idx) => (
+              {labels.slice(0, tabCountNum).map((label, idx) => {
+                const isActive = idx === 0;
+                // Gunakan nilai input langsung untuk preview
+                const paddingValue = `${tabPadding || "12"}px`;
+                const fontSizeValue = `${fontSize || "14"}px`;
+
+                // Normalize hex colors untuk preview (pastikan ada #)
+                const normalizeHexForPreview = (color: string): string => {
+                  if (!color) return "#000000";
+                  return color.startsWith("#") ? color : `#${color}`;
+                };
+
+                return (
                   <button
                     key={idx}
-                    onClick={() => setActiveTabIndex(idx)}
                     style={{
-                      background: idx === activeTabIndex ? activeBgColor : "transparent",
-                      color: idx === activeTabIndex ? activeTextColor : inactiveTextColor,
-                      fontSize: fontSize ? `${fontSize}px` : "14px",
-                      padding: `${py}px ${px}px`,
+                      background: "transparent",
+                      color: normalizeHexForPreview(isActive ? activeTextColor : inactiveTextColor),
+                      fontSize: fontSizeValue,
+                      paddingTop: paddingValue,
+                      paddingBottom: paddingValue,
+                      paddingLeft: 0,
+                      paddingRight: 0,
                       border: "none",
-                      borderRadius: `${borderRadius}px`,
-                      cursor: "pointer",
-                      fontWeight: idx === activeTabIndex ? 600 : 400,
-                      boxShadow: idx === activeTabIndex ? "0 1px 2px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.1)" : "none",
+                      borderBottom: `2px solid ${isActive ? normalizeHexForPreview(activeBorderColor) : "transparent"}`,
+                      cursor: "default",
+                      fontWeight: 500,
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      height: "40px",
-                      transition: transitionType !== "none" ? `all ${transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300}ms` : "none",
                     }}
                   >
                     {label}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
-
-            {/* Preview Panel */}
-            <div style={{ minHeight: 60, padding: "12px 0", textAlign: "center", margin: 0 }}>{contents[activeTabIndex] && <p style={{ fontSize: 14, color: theme.secondaryText, margin: 0 }}>{contents[activeTabIndex]}</p>}</div>
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             <Button fullWidth secondary onClick={onBack}>

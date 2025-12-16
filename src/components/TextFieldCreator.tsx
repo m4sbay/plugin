@@ -22,63 +22,70 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
   // State Style Statis
-  const [label, setLabel] = useState("Label");
-  const [labelColor, setLabelColor] = useState("#00BCFF");
+  const [label, setLabel] = useState("Display Name");
+  const [labelColor, setLabelColor] = useState("#64748B");
   const [labelFontSize, setLabelFontSize] = useState("14");
-  const [placeholder, setPlaceholder] = useState("Contoh : nama lengkap");
+  const [placeholder, setPlaceholder] = useState("Masukkan nama tampilan");
   const [width, setWidth] = useState("");
   const [bgColor, setBgColor] = useState("#FFFFFF");
-  const [borderRadius, setBorderRadius] = useState("6");
-  const [outlineColor, setOutlineColor] = useState("#D1D5DB");
-  const [inputPadding, setInputPadding] = useState("6"); // py-1.5 = 6px
-  const [wrapperPadding, setWrapperPadding] = useState("12"); // pl-3 = 12px
+  const [borderRadius, setBorderRadius] = useState("8");
+  const [borderColor, setBorderColor] = useState("#CBD5E1");
+  const [paddingX, setPaddingX] = useState("12");
+  const [paddingY, setPaddingY] = useState("8");
+  const [gap, setGap] = useState("12");
+  const [inputTextColor, setInputTextColor] = useState("#111827");
 
   // State Style Dinamis
-  const [focusRingColor, setFocusRingColor] = useState("#4F46E5"); // indigo-600
+  const [focusRingColor, setFocusRingColor] = useState("#6366F1");
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
+  // Helper function untuk normalize hex color (pastikan ada # di depan)
+  const normalizeHex = useCallback((color: string): string => {
+    if (!color) return "#000000";
+    const cleanColor = color.replace("#", "").toUpperCase();
+    return `#${cleanColor}`;
+  }, []);
+
   // Generate Tailwind class berdasarkan struktur baru
   const generateCode = useCallback(() => {
-    // Label classes
+    // Parse values
     const labelSize = labelFontSize.replace(/px/gi, "").trim() || "14";
-    const labelClasses = `block text-[${labelSize}px] font-medium`;
-    const labelStyle = labelColor ? ` style="color: ${labelColor}"` : "";
+    const gapValue = gap.replace(/px/gi, "").trim() || "12";
+    const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "8";
+    const paddingXValue = paddingX.replace(/px/gi, "").trim() || "12";
+    const paddingYValue = paddingY.replace(/px/gi, "").trim() || "8";
 
-    // Wrapper classes (container untuk input)
-    const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "6";
-    const wrapperPaddingValue = wrapperPadding.replace(/px/gi, "").trim() || "12";
-    const outlineColorValue = outlineColor || "#D1D5DB";
-    const focusRingColorValue = focusRingColor || "#4F46E5";
+    // Normalize hex colors
+    const labelColorHex = normalizeHex(labelColor);
+    const borderColorHex = normalizeHex(borderColor);
+    const inputTextColorHex = normalizeHex(inputTextColor);
+    const focusRingColorHex = normalizeHex(focusRingColor);
 
-    let wrapperClasses = `flex items-center rounded-[${borderRadiusValue}px] bg-[${bgColor}] pl-[${wrapperPaddingValue}px] outline-1 -outline-offset-1 outline-[${outlineColorValue}] has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-[${focusRingColorValue}]`;
+    // Label classes
+    const labelClasses = `text-[${labelSize}px] font-medium text-[${labelColorHex}] flex items-center gap-1`;
 
-    // Input classes - menggunakan labelFontSize untuk text dan placeholder
-    const inputPaddingValue = inputPadding.replace(/px/gi, "").trim() || "6";
-    let inputClasses = `block min-w-0 grow py-[${inputPaddingValue}px] pr-[${parseInt(inputPaddingValue) * 2}px] pl-[${parseInt(inputPaddingValue)}px] text-[${labelSize}px] text-gray-900 placeholder:text-gray-400 focus:outline-none`;
+    // Input classes
+    let inputClasses = `rounded-[${borderRadiusValue}px] border border-[${borderColorHex}] px-[${paddingXValue}px] py-[${paddingYValue}px] text-[${labelSize}px] text-[${inputTextColorHex}] focus:ring-1 focus:ring-[${focusRingColorHex}]`;
 
-    // Tambahkan width ke wrapper jika ada
+    // Tambahkan width ke input jika ada
     if (width) {
       const widthValue = width.replace(/px/gi, "").trim();
       if (widthValue) {
-        wrapperClasses += ` w-[${widthValue}px]`;
+        inputClasses += ` w-[${widthValue}px]`;
       }
     }
 
     // Generate HTML sesuai struktur baru
-    const html = `<div>
-  <label for="textfield" class="${labelClasses}"${labelStyle}>${label}</label>
-  <div class="mt-2">
-    <div class="${wrapperClasses}">
-      <input id="textfield" type="text" name="textfield" placeholder="${placeholder}" class="${inputClasses}" />
-    </div>
-  </div>
+    const html = `<div class="flex flex-col gap-[${gapValue}px]">
+  <label class="${labelClasses}">${label}</label>
+  <input type="text" placeholder="${placeholder}" class="${inputClasses}" />
 </div>`;
 
     setHtmltailwind(html);
     return html;
-  }, [label, labelColor, labelFontSize, placeholder, width, bgColor, borderRadius, outlineColor, inputPadding, wrapperPadding, focusRingColor]);
+  }, [label, labelColor, labelFontSize, placeholder, width, borderRadius, borderColor, paddingX, paddingY, gap, inputTextColor, focusRingColor, normalizeHex]);
 
   useEffect(() => {
     generateCode();
@@ -101,9 +108,11 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
             if (textFieldData.width) setWidth(textFieldData.width);
             if (textFieldData.bgColor) setBgColor(textFieldData.bgColor);
             if (textFieldData.borderRadius) setBorderRadius(textFieldData.borderRadius);
-            if (textFieldData.outlineColor) setOutlineColor(textFieldData.outlineColor);
-            if (textFieldData.inputPadding) setInputPadding(textFieldData.inputPadding);
-            if (textFieldData.wrapperPadding) setWrapperPadding(textFieldData.wrapperPadding);
+            if (textFieldData.borderColor) setBorderColor(textFieldData.borderColor);
+            if (textFieldData.paddingX) setPaddingX(textFieldData.paddingX);
+            if (textFieldData.paddingY) setPaddingY(textFieldData.paddingY);
+            if (textFieldData.gap) setGap(textFieldData.gap);
+            if (textFieldData.inputTextColor) setInputTextColor(textFieldData.inputTextColor);
             if (textFieldData.focusRingColor) setFocusRingColor(textFieldData.focusRingColor);
           }
         } catch (e) {
@@ -141,7 +150,6 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
 
   // Emit ke Figma saat klik Buat
   const handleCreateTextField = () => {
-    // Format padding: "wrapperPadding,inputPadding" untuk memisahkan wrapper padding dan input padding
     emit("CREATE_TEXT_FIELD", {
       label,
       labelColor,
@@ -151,15 +159,12 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
       height: "",
       bgColor,
       borderRadius,
-      outlineWidth: "1",
-      outlineColor,
-      padding: `${wrapperPadding},${inputPadding}`,
-      shadow: "",
-      hoverBgColor: "",
-      activeRingWidth: "2",
-      ringColor: focusRingColor,
-      transitionType: "normal",
-      labelGap: "8",
+      borderColor,
+      paddingX,
+      paddingY,
+      gap,
+      inputTextColor,
+      focusRingColor,
       htmltailwind,
     });
   };
@@ -191,16 +196,17 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
         <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Statis :</Text>
           <VerticalSpace space="small" />
-          <InputField label="Label Input :" value={label} onChange={setLabel} placeholder="Contoh: Label" />
+          <InputField label="Label Input :" value={label} onChange={setLabel} placeholder="Contoh: Display Name" />
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
-          <InputField label="Ukuran teks label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14" />
-          <InputField label="Placeholder :" value={placeholder} onChange={setPlaceholder} placeholder="Contoh: nama lengkap" />
-          <InputField label="Lebar input (px) :" value={width} onChange={setWidth} placeholder="Contoh: 300" />
-          <ColorPicker label="Warna Latar :" value={bgColor} onChange={setBgColor} />
-          <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 6" />
-          <ColorPicker label="Warna outline :" value={outlineColor} onChange={setOutlineColor} />
-          <InputField label="Padding wrapper (px) :" value={wrapperPadding} onChange={setWrapperPadding} placeholder="Contoh: 12" />
-          <InputField label="Padding input (px) :" value={inputPadding} onChange={setInputPadding} placeholder="Contoh: 6" />
+          <InputField label="Ukuran teks label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
+          <InputField label="Placeholder :" value={placeholder} onChange={setPlaceholder} placeholder="Contoh: Masukkan nama tampilan" />
+          <InputField label="Lebar input (px) :" value={width} onChange={setWidth} placeholder="Contoh: 300 (kosongkan untuk auto)" />
+          <InputField label="Gap antara label dan input (px) :" value={gap} onChange={setGap} placeholder="Contoh: 12 (akan menjadi gap-[12px])" />
+          <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 8 (akan menjadi rounded-[8px])" />
+          <ColorPicker label="Warna border input :" value={borderColor} onChange={setBorderColor} />
+          <InputField label="Padding horizontal (px) :" value={paddingX} onChange={setPaddingX} placeholder="Contoh: 12 (akan menjadi px-[12px])" />
+          <InputField label="Padding vertikal (px) :" value={paddingY} onChange={setPaddingY} placeholder="Contoh: 8 (akan menjadi py-[8px])" />
+          <ColorPicker label="Warna teks input :" value={inputTextColor} onChange={setInputTextColor} />
         </div>
         {/* Kolom 2: Style Dinamis */}
         <div style={{ flex: 1, minWidth: 260 }}>
@@ -221,39 +227,22 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               padding: 24,
             }}
           >
-            <div>
-              <label style={{ display: "block", fontSize: `${labelFontSize}px`, fontWeight: 500, color: labelColor, marginBottom: 8 }}>{label}</label>
-              <div style={{ marginTop: 8 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    borderRadius: `${borderRadius}px`,
-                    background: bgColor,
-                    paddingLeft: `${wrapperPadding}px`,
-                    outline: `1px solid ${outlineColor}`,
-                    outlineOffset: "-1px",
-                    width: width ? `${width.replace(/px/gi, "")}px` : "auto",
-                  }}
-                >
-                  <input
-                    type="text"
-                    placeholder={placeholder}
-                    style={{
-                      display: "block",
-                      minWidth: 0,
-                      flexGrow: 1,
-                      width: "100%",
-                      padding: `${inputPadding}px ${parseInt(inputPadding) * 2}px ${inputPadding}px ${inputPadding}px`,
-                      fontSize: `${labelFontSize}px`,
-                      color: "#111827",
-                      border: "none",
-                      outline: "none",
-                      background: "transparent",
-                    }}
-                  />
-                </div>
-              </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: `${gap.replace(/px/gi, "") || 12}px` }}>
+              <label style={{ fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`, fontWeight: 500, color: labelColor, display: "flex", alignItems: "center", gap: "4px" }}>{label}</label>
+              <input
+                type="text"
+                placeholder={placeholder}
+                style={{
+                  borderRadius: `${borderRadius.replace(/px/gi, "") || 8}px`,
+                  border: `1px solid ${borderColor}`,
+                  padding: `${paddingY.replace(/px/gi, "") || 8}px ${paddingX.replace(/px/gi, "") || 12}px`,
+                  fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`,
+                  color: inputTextColor,
+                  width: width ? `${width.replace(/px/gi, "")}px` : "100%",
+                  outline: "none",
+                  background: bgColor,
+                }}
+              />
             </div>
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
