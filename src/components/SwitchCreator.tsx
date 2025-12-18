@@ -262,7 +262,6 @@ ${switchItems}
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
           <VerticalSpace space="small" />
           <InputField label="Lebar container (px) :" value={containerWidth} onChange={setContainerWidth} placeholder="Contoh: 400 (tidak boleh kosong)" />
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12, color: theme.primaryText }}>Konten :</Text>
           <InputField label="Headline/Judul :" value={headlineText} onChange={setHeadlineText} placeholder="Contoh: Switch" />
           <ColorPicker label="Warna headline :" value={headlineColor} onChange={setHeadlineColor} />
           <InputField label="Ukuran font headline (px) :" value={headlineFontSize} onChange={setHeadlineFontSize} placeholder="Contoh: 18" />
@@ -272,20 +271,16 @@ ${switchItems}
           <InputField label="Disabled (pisahkan dengan koma, true/false) :" value={disabledStates} onChange={setDisabledStates} placeholder="Contoh: false,false,false,true" />
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14" />
-
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12, color: theme.primaryText }}>Container :</Text>
-
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12, color: theme.primaryText }}>Switch :</Text>
           <InputField label="Lebar switch (px) :" value={switchWidth} onChange={setSwitchWidth} placeholder="Contoh: 44" />
           <InputField label="Tinggi switch (px) :" value={switchHeight} onChange={setSwitchHeight} placeholder="Contoh: 24" />
           <InputField label="Ukuran toggle circle (px) :" value={toggleSize} onChange={setToggleSize} placeholder="Contoh: 20" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 9999 (rounded-full)" />
 
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12, color: theme.primaryText }}>Warna (Unchecked) :</Text>
+        
           <ColorPicker label="Warna border (unchecked) :" value={uncheckedBorderColor} onChange={setUncheckedBorderColor} />
           <ColorPicker label="Background (unchecked) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
 
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12, color: theme.primaryText }}>Warna (Checked) :</Text>
+          
           <ColorPicker label="Warna border (checked) :" value={checkedBorderColor} onChange={setCheckedBorderColor} />
           <ColorPicker label="Background (checked) :" value={checkedBgColor} onChange={setCheckedBgColor} />
           <ColorPicker label="Warna toggle circle :" value={toggleBgColor} onChange={setToggleBgColor} />
@@ -296,11 +291,10 @@ ${switchItems}
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
 
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12, color: theme.primaryText }}>Focus State :</Text>
           <InputField label="Lebar ring focus (px) :" value={focusRingWidth} onChange={setFocusRingWidth} placeholder="Contoh: 2" />
           <ColorPicker label="Warna ring focus :" value={focusRingColor} onChange={setFocusRingColor} />
 
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12, color: theme.primaryText }}>Transisi :</Text>
+          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>TIpe Transisi (ms) :</Text>
           <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
         </div>
 

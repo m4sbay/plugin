@@ -22,16 +22,17 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
   // State Style Statis
-  const [label, setLabel] = useState("Display Name");
+  const [label, setLabel] = useState("Nama Lengkap");
   const [labelColor, setLabelColor] = useState("#64748B");
   const [labelFontSize, setLabelFontSize] = useState("14");
-  const [placeholder, setPlaceholder] = useState("Masukkan nama tampilan");
+  const [placeholder, setPlaceholder] = useState("Masukkan nama lengkap kamu");
   const [width, setWidth] = useState("");
   const [bgColor, setBgColor] = useState("#FFFFFF");
   const [borderRadius, setBorderRadius] = useState("8");
   const [borderColor, setBorderColor] = useState("#CBD5E1");
   const [paddingX, setPaddingX] = useState("12");
   const [paddingY, setPaddingY] = useState("8");
+  const [padding, setPadding] = useState("12, 8");
   const [gap, setGap] = useState("12");
   const [inputTextColor, setInputTextColor] = useState("#111827");
 
@@ -46,6 +47,19 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     if (!color) return "#000000";
     const cleanColor = color.replace("#", "").toUpperCase();
     return `#${cleanColor}`;
+  }, []);
+
+  // Helper function untuk parse padding string "x, y" menjadi [x, y]
+  const parsePadding = useCallback((paddingStr: string): [string, string] => {
+    const parts = paddingStr.split(",").map(p => p.trim());
+    const x = parts[0] || "12";
+    const y = parts[1] || parts[0] || "8";
+    return [x, y];
+  }, []);
+
+  // Helper function untuk format paddingX dan paddingY menjadi string "x, y"
+  const formatPadding = useCallback((x: string, y: string): string => {
+    return `${x}, ${y}`;
   }, []);
 
   // Generate Tailwind class berdasarkan struktur baru
@@ -111,6 +125,12 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
             if (textFieldData.borderColor) setBorderColor(textFieldData.borderColor);
             if (textFieldData.paddingX) setPaddingX(textFieldData.paddingX);
             if (textFieldData.paddingY) setPaddingY(textFieldData.paddingY);
+            // Update padding state dari paddingX dan paddingY
+            if (textFieldData.paddingX || textFieldData.paddingY) {
+              const x = textFieldData.paddingX || "12";
+              const y = textFieldData.paddingY || "8";
+              setPadding(formatPadding(x, y));
+            }
             if (textFieldData.gap) setGap(textFieldData.gap);
             if (textFieldData.inputTextColor) setInputTextColor(textFieldData.inputTextColor);
             if (textFieldData.focusRingColor) setFocusRingColor(textFieldData.focusRingColor);
@@ -196,16 +216,25 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
         <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Statis :</Text>
           <VerticalSpace space="small" />
-          <InputField label="Label Input :" value={label} onChange={setLabel} placeholder="Contoh: Display Name" />
+          <InputField label="Label Input :" value={label} onChange={setLabel} placeholder="Contoh: Nama Lengkap" />
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran teks label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
           <InputField label="Placeholder :" value={placeholder} onChange={setPlaceholder} placeholder="Contoh: Masukkan nama tampilan" />
           <InputField label="Lebar input (px) :" value={width} onChange={setWidth} placeholder="Contoh: 300 (kosongkan untuk auto)" />
-          <InputField label="Gap antara label dan input (px) :" value={gap} onChange={setGap} placeholder="Contoh: 12 (akan menjadi gap-[12px])" />
+          <InputField label="Gap label dan input (px) :" value={gap} onChange={setGap} placeholder="Contoh: 12 (akan menjadi gap-[12px])" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 8 (akan menjadi rounded-[8px])" />
           <ColorPicker label="Warna border input :" value={borderColor} onChange={setBorderColor} />
-          <InputField label="Padding horizontal (px) :" value={paddingX} onChange={setPaddingX} placeholder="Contoh: 12 (akan menjadi px-[12px])" />
-          <InputField label="Padding vertikal (px) :" value={paddingY} onChange={setPaddingY} placeholder="Contoh: 8 (akan menjadi py-[8px])" />
+          <InputField
+            label="Padding sumbu x dan y :"
+            value={padding}
+            onChange={value => {
+              setPadding(value);
+              const [x, y] = parsePadding(value);
+              setPaddingX(x);
+              setPaddingY(y);
+            }}
+            placeholder="Contoh: 12, 8"
+          />
           <ColorPicker label="Warna teks input :" value={inputTextColor} onChange={setInputTextColor} />
         </div>
         {/* Kolom 2: Style Dinamis */}

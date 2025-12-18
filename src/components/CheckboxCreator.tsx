@@ -1,4 +1,4 @@
-import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect } from "preact/hooks";
@@ -26,7 +26,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   // State Style Statis
   const [checkboxLabel, setCheckboxLabel] = useState("Setuju");
   const [checkboxDescription, setCheckboxDescription] = useState("Ya saya setuju dengan syarat dan ketentuan.");
-  const [labelColor, setLabelColor] = useState("#FFFFFF");
+  const [labelColor, setLabelColor] = useState("#3B82F6");
   const [labelFontSize, setLabelFontSize] = useState("14");
   const [descriptionColor, setDescriptionColor] = useState("#9CA3AF");
   const [descriptionFontSize, setDescriptionFontSize] = useState("14");
@@ -41,15 +41,6 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   // State Style Dinamis
   const [focusRingWidth, setFocusRingWidth] = useState("1");
   const [focusRingColor, setFocusRingColor] = useState("#3B82F6");
-
-  // Transisi
-  const [transitionType, setTransitionType] = useState("none");
-  const transitionOptions = [
-    { value: "none", text: "Tanpa Transisi" },
-    { value: "fast", text: "Cepat (150ms)" },
-    { value: "normal", text: "Normal (300ms)" },
-    { value: "slow", text: "Lambat (500ms)" },
-  ];
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
@@ -72,7 +63,6 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     const descriptionIndent = checkboxSizePx + gapPx;
     const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "4";
     const checkmarkSizeValue = checkmarkSize.replace(/px/gi, "").trim() || "14";
-    const transitionMs = transitionType !== "none" ? (transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300) : 0;
 
     // Normalize hex colors
     const checkedBgColorHex = normalizeHex(checkedBgColor);
@@ -80,9 +70,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     const focusRingColorHex = normalizeHex(focusRingColor);
 
     // Classes untuk checkbox input
-    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] focus:outline-none focus:ring-[${focusRingWidth}px] focus:ring-[${focusRingColorHex}] focus:ring-offset-0${
-      transitionMs > 0 ? ` duration-[${transitionMs}ms]` : ""
-    }`;
+    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] focus:outline-none focus:ring-[${focusRingWidth}px] focus:ring-[${focusRingColorHex}] focus:ring-offset-0`;
 
     // Normalize colors untuk label dan deskripsi
     const labelColorHex = normalizeHex(labelColor);
@@ -128,7 +116,6 @@ ${checkboxItem}
     gapBetweenCheckboxLabel,
     focusRingWidth,
     focusRingColor,
-    transitionType,
     checkmarkSize,
     checkmarkColor,
     normalizeHex,
@@ -159,7 +146,6 @@ ${checkboxItem}
             if (checkboxData.gapBetweenCheckboxLabel) setGapBetweenCheckboxLabel(checkboxData.gapBetweenCheckboxLabel);
             if (checkboxData.focusRingWidth) setFocusRingWidth(checkboxData.focusRingWidth);
             if (checkboxData.focusRingColor) setFocusRingColor(checkboxData.focusRingColor);
-            if (checkboxData.transitionType) setTransitionType(checkboxData.transitionType);
             if (checkboxData.checkmarkSize) setCheckmarkSize(checkboxData.checkmarkSize);
             if (checkboxData.checkmarkColor) setCheckmarkColor(checkboxData.checkmarkColor);
             if (checkboxData.checkboxDescriptions) setCheckboxDescription(checkboxData.checkboxDescriptions); // fallback lama
@@ -213,7 +199,6 @@ ${checkboxItem}
       gapBetweenCheckboxLabel,
       focusRingWidth,
       focusRingColor,
-      transitionType,
       checkmarkSize,
       checkmarkColor,
       descriptionColor,
@@ -265,7 +250,7 @@ ${checkboxItem}
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 4" />
           <ColorPicker label="Background (unchecked) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
           <ColorPicker label="Background (checked) :" value={checkedBgColor} onChange={setCheckedBgColor} />
-          <InputField label="Jarak checkbox-label (px) :" value={gapBetweenCheckboxLabel} onChange={setGapBetweenCheckboxLabel} placeholder="Contoh: 8" />
+          <InputField label="Padding checkbox-label (px) :" value={gapBetweenCheckboxLabel} onChange={setGapBetweenCheckboxLabel} placeholder="Contoh: 8" />
           <InputField label="Ukuran checkmark (px) :" value={checkmarkSize} onChange={setCheckmarkSize} placeholder="Contoh: 14 (akan menjadi h-[14px] w-[14px])" />
           <ColorPicker label="Warna checkmark :" value={checkmarkColor} onChange={setCheckmarkColor} />
         </div>
@@ -274,13 +259,8 @@ ${checkboxItem}
         <div style={{ flex: 1, minWidth: 260 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
-
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12 }}>Focus State :</Text>
           <InputField label="Lebar ring focus (px) :" value={focusRingWidth} onChange={setFocusRingWidth} placeholder="Contoh: 2" />
           <ColorPicker label="Warna ring focus :" value={focusRingColor} onChange={setFocusRingColor} />
-
-          <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, marginTop: 12 }}>Transisi :</Text>
-          <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}

@@ -207,11 +207,6 @@ ${tabButtonsHtml}
           <ColorPicker label="Warna teks tab tidak aktif :" value={inactiveTextColor} onChange={setInactiveTextColor} />
           <InputField label="Padding vertikal tab (px) :" value={tabPadding} onChange={setTabPadding} placeholder="Contoh: 12 (akan menjadi py-[12px])" />
           <InputField label="Gap antar tab (px) :" value={tabGap} onChange={setTabGap} placeholder="Contoh: 16 (akan menjadi gap-[16px])" />
-
-          <div style={{ marginTop: 8 }}>
-            <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, display: "block", color: theme.primaryText }}>Tipe Transisi :</Text>
-            <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
-          </div>
         </div>
 
         {/* Kolom 2: Style Dinamis */}
@@ -221,6 +216,10 @@ ${tabButtonsHtml}
           <VerticalSpace space="small" />
           <ColorPicker label="Warna teks saat hover :" value={hoverTextColor} onChange={setHoverTextColor} />
           <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
+          <div style={{ marginTop: 8 }}>
+            <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, display: "block", color: theme.primaryText }}>Tipe Transisi :</Text>
+            <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
+          </div>
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
