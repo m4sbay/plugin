@@ -44,9 +44,6 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   const [disabledStates, setDisabledStates] = useState("false"); // comma-separated: "false,false,false,true"
 
   // State Style Dinamis
-  const [focusRingWidth, setFocusRingWidth] = useState("2");
-  const [focusRingColor, setFocusRingColor] = useState("#3B82F6"); // blue-500
-
   // Transisi
   const [transitionType, setTransitionType] = useState("normal");
   const transitionOptions = [
@@ -90,7 +87,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
     <label class="relative inline-flex h-[${switchHeight}px] w-[${switchWidth}px] cursor-pointer items-center flex-shrink-0">
       <input id="${switchId}" type="checkbox" class="peer sr-only" ${isChecked ? "checked" : ""} />
       <span
-        class="absolute inset-0 rounded-full border border-[${uncheckedBorderColor}] bg-[${uncheckedBgColor}]${transitionClass} peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[${focusRingColor}] peer-checked:bg-[${checkedBgColor}] peer-checked:border-[${checkedBorderColor}]"
+        class="absolute inset-0 rounded-full border border-[${uncheckedBorderColor}] bg-[${uncheckedBgColor}]${transitionClass} peer-checked:bg-[${checkedBgColor}] peer-checked:border-[${checkedBorderColor}]"
       ></span>
       <span class="pointer-events-none absolute top-0.5 left-0.5 h-[${toggleSize}px] w-[${toggleSize}px] rounded-full bg-[${toggleBgColor}] shadow${transitionClass} peer-checked:translate-x-[${
         parseInt(switchWidth) - parseInt(toggleSize) - 2
@@ -130,8 +127,6 @@ ${switchItems}
     toggleBgColor,
     defaultCheckedStates,
     disabledStates,
-    focusRingWidth,
-    focusRingColor,
     transitionType,
   ]);
 
@@ -166,8 +161,6 @@ ${switchItems}
           if (parsed.toggleBgColor !== undefined) setToggleBgColor(parsed.toggleBgColor || "#FFFFFF");
           if (parsed.defaultCheckedStates !== undefined) setDefaultCheckedStates(parsed.defaultCheckedStates || "false");
           if (parsed.disabledStates !== undefined) setDisabledStates(parsed.disabledStates || "false");
-          if (parsed.focusRingWidth !== undefined) setFocusRingWidth(parsed.focusRingWidth || "2");
-          if (parsed.focusRingColor !== undefined) setFocusRingColor(parsed.focusRingColor || "#3B82F6");
           if (parsed.transitionType !== undefined) setTransitionType(parsed.transitionType || "normal");
           if (parsed.htmltailwind !== undefined) setHtmltailwind(parsed.htmltailwind || "");
         }
@@ -220,8 +213,6 @@ ${switchItems}
       toggleBgColor,
       defaultCheckedStates,
       disabledStates,
-      focusRingWidth,
-      focusRingColor,
       transitionType,
       htmltailwind,
     });
@@ -276,11 +267,9 @@ ${switchItems}
           <InputField label="Ukuran toggle circle (px) :" value={toggleSize} onChange={setToggleSize} placeholder="Contoh: 20" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 9999 (rounded-full)" />
 
-        
           <ColorPicker label="Warna border (unchecked) :" value={uncheckedBorderColor} onChange={setUncheckedBorderColor} />
           <ColorPicker label="Background (unchecked) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
 
-          
           <ColorPicker label="Warna border (checked) :" value={checkedBorderColor} onChange={setCheckedBorderColor} />
           <ColorPicker label="Background (checked) :" value={checkedBgColor} onChange={setCheckedBgColor} />
           <ColorPicker label="Warna toggle circle :" value={toggleBgColor} onChange={setToggleBgColor} />
@@ -290,9 +279,6 @@ ${switchItems}
         <div style={{ flex: 1, minWidth: 260 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
-
-          <InputField label="Lebar ring focus (px) :" value={focusRingWidth} onChange={setFocusRingWidth} placeholder="Contoh: 2" />
-          <ColorPicker label="Warna ring focus :" value={focusRingColor} onChange={setFocusRingColor} />
 
           <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>TIpe Transisi (ms) :</Text>
           <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />

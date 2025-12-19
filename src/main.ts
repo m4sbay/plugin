@@ -394,8 +394,6 @@ export default function () {
           toggleBgColor: selectedNode.getPluginData("toggleBgColor") || "",
           defaultCheckedStates: selectedNode.getPluginData("defaultCheckedStates") || "",
           disabledStates: selectedNode.getPluginData("disabledStates") || "",
-          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
-          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
           transitionType: selectedNode.getPluginData("transitionType") || "",
         };
         emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(switchData));
@@ -628,8 +626,6 @@ export default function () {
           toggleBgColor: selectedNode.getPluginData("toggleBgColor") || "",
           defaultCheckedStates: selectedNode.getPluginData("defaultCheckedStates") || "",
           disabledStates: selectedNode.getPluginData("disabledStates") || "",
-          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
-          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
           transitionType: selectedNode.getPluginData("transitionType") || "",
         };
         emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(switchData));
@@ -1235,8 +1231,6 @@ export default function () {
       toggleBgColor,
       defaultCheckedStates,
       disabledStates,
-      focusRingWidth,
-      focusRingColor,
       transitionType,
       htmltailwind,
     } = props;
@@ -1427,8 +1421,6 @@ export default function () {
     component.setPluginData("toggleBgColor", toggleBgColor);
     component.setPluginData("defaultCheckedStates", defaultCheckedStates);
     component.setPluginData("disabledStates", disabledStates);
-    component.setPluginData("focusRingWidth", focusRingWidth);
-    component.setPluginData("focusRingColor", focusRingColor);
     component.setPluginData("transitionType", transitionType);
 
     // Tambahkan ke canvas dan seleksi
