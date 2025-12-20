@@ -33,7 +33,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
   const [paddingX, setPaddingX] = useState("12");
   const [paddingY, setPaddingY] = useState("8");
   const [padding, setPadding] = useState("12, 8");
-  const [gap, setGap] = useState("12");
+  const [gap, setGap] = useState("10");
   const [inputTextColor, setInputTextColor] = useState("#111827");
 
   // State Style Dinamis

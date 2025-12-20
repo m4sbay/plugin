@@ -5,6 +5,8 @@ import { useState, useCallback, useEffect } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
+import { copyToClipboard } from "../utils/clipboardUtils";
+import { normalizeHex } from "../utils/colorUtils";
 
 type RadioButtonProps = {
   onBack: () => void;
@@ -48,13 +50,6 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
-
-  // Helper function untuk normalize hex color (pastikan ada # di depan)
-  const normalizeHex = useCallback((color: string): string => {
-    if (!color) return "#000000";
-    const cleanColor = color.replace("#", "").toUpperCase();
-    return `#${cleanColor}`;
-  }, []);
 
   // Generate Tailwind code
   const generateCode = useCallback(() => {
@@ -168,23 +163,10 @@ ${radioItems}
   }, []);
 
   const handleCopyCode = useCallback(async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(htmltailwind);
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = htmltailwind;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
+    const success = await copyToClipboard(htmltailwind);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
     }
   }, [htmltailwind]);
 

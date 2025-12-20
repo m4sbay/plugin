@@ -5,6 +5,8 @@ import { useState, useCallback, useEffect } from "preact/hooks";
 import { SelectionChangeHandler } from "../types/types";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
+import { copyToClipboard } from "../utils/clipboardUtils";
+import { normalizeHex } from "../utils/colorUtils";
 
 type CheckboxCreatorProps = {
   onBack: () => void;
@@ -28,6 +30,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   const [checkboxDescription, setCheckboxDescription] = useState("Ya saya setuju dengan syarat dan ketentuan.");
   const [labelColor, setLabelColor] = useState("#3B82F6");
   const [labelFontSize, setLabelFontSize] = useState("14");
+  const [labelFontWeight, setLabelFontWeight] = useState("500");
   const [descriptionColor, setDescriptionColor] = useState("#9CA3AF");
   const [descriptionFontSize, setDescriptionFontSize] = useState("14");
   const [checkboxSize, setCheckboxSize] = useState("15");
@@ -38,20 +41,9 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   const [checkmarkSize, setCheckmarkSize] = useState("12");
   const [checkmarkColor, setCheckmarkColor] = useState("#FFFFFF");
 
-  // State Style Dinamis
-  const [focusRingWidth, setFocusRingWidth] = useState("1");
-  const [focusRingColor, setFocusRingColor] = useState("#3B82F6");
-
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [checkedStates, setCheckedStates] = useState<boolean[]>([]);
-
-  // Helper function untuk normalize hex color (pastikan ada # di depan)
-  const normalizeHex = useCallback((color: string): string => {
-    if (!color) return "#000000";
-    const cleanColor = color.replace("#", "").toUpperCase();
-    return `#${cleanColor}`;
-  }, []);
 
   // Generate Tailwind code
   const generateCode = useCallback(() => {
@@ -67,10 +59,9 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     // Normalize hex colors
     const checkedBgColorHex = normalizeHex(checkedBgColor);
     const checkmarkColorHex = normalizeHex(checkmarkColor);
-    const focusRingColorHex = normalizeHex(focusRingColor);
 
     // Classes untuk checkbox input
-    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] focus:outline-none focus:ring-[${focusRingWidth}px] focus:ring-[${focusRingColorHex}] focus:ring-offset-0`;
+    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] focus:outline-none`;
 
     // Normalize colors untuk label dan deskripsi
     const labelColorHex = normalizeHex(labelColor);
@@ -90,7 +81,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
       </span>
     </label>
     <div class="ml-[${gapBetweenCheckboxLabel}px]">
-      <span class="text-[${labelFontSize}px] font-medium text-[${labelColorHex}]">${label}</span>
+      <span class="text-[${labelFontSize}px] font-[${labelFontWeight}] text-[${labelColorHex}]">${label}</span>
     </div>
   </div>
   ${description ? `<div class="ml-[${descriptionIndent}px]"><p class="text-[${descriptionFontSize}px] text-[${descriptionColorHex}]">${description}</p></div>` : ""}
@@ -107,6 +98,7 @@ ${checkboxItem}
     checkboxDescription,
     labelColor,
     labelFontSize,
+    labelFontWeight,
     descriptionColor,
     descriptionFontSize,
     checkboxSize,
@@ -114,8 +106,6 @@ ${checkboxItem}
     checkedBgColor,
     uncheckedBgColor,
     gapBetweenCheckboxLabel,
-    focusRingWidth,
-    focusRingColor,
     checkmarkSize,
     checkmarkColor,
     normalizeHex,
@@ -139,13 +129,12 @@ ${checkboxItem}
             if (checkboxData.checkboxDescription) setCheckboxDescription(checkboxData.checkboxDescription);
             if (checkboxData.labelColor) setLabelColor(checkboxData.labelColor);
             if (checkboxData.labelFontSize) setLabelFontSize(checkboxData.labelFontSize);
+            if (checkboxData.labelFontWeight) setLabelFontWeight(checkboxData.labelFontWeight);
             if (checkboxData.checkboxSize) setCheckboxSize(checkboxData.checkboxSize);
             if (checkboxData.borderRadius) setBorderRadius(checkboxData.borderRadius);
             if (checkboxData.checkedBgColor) setCheckedBgColor(checkboxData.checkedBgColor);
             if (checkboxData.uncheckedBgColor) setUncheckedBgColor(checkboxData.uncheckedBgColor);
             if (checkboxData.gapBetweenCheckboxLabel) setGapBetweenCheckboxLabel(checkboxData.gapBetweenCheckboxLabel);
-            if (checkboxData.focusRingWidth) setFocusRingWidth(checkboxData.focusRingWidth);
-            if (checkboxData.focusRingColor) setFocusRingColor(checkboxData.focusRingColor);
             if (checkboxData.checkmarkSize) setCheckmarkSize(checkboxData.checkmarkSize);
             if (checkboxData.checkmarkColor) setCheckmarkColor(checkboxData.checkmarkColor);
             if (checkboxData.checkboxDescriptions) setCheckboxDescription(checkboxData.checkboxDescriptions); // fallback lama
@@ -164,24 +153,10 @@ ${checkboxItem}
 
   // Fungsi untuk copy kode ke clipboard
   const handleCopyCode = useCallback(async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(htmltailwind);
-      } else {
-        // Fallback untuk browser yang tidak support Clipboard API
-        const textArea = document.createElement("textarea");
-        textArea.value = htmltailwind;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
+    const success = await copyToClipboard(htmltailwind);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
     }
   }, [htmltailwind]);
 
@@ -192,13 +167,12 @@ ${checkboxItem}
       checkboxDescription,
       labelColor,
       labelFontSize,
+      labelFontWeight,
       checkboxSize,
       borderRadius,
       checkedBgColor,
       uncheckedBgColor,
       gapBetweenCheckboxLabel,
-      focusRingWidth,
-      focusRingColor,
       checkmarkSize,
       checkmarkColor,
       descriptionColor,
@@ -240,6 +214,7 @@ ${checkboxItem}
 
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14" />
+          <InputField label="Font weight label :" value={labelFontWeight} onChange={setLabelFontWeight} placeholder="Contoh: 500 (akan menjadi font-[500])" />
 
           <InputField label="Deskripsi Checkbox :" value={checkboxDescription} onChange={setCheckboxDescription} placeholder="Contoh: Get notified when a candidate accepts or rejects an offer." />
 
@@ -255,15 +230,7 @@ ${checkboxItem}
           <ColorPicker label="Warna checkmark :" value={checkmarkColor} onChange={setCheckmarkColor} />
         </div>
 
-        {/* Kolom 2: Style Dinamis */}
-        <div style={{ flex: 1, minWidth: 260 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
-          <VerticalSpace space="small" />
-          <InputField label="Lebar ring focus (px) :" value={focusRingWidth} onChange={setFocusRingWidth} placeholder="Contoh: 2" />
-          <ColorPicker label="Warna ring focus :" value={focusRingColor} onChange={setFocusRingColor} />
-        </div>
-
-        {/* Kolom 3: Live Preview & Kode */}
+        {/* Kolom 2: Live Preview & Kode */}
         <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
@@ -343,7 +310,7 @@ ${checkboxItem}
                       </span>
                     </label>
                     <div style={{ marginLeft: `${gapBetweenCheckboxLabel}px`, flex: 1 }}>
-                      <span style={{ color: labelColor, fontSize: `${labelFontSize}px`, fontWeight: 500, display: "block" }}>{label}</span>
+                      <span style={{ color: labelColor, fontSize: `${labelFontSize}px`, fontWeight: Number(labelFontWeight) || 500, display: "block" }}>{label}</span>
                     </div>
                   </div>
                   {description && (

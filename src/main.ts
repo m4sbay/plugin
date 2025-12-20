@@ -12,23 +12,13 @@ import {
   CreateRadioButtonHandler,
 } from "./types/types";
 import { VerticalSpace } from "@create-figma-plugin/ui";
+import { getFontStyle, loadAllInterFonts, loadInterFonts } from "./utils/fontUtils";
+import { hexToRgb, hexToRgbOrNull } from "./utils/colorUtils";
+import { parsePx, parseMs, parseNumber } from "./utils/numberUtils";
+import { generateComponentId, setPluginDataBatch } from "./utils/componentUtils";
 
-// Fungsi kustom untuk mengkonversi hex ke RGB
-function customConvertHexColorToRgbColor(hex: string): { r: number; g: number; b: number } | null {
-  let cleanHex = hex.trim().toUpperCase();
-  if (!cleanHex.startsWith("#")) {
-    cleanHex = `#${cleanHex}`;
-  }
-  if (!/^#[0-9A-F]{6}$/.test(cleanHex)) {
-    console.log(`Invalid hex format: ${cleanHex}`);
-    return null;
-  }
-  const r = parseInt(cleanHex.slice(1, 3), 16) / 255;
-  const g = parseInt(cleanHex.slice(3, 5), 16) / 255;
-  const b = parseInt(cleanHex.slice(5, 7), 16) / 255;
-  console.log(`Converted ${cleanHex} to RGB: { r: ${r}, g: ${g}, b: ${b} }`);
-  return { r, g, b };
-}
+// Alias untuk backward compatibility (menggunakan versi yang bisa return null untuk validasi)
+const customConvertHexColorToRgbColor = hexToRgbOrNull;
 
 export default function () {
   // Dipanggil dari UI ButtonCreator.tsx ketika pengguna menekan tombol "Buat".
@@ -82,7 +72,7 @@ export default function () {
       }
 
       try {
-        await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+        await loadInterFonts(["Regular"]);
       } catch (error) {
         figma.notify("Gagal memuat font 'Inter Regular': " + error);
         return;
@@ -143,7 +133,7 @@ export default function () {
         }
       }
 
-      const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+      const componentId = generateComponentId();
       component.setPluginData("id", componentId);
       component.setPluginData("htmltailwind", htmltailwind);
 
@@ -248,6 +238,7 @@ export default function () {
           checkboxCount: selectedNode.getPluginData("checkboxCount") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
           labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          labelFontWeight: selectedNode.getPluginData("labelFontWeight") || "",
           checkboxSize: selectedNode.getPluginData("checkboxSize") || "",
           borderWidth: selectedNode.getPluginData("borderWidth") || "",
           borderRadius: selectedNode.getPluginData("borderRadius") || "",
@@ -258,9 +249,6 @@ export default function () {
           gapBetweenCheckboxLabel: selectedNode.getPluginData("gapBetweenCheckboxLabel") || "",
           hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
           hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
-          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
-          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
-          transitionType: selectedNode.getPluginData("transitionType") || "",
         };
         emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(checkboxData));
       } else if (htmltailwind && selectedNode.name === "Radio Button") {
@@ -480,6 +468,7 @@ export default function () {
           checkboxCount: selectedNode.getPluginData("checkboxCount") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
           labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
+          labelFontWeight: selectedNode.getPluginData("labelFontWeight") || "",
           checkboxSize: selectedNode.getPluginData("checkboxSize") || "",
           borderWidth: selectedNode.getPluginData("borderWidth") || "",
           borderRadius: selectedNode.getPluginData("borderRadius") || "",
@@ -490,9 +479,6 @@ export default function () {
           gapBetweenCheckboxLabel: selectedNode.getPluginData("gapBetweenCheckboxLabel") || "",
           hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
           hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
-          focusRingWidth: selectedNode.getPluginData("focusRingWidth") || "",
-          focusRingColor: selectedNode.getPluginData("focusRingColor") || "",
-          transitionType: selectedNode.getPluginData("transitionType") || "",
         };
         emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(checkboxData));
       } else if (htmltailwind && selectedNode.name === "Radio Button") {
@@ -675,7 +661,7 @@ export default function () {
 
     // Buat label
     const text = figma.createText();
-    await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+    await loadInterFonts(["Regular"]);
     text.characters = label;
     text.fontSize = Number(fontSize) || 16;
     text.fills = [{ type: "SOLID", color: hexToRgb(textColor) }];
@@ -727,6 +713,7 @@ export default function () {
       checkboxDescription,
       labelColor,
       labelFontSize,
+      labelFontWeight,
       descriptionColor,
       descriptionFontSize,
       checkboxSize,
@@ -736,15 +723,14 @@ export default function () {
       gapBetweenCheckboxLabel,
       checkmarkSize,
       checkmarkColor,
-      focusRingWidth,
-      focusRingColor,
-      transitionType,
       htmltailwind,
     } = props;
 
+    // Load font berdasarkan weight yang digunakan
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+      const labelWeight = labelFontWeight || "500";
+      const fontStyle = getFontStyle(labelWeight);
+      await loadInterFonts([fontStyle, "Regular"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter': " + error);
       return;
@@ -785,7 +771,8 @@ export default function () {
     // Label
     const labelText = figma.createText();
     labelText.characters = checkboxLabel || "Checkbox";
-    labelText.fontName = { family: "Inter", style: "Medium" };
+    const labelWeight = labelFontWeight || "500";
+    labelText.fontName = { family: "Inter", style: getFontStyle(labelWeight) };
     labelText.fontSize = Number(labelFontSize) || 14;
     labelText.fills = [{ type: "SOLID", color: customConvertHexColorToRgbColor(labelColor) || { r: 1, g: 1, b: 1 } }];
     labelText.name = "Label";
@@ -822,7 +809,7 @@ export default function () {
     }
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("checkboxProps", JSON.stringify(props));
@@ -832,6 +819,7 @@ export default function () {
     component.setPluginData("checkboxDescription", checkboxDescription || "");
     component.setPluginData("labelColor", labelColor);
     component.setPluginData("labelFontSize", labelFontSize);
+    component.setPluginData("labelFontWeight", labelFontWeight || "500");
     component.setPluginData("descriptionColor", descriptionColor);
     component.setPluginData("descriptionFontSize", descriptionFontSize);
     component.setPluginData("checkboxSize", checkboxSize);
@@ -841,9 +829,6 @@ export default function () {
     component.setPluginData("gapBetweenCheckboxLabel", gapBetweenCheckboxLabel);
     component.setPluginData("checkmarkSize", checkmarkSize);
     component.setPluginData("checkmarkColor", checkmarkColor);
-    component.setPluginData("focusRingWidth", focusRingWidth);
-    component.setPluginData("focusRingColor", focusRingColor);
-    component.setPluginData("transitionType", transitionType);
 
     // Tambahkan ke canvas dan seleksi
     figma.currentPage.appendChild(component);
@@ -857,7 +842,7 @@ export default function () {
     const { label, labelColor, fontSize, placeholder, width, height, bgColor, borderRadius, borderColor, paddingX, paddingY, gap, inputTextColor, focusRingColor, htmltailwind } = props;
 
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+      await loadInterFonts(["Regular"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter Regular': " + error);
       return;
@@ -907,8 +892,8 @@ export default function () {
     }
 
     // Parse padding
-    const paddingXValue = paddingX ? Number(paddingX.replace(/px/gi, "").trim()) || 12 : 12;
-    const paddingYValue = paddingY ? Number(paddingY.replace(/px/gi, "").trim()) || 8 : 8;
+    const paddingXValue = paddingX ? parsePx(paddingX, 12) : 12;
+    const paddingYValue = paddingY ? parsePx(paddingY, 8) : 8;
 
     // Buat input frame (tanpa wrapper, langsung dengan border)
     const inputFrame = figma.createFrame();
@@ -961,7 +946,7 @@ export default function () {
     component.appendChild(inputFrame);
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
 
@@ -994,20 +979,20 @@ export default function () {
     const { tooltipText, bgColor, textColor, fontSize, padding, borderRadius, marginBottom, htmltailwind } = props;
 
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+      await loadInterFonts(["Regular"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter Regular': " + error);
       return;
     }
 
     // Parse values
-    const fontSizeValue = Number(fontSize.replace(/px/gi, "").trim()) || 14;
+    const fontSizeValue = parsePx(fontSize, 14);
     const paddingY = padding.split(",")[0]?.trim().replace(/px/gi, "") || "8";
     const paddingX = padding.split(",")[1]?.trim().replace(/px/gi, "") || "12";
     const paddingXValue = Number(paddingX) || 12;
     const paddingYValue = Number(paddingY) || 8;
-    const borderRadiusValue = Number(borderRadius.replace(/px/gi, "").trim()) || 8;
-    const marginBottomValue = Number(marginBottom.replace(/px/gi, "").trim()) || 16;
+    const borderRadiusValue = parsePx(borderRadius, 8);
+    const marginBottomValue = parsePx(marginBottom, 16);
 
     // Buat komponen tooltip
     const component = figma.createComponent();
@@ -1071,7 +1056,7 @@ export default function () {
     component.resize(componentWidth, componentHeight);
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("tooltipText", tooltipText || "");
@@ -1101,8 +1086,7 @@ export default function () {
     const { tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabPadding, tabGap, htmltailwind } = props;
 
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+      await loadInterFonts(["Regular", "Medium"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter': " + error);
       return;
@@ -1185,7 +1169,7 @@ export default function () {
     }
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("tabsProps", JSON.stringify(props));
@@ -1236,8 +1220,7 @@ export default function () {
     } = props;
 
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+      await loadInterFonts(["Regular", "Medium"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter': " + error);
       return;
@@ -1396,7 +1379,7 @@ export default function () {
     }
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("switchProps", JSON.stringify(props));
@@ -1457,8 +1440,7 @@ export default function () {
     } = props;
 
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+      await loadInterFonts(["Regular", "Medium"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter': " + error);
       return;
@@ -1566,7 +1548,7 @@ export default function () {
     }
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("alertBannerProps", JSON.stringify(props));
@@ -1605,7 +1587,7 @@ export default function () {
     const { progressValue, progressType, width, height, progressColor, bgColor, borderRadius, percentageTextColor, percentageMargin, showPercentage, htmltailwind } = props;
 
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+      await loadInterFonts(["Regular"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter Regular': " + error);
       return;
@@ -1677,7 +1659,7 @@ export default function () {
     }
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
 
@@ -1705,8 +1687,7 @@ export default function () {
     const { columns, rows, headerBgColor, headerTextColor, rowBgColor, stripedRowBgColor, rowTextColor, borderColor, fontSize, padding, stripedRows, textAlignment, htmltailwind } = props;
 
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
+      await loadInterFonts(["Regular", "Medium"]);
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter': " + error);
       return;
@@ -1908,7 +1889,7 @@ export default function () {
     }
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
 
@@ -1961,10 +1942,9 @@ export default function () {
       htmltailwind,
     } = props;
 
+    // Load semua font style yang mungkin digunakan
     try {
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-      await figma.loadFontAsync({ family: "Inter", style: "Medium" });
-      await figma.loadFontAsync({ family: "Inter", style: "SemiBold" });
+      await loadAllInterFonts();
     } catch (error) {
       figma.notify("Gagal memuat font 'Inter': " + error);
       return;
@@ -2005,7 +1985,7 @@ export default function () {
     // Buat heading text
     const headingText = figma.createText();
     headingText.characters = headingLabel;
-    headingText.fontName = { family: "Inter", style: Number(headingFontWeight) >= 600 ? "SemiBold" : "Medium" };
+    headingText.fontName = { family: "Inter", style: getFontStyle(headingFontWeight) };
     headingText.fontSize = Number(headingFontSize) || 14;
     headingText.fills = [{ type: "SOLID", color: headingRgb }];
     headingText.name = "Heading";
@@ -2061,9 +2041,10 @@ export default function () {
       // Buat label text
       const labelText = figma.createText();
       labelText.characters = labels[i];
+      const labelWeight = isChecked ? labelFontWeightChecked : labelFontWeight;
       labelText.fontName = {
         family: "Inter",
-        style: isChecked && Number(labelFontWeightChecked) >= 600 ? "SemiBold" : Number(labelFontWeight) >= 500 ? "Medium" : "Regular",
+        style: getFontStyle(labelWeight),
       };
       labelText.fontSize = Number(labelFontSize) || 14;
       labelText.fills = [{ type: "SOLID", color: isChecked ? labelCheckedRgb : labelRgb }];
@@ -2078,7 +2059,7 @@ export default function () {
     }
 
     // Simpan data plugin
-    const componentId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9);
+    const componentId = generateComponentId();
     component.setPluginData("id", componentId);
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("radioButtonProps", JSON.stringify(props));
@@ -2112,22 +2093,6 @@ export default function () {
 
     figma.notify(`✅ Radio Button berhasil dibuat (${labels.length} radio)!`);
   });
-
-  // Fungsi bantu konversi HEX ke RGB Figma
-  function hexToRgb(hex: string) {
-    let c = hex.replace("#", "");
-    if (c.length === 3)
-      c = c
-        .split("")
-        .map(x => x + x)
-        .join("");
-    const num = parseInt(c, 16);
-    return {
-      r: ((num >> 16) & 255) / 255,
-      g: ((num >> 8) & 255) / 255,
-      b: (num & 255) / 255,
-    };
-  }
 
   showUI({ width: 1200, height: 700 });
 }
