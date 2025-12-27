@@ -792,7 +792,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             )}
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth onClick={() => emit<CloseHandler>("CLOSE")} secondary>
+            <Button fullWidth onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateButtonClick}>
