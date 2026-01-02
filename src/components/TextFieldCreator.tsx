@@ -244,14 +244,15 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           <ColorPicker label="Warna ring saat focus :" value={focusRingColor} onChange={setFocusRingColor} />
         </div>
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2 }}>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)"}}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.panelBackground,
-              minHeight: 120,
+              flex: 1,
+              minHeight: 0,
               marginBottom: 24,
               padding: 24,
             }}
@@ -290,16 +291,17 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.codeBackground,
-              minHeight: 80,
+              height: 200,
               padding: 16,
               fontFamily: "monospace",
               fontSize: 13,
               color: theme.codeText,
               wordBreak: "break-all",
               position: "relative",
+              overflow: "hidden",
             }}
           >
-            <Textbox value={htmltailwind} onValueInput={() => {}} style={{ background: "transparent", border: "none", width: "100%", minHeight: 60, color: theme.codeText }} />
+            <textarea value={htmltailwind} readOnly style={{ background: "transparent", border: "none", width: "100%",height: "100%", color: theme.codeText, whiteSpace: "pre-wrap", overflowWrap: "break-word", resize: "none" }} />
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>

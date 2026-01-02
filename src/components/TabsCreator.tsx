@@ -223,14 +223,15 @@ ${tabButtonsHtml}
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2 }}>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.panelBackground,
-              minHeight: 200,
+              flex: 1,
+              minHeight: 0,
               marginBottom: 24,
               padding: 24,
               width: "100%",
@@ -299,30 +300,31 @@ ${tabButtonsHtml}
               Buat
             </Button>
           </div>
+          
           <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.codeBackground,
-              minHeight: 80,
+              flex: 1,
+              minHeight: 0,
               padding: 16,
               fontFamily: "monospace",
               fontSize: 11,
               color: theme.codeText,
               wordBreak: "break-all",
               position: "relative",
-              maxHeight: 300,
-              overflow: "auto",
+              overflow: "hidden",
             }}
           >
-            <Textbox value={htmltailwind} onValueInput={() => {}} style={{ background: "transparent", border: "none", width: "100%", minHeight: 60, fontSize: 11, color: theme.codeText }} />
+            <textarea value={htmltailwind} readOnly style={{ background: "transparent", border: "none", width: "100%", height: "100%", fontSize: 11, color: theme.codeText, whiteSpace: "pre-wrap", overflowWrap: "break-word", resize: "none" }} />
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
-          </Button>
-        </div>
+              {copied ? "Tersalin!" : "Copy"}
+            </Button>
+          </div>
       </div>
     </div>
   );

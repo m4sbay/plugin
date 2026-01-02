@@ -186,7 +186,7 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
       </div>
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style */}
-        <div style={{maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
           <VerticalSpace space="small" />
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Pengaturan :</Text>
           <VerticalSpace space="small" />
@@ -208,9 +208,9 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
         </div>
 
         {/* Kolom 2: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 600, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2 }}>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 600, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
-          <div style={{ border: `1px solid ${theme.panelBorder}`, borderRadius: 8, background: theme.panelBackground, minHeight: 120, marginBottom: 24, padding: 24, overflowX: "auto" }}>
+          <div style={{ border: `1px solid ${theme.panelBorder}`, borderRadius: 8, background: theme.panelBackground, flex: 1, minHeight: 0, marginBottom: 24, padding: 24, overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", border: `1px solid ${borderColor}` }}>
               <thead>
                 <tr style={{ background: headerBgColor, color: headerTextColor, fontSize: `${fontSize}px`, fontWeight: 600 }}>
@@ -264,8 +264,23 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
             </Button>
           </div>
           <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
-          <div style={{ border: `1px solid ${theme.panelBorder}`, borderRadius: 8, background: theme.codeBackground, minHeight: 80, padding: 16, fontFamily: "monospace", fontSize: 13, color: theme.codeText, wordBreak: "break-all", position: "relative" }}>
-            <Textbox value={htmltailwind} onValueInput={() => {}} style={{ background: "transparent", border: "none", width: "100%", minHeight: 60, color: theme.codeText }} />
+          <div
+            style={{
+              border: `1px solid ${theme.panelBorder}`,
+              borderRadius: 8,
+              background: theme.codeBackground,
+              flex: 1,
+              minHeight: 0,
+              padding: 16,
+              fontFamily: "monospace",
+              fontSize: 13,
+              color: theme.codeText,
+              wordBreak: "break-all",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <textarea value={htmltailwind} readOnly style={{ background: "transparent", border: "none", width: "100%", height: "100%", color: theme.codeText, whiteSpace: "pre-wrap", overflowWrap: "break-word", resize: "none" }} />
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>

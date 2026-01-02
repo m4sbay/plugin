@@ -740,24 +740,15 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           />
         </div>
         {/* Kolom 3: Live Preview & Kode */}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 320,
-            maxWidth: 400,
-            position: "sticky",
-            top: 24,
-            alignSelf: "flex-start",
-            zIndex: 2,
-          }}
-        >
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Preview Komponen :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Live Preview :</Text>
           <div
             style={{
-              border: `1px solid ${theme.previewBorder}`,
+              border: ` 1px solid ${theme.previewBorder}`,
               borderRadius: 8,
               background: theme.previewBackground,
-              minHeight: 180,
+              flex: 1,
+              minHeight: 0,
               marginBottom: 24,
               padding: 24,
               display: "flex",
@@ -801,7 +792,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           </div>
           <VerticalSpace space="large" />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <Text style={{ fontWeight: 600, fontSize: 16 }}>Preview Kode :</Text>
+            <Text style={{ fontWeight: 600, fontSize: 16 }}>Kode :</Text>
             <VerticalSpace space="small" />
           </div>
           <div
@@ -809,16 +800,18 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               border: `1px solid ${theme.surfaceBorder}`,
               borderRadius: 8,
               background: theme.codeBackground,
-              minHeight: 80,
+              flex: 1,
+              minHeight: 0,
               padding: 16,
               fontFamily: "monospace",
               fontSize: 13,
               color: theme.codeText,
               wordBreak: "break-all",
               position: "relative",
+              overflow: "hidden",
             }}
           >
-            <Textbox value={htmltailwind} onValueInput={() => {}} style={{ background: "transparent", border: "none", width: "100%", minHeight: 60, color: theme.codeText }} />
+            <textarea value={htmltailwind} readOnly style={{ background: "transparent", border: "none", width: "100%", height: "100%", color: theme.codeText, whiteSpace: "pre-wrap", overflowWrap: "break-word", resize: "none" }} />
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
