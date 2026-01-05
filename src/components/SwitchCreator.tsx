@@ -8,7 +8,8 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 type SwitchCreatorProps = {
   onBack: () => void;
@@ -109,8 +110,9 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
 ${switchItems}
 </section>`;
 
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [
     switchCount,
     switchLabels,
@@ -392,7 +394,7 @@ ${switchItems}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

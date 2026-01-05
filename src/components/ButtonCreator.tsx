@@ -9,8 +9,8 @@ import { ColorPicker } from "./ui/ColorPicker";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 type ButtonCreatorProps = {
   onBack: () => void;
@@ -450,8 +450,9 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       }
 
       const htmltailwind = `<button class="${classes}">${defaultLabel}</button>`;
-      setHtmltailwind(htmltailwind);
-      return { htmltailwind };
+      const formattedHtml = formatHTML(htmltailwind);
+      setHtmltailwind(formattedHtml);
+      return { htmltailwind: formattedHtml };
     },
     [
       color,
@@ -759,6 +760,10 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflow: "hidden",
             }}
           >
             {previewHtml ? (
@@ -778,6 +783,8 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
                     }
                     return "auto";
                   })(),
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
                 }}
                 dangerouslySetInnerHTML={{ __html: previewHtml }}
               />
@@ -818,7 +825,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

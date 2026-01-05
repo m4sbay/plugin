@@ -4,11 +4,11 @@ import { h } from "preact";
 import { useState, useCallback, useEffect } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { SelectionChangeHandler } from "../types/types";
-import { Prism as SyntaxHighlighterComponent } from 'react-syntax-highlighter';
+import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-
-import { vscDarkPlus, prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 // Komponen untuk preview alert
 function AlertPreview({ alertType, title, message, borderRadius, width, padding }: { alertType: string; title: string; message: string; borderRadius: string; width?: string; padding?: string }) {
@@ -173,8 +173,9 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
     ${message}
   </p>
 </div>`;
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [alertType, title, message, borderRadius, width, padding]);
 
   useEffect(() => {
@@ -325,7 +326,7 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

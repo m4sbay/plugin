@@ -10,7 +10,8 @@ import { normalizeHex } from "../utils/colorUtils";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 type RadioButtonProps = {
   onBack: () => void;
@@ -100,8 +101,9 @@ ${heading}
 ${radioItems}
 </div>`;
 
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [
     headingLabel,
     headingFontSize,
@@ -268,7 +270,7 @@ ${radioItems}
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)"}}>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
             style={{
@@ -365,7 +367,7 @@ ${radioItems}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

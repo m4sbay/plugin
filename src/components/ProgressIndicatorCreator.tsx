@@ -8,7 +8,8 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 type ProgressIndicatorCreatorProps = {
   onBack: () => void;
@@ -58,7 +59,8 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
   </div>
   ${percentage}
 </div>`;
-    setHtmltailwind(html);
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
   }, [progressValue, width, height, progressColor, bgColor, borderRadius, percentageTextColor, percentageMargin, showPercentage]);
 
   useEffect(() => {
@@ -254,7 +256,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

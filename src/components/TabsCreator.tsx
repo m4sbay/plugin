@@ -8,7 +8,8 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 type TabsCreatorProps = {
   onBack: () => void;
@@ -98,8 +99,9 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
 ${tabButtonsHtml}
 </div>`;
 
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabPadding, tabGap, normalizeHex]);
 
   useEffect(() => {
@@ -304,7 +306,7 @@ ${tabButtonsHtml}
               Buat
             </Button>
           </div>
-          
+
           <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
           <div
             style={{
@@ -323,7 +325,7 @@ ${tabButtonsHtml}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{
@@ -341,9 +343,9 @@ ${tabButtonsHtml}
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-              {copied ? "Tersalin!" : "Copy"}
-            </Button>
-          </div>
+            {copied ? "Tersalin!" : "Copy"}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -5,10 +5,11 @@ import { useState, useCallback, useEffect } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
-import { Prism as SyntaxHighlighterComponent } from 'react-syntax-highlighter';
+import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 type DataTableCreatorProps = {
   onBack: () => void;
@@ -87,8 +88,9 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
   <thead>${headerRow}</thead>
   <tbody>${dataRows}</tbody>
 </table>`;
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [columns, rows, headerBgColor, headerTextColor, rowBgColor, stripedRowBgColor, rowTextColor, borderColor, fontSize, padding, stripedRows, textAlignment]);
 
   useEffect(() => {
@@ -285,7 +287,7 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

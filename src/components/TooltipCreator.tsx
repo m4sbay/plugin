@@ -8,7 +8,8 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { formatHTML } from "../utils/htmlFormatter";
 
 type TooltipCreatorProps = {
   onBack: () => void;
@@ -53,8 +54,9 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
 </div> 
 <!-- Pastikan komponen yang ingin diberi tooltip terbungkus dalam "div" dengan class "relative" dan "group" -->`;
 
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [tooltipText, bgColor, textColor, fontSize, padding, borderRadius, marginBottom]);
 
   useEffect(() => {
@@ -238,7 +240,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

@@ -6,9 +6,10 @@ import { SelectionChangeHandler } from "../types/types";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
-import { prism, vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { duotoneDark, prism, shadesOfPurple, vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
+import { formatHTML } from "../utils/htmlFormatter";
 
 type TextFieldCreatorProps = {
   onBack: () => void;
@@ -101,8 +102,9 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
   <input type="text" placeholder="${placeholder}" class="${inputClasses}" />
 </div>`;
 
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [label, labelColor, labelFontSize, placeholder, width, borderRadius, borderColor, paddingX, paddingY, gap, inputTextColor, focusRingColor, normalizeHex]);
 
   useEffect(() => {
@@ -248,7 +250,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           <ColorPicker label="Warna ring saat focus :" value={focusRingColor} onChange={setFocusRingColor} />
         </div>
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)"}}>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
             style={{
@@ -259,9 +261,13 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               minHeight: 0,
               marginBottom: 24,
               padding: 24,
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflow: "hidden",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: `${gap.replace(/px/gi, "") || 12}px` }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: `${gap.replace(/px/gi, "") || 12}px`, width: "100%", maxWidth: "100%", overflow: "hidden" }}>
               <label style={{ fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`, fontWeight: 500, color: labelColor, display: "flex", alignItems: "center", gap: "4px" }}>{label}</label>
               <input
                 type="text"
@@ -273,6 +279,8 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
                   fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`,
                   color: inputTextColor,
                   width: width ? `${width.replace(/px/gi, "")}px` : "100%",
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
                   outline: "none",
                   background: bgColor,
                 }}
@@ -307,7 +315,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{

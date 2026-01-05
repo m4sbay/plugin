@@ -7,10 +7,11 @@ import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { copyToClipboard } from "../utils/clipboardUtils";
 import { normalizeHex } from "../utils/colorUtils";
-import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Prism as SyntaxHighlighterComponent } from 'react-syntax-highlighter';
+import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
+import { formatHTML } from "../utils/htmlFormatter";
 
 type CheckboxCreatorProps = {
   onBack: () => void;
@@ -95,8 +96,9 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
 ${checkboxItem}
 </div>`;
 
-    setHtmltailwind(html);
-    return html;
+    const formattedHtml = formatHTML(html);
+    setHtmltailwind(formattedHtml);
+    return formattedHtml;
   }, [
     checkboxLabel,
     checkboxDescription,
@@ -356,7 +358,7 @@ ${checkboxItem}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? vscDarkPlus : prism}
+              style={isDark ? shadesOfPurple : duotoneDark}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
               lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
               customStyle={{
