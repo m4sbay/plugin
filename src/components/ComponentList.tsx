@@ -1,6 +1,7 @@
 import { Button, Text, VerticalSpace } from "@create-figma-plugin/ui";
 import { h } from "preact";
 
+
 const components = ["Button", "Checkbox", "Text Field", "Radio Button", "Tabs", "Switch", "Alert Banner", "Tooltip", "Progress Indicator", "Data Table"];
 
 type ComponentListProps = {

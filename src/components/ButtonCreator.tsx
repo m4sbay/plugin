@@ -6,6 +6,11 @@ import "../style.css";
 import { CloseHandler, CreateButtonHandler, SelectionChangeHandler } from "../types/types";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
+import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
+// Gunakan casting 'as any' untuk menghindari error JSX
+const SyntaxHighlighter = SyntaxHighlighterComponent as any;
+
+import { vscDarkPlus, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 type ButtonCreatorProps = {
   onBack: () => void;
@@ -795,6 +800,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             <Text style={{ fontWeight: 600, fontSize: 16 }}>Kode :</Text>
             <VerticalSpace space="small" />
           </div>
+          {/* Kolom 3: Live Preview & Kode */}
           <div
             style={{
               border: `1px solid ${theme.surfaceBorder}`,
@@ -802,16 +808,31 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               background: theme.codeBackground,
               flex: 1,
               minHeight: 0,
-              padding: 16,
+              padding: 0, // Set ke 0 agar highlighter mengisi penuh kontainer
               fontFamily: "monospace",
               fontSize: 13,
               color: theme.codeText,
-              wordBreak: "break-all",
               position: "relative",
               overflow: "hidden",
             }}
           >
-            <textarea value={htmltailwind} readOnly style={{ background: "transparent", border: "none", width: "100%", height: "100%", color: theme.codeText, whiteSpace: "pre-wrap", overflowWrap: "break-word", resize: "none" }} />
+            <SyntaxHighlighter
+              language="html"
+              style={isDark ? vscDarkPlus : prism}
+              wrapLines={true} // Mengaktifkan fitur wrap per baris
+              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              customStyle={{
+                margin: 0,
+                padding: "16px",
+                fontSize: "13px",
+                background: "transparent",
+                height: "100%",
+                width: "100%",
+                overflowX: "hidden", // Menghindari scroll horizontal
+              }}
+            >
+              {htmltailwind}
+            </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
