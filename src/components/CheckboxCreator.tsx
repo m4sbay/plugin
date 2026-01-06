@@ -7,7 +7,7 @@ import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { copyToClipboard } from "../utils/clipboardUtils";
 import { normalizeHex } from "../utils/colorUtils";
-import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
@@ -353,14 +353,20 @@ ${checkboxItem}
               fontSize: 13,
               color: theme.codeText,
               position: "relative",
-              overflow: "hidden",
+              overflow: "auto", // Ubah dari "hidden" ke "auto" untuk scroll
             }}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? shadesOfPurple : duotoneDark}
+              style={isDark ? shadesOfPurple : prism}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
-              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              lineProps={{
+                style: {
+                  whiteSpace: "pre", // Ubah dari "pre-wrap" ke "pre" untuk mempertahankan indentasi
+                  wordBreak: "normal", // Ubah dari "break-all" ke "normal"
+                  overflowWrap: "break-word", // Tambahkan untuk wrap yang lebih baik
+                },
+              }}
               customStyle={{
                 margin: 0,
                 padding: "16px",
@@ -368,7 +374,10 @@ ${checkboxItem}
                 background: "transparent",
                 height: "100%",
                 width: "100%",
-                overflowX: "hidden", // Menghindari scroll horizontal
+                overflowX: "auto", // Tambahkan scroll horizontal jika perlu
+                overflowY: "auto", // Tambahkan scroll vertical
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace", // Pastikan font monospace konsisten
+                lineHeight: "1.5", // Tambahkan line height untuk readability
               }}
             >
               {htmltailwind}

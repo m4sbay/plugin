@@ -8,7 +8,7 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
 
 type SwitchCreatorProps = {
@@ -27,118 +27,56 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State Style Statis
-  const [headlineText, setHeadlineText] = useState("Switch");
-  const [headlineColor, setHeadlineColor] = useState("#00BCFF"); // gray-900
-  const [headlineFontSize, setHeadlineFontSize] = useState("18");
-  const [switchCount, setSwitchCount] = useState("1");
-  const [switchLabels, setSwitchLabels] = useState("Airplane Mode");
-  const [containerWidth, setContainerWidth] = useState("100%"); // Lebar container/card
-  const [labelColor, setLabelColor] = useState("#00BCFF"); // slate-700
-  const [labelFontSize, setLabelFontSize] = useState("14");
-  const [switchWidth, setSwitchWidth] = useState("44"); // w-11 = 44px
-  const [switchHeight, setSwitchHeight] = useState("24"); // h-6 = 24px
-  const [toggleSize, setToggleSize] = useState("20"); // h-5 w-5 = 20px
-  const [borderRadius, setBorderRadius] = useState("9999"); // rounded-full
-  const [uncheckedBorderColor, setUncheckedBorderColor] = useState("#CBD5E1"); // slate-300
-  const [uncheckedBgColor, setUncheckedBgColor] = useState("#E2E8F0"); // slate-200
-  const [checkedBorderColor, setCheckedBorderColor] = useState("#2563EB"); // blue-600
-  const [checkedBgColor, setCheckedBgColor] = useState("#2563EB"); // blue-600
-  const [toggleBgColor, setToggleBgColor] = useState("#FFFFFF"); // white
-  const [defaultCheckedStates, setDefaultCheckedStates] = useState("false"); // comma-separated: "false,true,false"
-  const [disabledStates, setDisabledStates] = useState("false"); // comma-separated: "false,false,false,true"
+  // State Style Statis - Track
+  const [switchWidth, setSwitchWidth] = useState("51"); // w-[51px]
+  const [switchHeight, setSwitchHeight] = useState("31"); // h-[31px]
+  const [trackBorderRadius, setTrackBorderRadius] = useState("16"); // rounded-[16px]
+  const [uncheckedBgColor, setUncheckedBgColor] = useState("rgba(118,118,128,0.12)"); // bg unchecked
+  const [checkedBgColor, setCheckedBgColor] = useState("#00BCFF"); // peer-checked:bg
 
-  // State Style Dinamis
-  // Transisi
-  const [transitionType, setTransitionType] = useState("normal");
-  const transitionOptions = [
-    { value: "none", text: "Tanpa Transisi" },
-    { value: "fast", text: "Cepat (150ms)" },
-    { value: "normal", text: "Normal (300ms)" },
-    { value: "slow", text: "Lambat (500ms)" },
+  // State Style Statis - Thumb
+  const [thumbSize, setThumbSize] = useState("27"); // h-[27px] w-[27px]
+  const [thumbBgColor, setThumbBgColor] = useState("#FFFFFF"); // bg-white
+
+  // State Style Dinamis - Transition
+  const [transitionDuration, setTransitionDuration] = useState("300"); // duration-300
+  const [transitionEasing, setTransitionEasing] = useState("ease-in-out"); // ease-in-out
+  const transitionEasingOptions = [
+    { value: "ease-in-out", text: "Ease In Out" },
+    { value: "ease-in", text: "Ease In" },
+    { value: "ease-out", text: "Ease Out" },
+    { value: "linear", text: "Linear" },
   ];
+  const [defaultChecked, setDefaultChecked] = useState("false"); // default checked state
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
+  const [previewChecked, setPreviewChecked] = useState(false);
 
   // Generate Tailwind code
   const generateCode = useCallback(() => {
-    const transitionClass = transitionType !== "none" ? ` transition-all duration-[${transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300}ms]` : "";
+    const translateX = parseInt(switchWidth) - parseInt(thumbSize) - 4; // 2px left + 2px spacing
+    const isChecked = defaultChecked === "true";
 
-    const count = parseInt(switchCount) || 1;
-    const labels = switchLabels.split(",").map(l => l.trim());
-    const checkedStates = defaultCheckedStates.split(",").map(c => c.trim() === "true");
-    const disabledStatesArray = disabledStates.split(",").map(d => d.trim() === "true");
-
-    const switchItems = Array.from({ length: count }, (_, i) => {
-      const label = labels[i] || `Switch ${i + 1}`;
-      const isChecked = checkedStates[i] || false;
-      const isDisabled = disabledStatesArray[i] || false;
-      const switchId = `switch-${i + 1}`;
-
-      if (isDisabled) {
-        return `  <div class="flex items-center justify-between py-2 opacity-50">
-    <label for="${switchId}" class="text-sm font-medium text-slate-700" style="flex-shrink:0;max-width:fit-content;">${label}</label>
-    <label class="relative inline-flex h-[${switchHeight}px] w-[${switchWidth}px] cursor-not-allowed items-center flex-shrink-0">
-      <input id="${switchId}" type="checkbox" class="peer sr-only" disabled />
-      <span class="absolute inset-0 rounded-full border border-[${uncheckedBorderColor}] bg-[${uncheckedBgColor}]"></span>
-      <span class="pointer-events-none absolute top-0.5 left-0.5 h-[${toggleSize}px] w-[${toggleSize}px] rounded-full bg-[${toggleBgColor}] shadow"></span>
-    </label>
-  </div>`;
-      }
-
-      return `  <div class="flex items-center justify-between py-2">
-    <label for="${switchId}" class="text-sm font-medium" style="color:${labelColor};font-size:${labelFontSize}px;flex-shrink:0;max-width:fit-content;">${label}</label>
-    <label class="relative inline-flex h-[${switchHeight}px] w-[${switchWidth}px] cursor-pointer items-center flex-shrink-0">
-      <input id="${switchId}" type="checkbox" class="peer sr-only" ${isChecked ? "checked" : ""} />
-      <span
-        class="absolute inset-0 rounded-full border border-[${uncheckedBorderColor}] bg-[${uncheckedBgColor}]${transitionClass} peer-checked:bg-[${checkedBgColor}] peer-checked:border-[${checkedBorderColor}]"
-      ></span>
-      <span class="pointer-events-none absolute top-0.5 left-0.5 h-[${toggleSize}px] w-[${toggleSize}px] rounded-full bg-[${toggleBgColor}] shadow${transitionClass} peer-checked:translate-x-[${
-        parseInt(switchWidth) - parseInt(toggleSize) - 2
-      }px]"></span>
-    </label>
-  </div>`;
-    }).join("\n");
-
-    const containerWidthClass = containerWidth === "100%" ? "w-full" : "";
-    const containerWidthStyle = containerWidth && containerWidth !== "100%" ? `width:${containerWidth}px;` : "";
-    const headlineStyle = `color:${headlineColor};font-size:${headlineFontSize}px;`;
-    const html = `<section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm${containerWidthClass ? ` ${containerWidthClass}` : ""}"${containerWidthStyle ? ` style="${containerWidthStyle}"` : ""}>
-  <h2 class="mb-4 font-semibold" style="${headlineStyle}">${headlineText}</h2>
-
-${switchItems}
-</section>`;
+    const html = `<label for="toggle-switch" class="relative inline-flex cursor-pointer items-center">
+  <input type="checkbox" id="toggle-switch" class="peer sr-only" ${isChecked ? "checked" : ""} />
+  <div class="peer flex h-[${switchHeight}px] w-[${switchWidth}px] items-center rounded-[${trackBorderRadius}px] bg-[${uncheckedBgColor}] transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:bg-[${checkedBgColor}] peer-focus:outline-none"></div>
+  <div class="absolute top-[2px] left-[2px] h-[${thumbSize}px] w-[${thumbSize}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateX}px]"></div>
+</label>`;
 
     const formattedHtml = formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
-  }, [
-    switchCount,
-    switchLabels,
-    containerWidth,
-    headlineText,
-    headlineColor,
-    headlineFontSize,
-    labelColor,
-    labelFontSize,
-    switchWidth,
-    switchHeight,
-    toggleSize,
-    borderRadius,
-    uncheckedBorderColor,
-    uncheckedBgColor,
-    checkedBorderColor,
-    checkedBgColor,
-    toggleBgColor,
-    defaultCheckedStates,
-    disabledStates,
-    transitionType,
-  ]);
+  }, [switchWidth, switchHeight, trackBorderRadius, uncheckedBgColor, checkedBgColor, thumbSize, thumbBgColor, transitionDuration, transitionEasing, defaultChecked]);
 
   useEffect(() => {
     generateCode();
   }, [generateCode]);
+
+  // Update preview checked state when defaultChecked changes
+  useEffect(() => {
+    setPreviewChecked(defaultChecked === "true");
+  }, [defaultChecked]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
@@ -148,26 +86,16 @@ ${switchItems}
       try {
         const parsed = JSON.parse(data);
         if (parsed?.componentType === "switch") {
-          if (parsed.switchCount !== undefined) setSwitchCount(parsed.switchCount || "1");
-          if (parsed.switchLabels !== undefined) setSwitchLabels(parsed.switchLabels || "Airplane Mode");
-          if (parsed.containerWidth !== undefined) setContainerWidth(parsed.containerWidth || "");
-          if (parsed.headlineText !== undefined) setHeadlineText(parsed.headlineText || "Switch");
-          if (parsed.headlineColor !== undefined) setHeadlineColor(parsed.headlineColor || "#00BCFF");
-          if (parsed.headlineFontSize !== undefined) setHeadlineFontSize(parsed.headlineFontSize || "18");
-          if (parsed.labelColor !== undefined) setLabelColor(parsed.labelColor || "#00BCFF");
-          if (parsed.labelFontSize !== undefined) setLabelFontSize(parsed.labelFontSize || "14");
-          if (parsed.switchWidth !== undefined) setSwitchWidth(parsed.switchWidth || "44");
-          if (parsed.switchHeight !== undefined) setSwitchHeight(parsed.switchHeight || "24");
-          if (parsed.toggleSize !== undefined) setToggleSize(parsed.toggleSize || "20");
-          if (parsed.borderRadius !== undefined) setBorderRadius(parsed.borderRadius || "9999");
-          if (parsed.uncheckedBorderColor !== undefined) setUncheckedBorderColor(parsed.uncheckedBorderColor || "#CBD5E1");
-          if (parsed.uncheckedBgColor !== undefined) setUncheckedBgColor(parsed.uncheckedBgColor || "#E2E8F0");
-          if (parsed.checkedBorderColor !== undefined) setCheckedBorderColor(parsed.checkedBorderColor || "#2563EB");
-          if (parsed.checkedBgColor !== undefined) setCheckedBgColor(parsed.checkedBgColor || "#2563EB");
-          if (parsed.toggleBgColor !== undefined) setToggleBgColor(parsed.toggleBgColor || "#FFFFFF");
-          if (parsed.defaultCheckedStates !== undefined) setDefaultCheckedStates(parsed.defaultCheckedStates || "false");
-          if (parsed.disabledStates !== undefined) setDisabledStates(parsed.disabledStates || "false");
-          if (parsed.transitionType !== undefined) setTransitionType(parsed.transitionType || "normal");
+          if (parsed.switchWidth !== undefined) setSwitchWidth(parsed.switchWidth || "51");
+          if (parsed.switchHeight !== undefined) setSwitchHeight(parsed.switchHeight || "31");
+          if (parsed.trackBorderRadius !== undefined) setTrackBorderRadius(parsed.trackBorderRadius || "16");
+          if (parsed.uncheckedBgColor !== undefined) setUncheckedBgColor(parsed.uncheckedBgColor || "rgba(118,118,128,0.12)");
+          if (parsed.checkedBgColor !== undefined) setCheckedBgColor(parsed.checkedBgColor || "#00BCFF");
+          if (parsed.thumbSize !== undefined) setThumbSize(parsed.thumbSize || "27");
+          if (parsed.thumbBgColor !== undefined) setThumbBgColor(parsed.thumbBgColor || "#FFFFFF");
+          if (parsed.transitionDuration !== undefined) setTransitionDuration(parsed.transitionDuration || "300");
+          if (parsed.transitionEasing !== undefined) setTransitionEasing(parsed.transitionEasing || "ease-in-out");
+          if (parsed.defaultChecked !== undefined) setDefaultChecked(parsed.defaultChecked || "false");
           if (parsed.htmltailwind !== undefined) setHtmltailwind(parsed.htmltailwind || "");
         }
       } catch (error) {
@@ -200,34 +128,21 @@ ${switchItems}
   // Emit ke Figma
   const handleCreateSwitch = () => {
     emit("CREATE_SWITCH", {
-      switchCount,
-      switchLabels,
-      containerWidth,
-      headlineText,
-      headlineColor,
-      headlineFontSize,
-      labelColor,
-      labelFontSize,
       switchWidth,
       switchHeight,
-      toggleSize,
-      borderRadius,
-      uncheckedBorderColor,
+      trackBorderRadius,
       uncheckedBgColor,
-      checkedBorderColor,
       checkedBgColor,
-      toggleBgColor,
-      defaultCheckedStates,
-      disabledStates,
-      transitionType,
+      thumbSize,
+      thumbBgColor,
+      transitionDuration,
+      transitionEasing,
+      defaultChecked,
       htmltailwind,
     });
   };
 
-  const count = parseInt(switchCount) || 1;
-  const labels = switchLabels.split(",").map(l => l.trim());
-  const checkedStates = defaultCheckedStates.split(",").map(c => c.trim() === "true");
-  const disabledStatesArray = disabledStates.split(",").map(d => d.trim() === "true");
+  const translateX = parseInt(switchWidth) - parseInt(thumbSize) - 4;
 
   return (
     <div
@@ -258,27 +173,14 @@ ${switchItems}
           <VerticalSpace space="small" />
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
           <VerticalSpace space="small" />
-          <InputField label="Lebar container (px) :" value={containerWidth} onChange={setContainerWidth} placeholder="Contoh: 400 (tidak boleh kosong)" />
-          <InputField label="Headline/Judul :" value={headlineText} onChange={setHeadlineText} placeholder="Contoh: Switch" />
-          <ColorPicker label="Warna headline :" value={headlineColor} onChange={setHeadlineColor} />
-          <InputField label="Ukuran font headline (px) :" value={headlineFontSize} onChange={setHeadlineFontSize} placeholder="Contoh: 18" />
-          <InputField label="Jumlah Switch :" value={switchCount} onChange={setSwitchCount} placeholder="Contoh: 3" />
-          <InputField label="Label Switch (pisahkan dengan koma) :" value={switchLabels} onChange={setSwitchLabels} placeholder="Contoh: Airplane Mode,Wi-Fi,Bluetooth" />
-          <InputField label="Default Checked (pisahkan dengan koma, true/false) :" value={defaultCheckedStates} onChange={setDefaultCheckedStates} placeholder="Contoh: false,true,true" />
-          <InputField label="Disabled (pisahkan dengan koma, true/false) :" value={disabledStates} onChange={setDisabledStates} placeholder="Contoh: false,false,false,true" />
-          <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
-          <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14" />
-          <InputField label="Lebar switch (px) :" value={switchWidth} onChange={setSwitchWidth} placeholder="Contoh: 44" />
-          <InputField label="Tinggi switch (px) :" value={switchHeight} onChange={setSwitchHeight} placeholder="Contoh: 24" />
-          <InputField label="Ukuran toggle circle (px) :" value={toggleSize} onChange={setToggleSize} placeholder="Contoh: 20" />
-          <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 9999 (rounded-full)" />
-
-          <ColorPicker label="Warna border (unchecked) :" value={uncheckedBorderColor} onChange={setUncheckedBorderColor} />
+          <InputField label="Lebar switch (px) :" value={switchWidth} onChange={setSwitchWidth} placeholder="Contoh: 51" />
+          <InputField label="Tinggi switch (px) :" value={switchHeight} onChange={setSwitchHeight} placeholder="Contoh: 31" />
+          <InputField label="Border radius track (px) :" value={trackBorderRadius} onChange={setTrackBorderRadius} placeholder="Contoh: 16" />
           <ColorPicker label="Background (unchecked) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
-
-          <ColorPicker label="Warna border (checked) :" value={checkedBorderColor} onChange={setCheckedBorderColor} />
           <ColorPicker label="Background (checked) :" value={checkedBgColor} onChange={setCheckedBgColor} />
-          <ColorPicker label="Warna toggle circle :" value={toggleBgColor} onChange={setToggleBgColor} />
+
+          <InputField label="Ukuran thumb (Toggle Circle) (px) :" value={thumbSize} onChange={setThumbSize} placeholder="Contoh: 27" />
+          <ColorPicker label="Warna thumb :" value={thumbBgColor} onChange={setThumbBgColor} />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
@@ -286,8 +188,22 @@ ${switchItems}
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
 
-          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>TIpe Transisi (ms) :</Text>
-          <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
+          <InputField label="Durasi transisi (ms) :" value={transitionDuration} onChange={setTransitionDuration} placeholder="Contoh: 300" />
+          <VerticalSpace space="small" />
+
+          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>Easing Transisi :</Text>
+          <Dropdown options={transitionEasingOptions} value={transitionEasing} onValueChange={setTransitionEasing} />
+          <VerticalSpace space="small" />
+
+          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>Default State :</Text>
+          <Dropdown
+            options={[
+              { value: "false", text: "Off (Unchecked)" },
+              { value: "true", text: "On (Checked)" },
+            ]}
+            value={defaultChecked}
+            onValueChange={setDefaultChecked}
+          />
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
@@ -302,69 +218,55 @@ ${switchItems}
               minHeight: 0,
               marginBottom: 24,
               padding: 24,
-              width: containerWidth === "100%" ? "100%" : containerWidth ? `${containerWidth}px` : "auto",
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflow: "auto",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            {/* Headline */}
-            <h2 style={{ marginBottom: 16, fontSize: `${headlineFontSize}px`, color: headlineColor, fontWeight: 600 }}>{headlineText}</h2>
-            {Array.from({ length: count }, (_, i) => {
-              const label = labels[i] || `Switch ${i + 1}`;
-              const isChecked = checkedStates[i] || false;
-              const isDisabled = disabledStatesArray[i] || false;
-              const translateX = parseInt(switchWidth) - parseInt(toggleSize) - 2;
-
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "8px 0",
-                    opacity: isDisabled ? 0.5 : 1,
-                  }}
-                >
-                  <label style={{ fontSize: `${labelFontSize}px`, color: labelColor, fontWeight: 500 }}>{label}</label>
-                  <label
-                    style={{
-                      position: "relative",
-                      display: "inline-flex",
-                      height: `${switchHeight}px`,
-                      width: `${switchWidth}px`,
-                      cursor: isDisabled ? "not-allowed" : "pointer",
-                      alignItems: "center",
-                    }}
-                  >
-                    <input type="checkbox" checked={isChecked} disabled={isDisabled} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} />
-                    <span
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        borderRadius: borderRadius === "9999" ? "9999px" : `${borderRadius}px`,
-                        border: `1px solid ${isChecked ? checkedBorderColor : uncheckedBorderColor}`,
-                        background: isChecked ? checkedBgColor : uncheckedBgColor,
-                        transition: transitionType !== "none" ? `all ${transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300}ms` : "none",
-                      }}
-                    />
-                    <span
-                      style={{
-                        pointerEvents: "none",
-                        position: "absolute",
-                        top: "2px",
-                        left: "2px",
-                        height: `${toggleSize}px`,
-                        width: `${toggleSize}px`,
-                        borderRadius: "50%",
-                        background: toggleBgColor,
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                        transform: isChecked ? `translateX(${translateX}px)` : "translateX(0)",
-                        transition: transitionType !== "none" ? `all ${transitionType === "fast" ? 150 : transitionType === "slow" ? 500 : 300}ms` : "none",
-                      }}
-                    />
-                  </label>
-                </div>
-              );
-            })}
+            <label
+              style={{
+                position: "relative",
+                display: "inline-flex",
+                height: `${switchHeight}px`,
+                width: `${switchWidth}px`,
+                cursor: "pointer",
+                alignItems: "center",
+              }}
+              onClick={() => setPreviewChecked(!previewChecked)}
+            >
+              <input type="checkbox" checked={previewChecked} onChange={() => setPreviewChecked(!previewChecked)} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  height: `${switchHeight}px`,
+                  width: `${switchWidth}px`,
+                  alignItems: "center",
+                  borderRadius: `${trackBorderRadius}px`,
+                  background: previewChecked ? checkedBgColor : uncheckedBgColor,
+                  transition: `all ${transitionDuration}ms ${transitionEasing}`,
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "2px",
+                  left: "2px",
+                  height: `${thumbSize}px`,
+                  width: `${thumbSize}px`,
+                  borderRadius: "50%",
+                  background: thumbBgColor,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                  transform: previewChecked ? `translateX(${translateX}px)` : "translateX(0)",
+                  transition: `all ${transitionDuration}ms ${transitionEasing}`,
+                }}
+              />
+            </label>
           </div>
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
@@ -389,14 +291,20 @@ ${switchItems}
               fontSize: 13,
               color: theme.codeText,
               position: "relative",
-              overflow: "hidden",
+              overflow: "auto", // Ubah dari "hidden" ke "auto" untuk scroll
             }}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? shadesOfPurple : duotoneDark}
+              style={isDark ? shadesOfPurple : prism}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
-              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              lineProps={{
+                style: {
+                  whiteSpace: "pre", // Ubah dari "pre-wrap" ke "pre" untuk mempertahankan indentasi
+                  wordBreak: "normal", // Ubah dari "break-all" ke "normal"
+                  overflowWrap: "break-word", // Tambahkan untuk wrap yang lebih baik
+                },
+              }}
               customStyle={{
                 margin: 0,
                 padding: "16px",
@@ -404,7 +312,10 @@ ${switchItems}
                 background: "transparent",
                 height: "100%",
                 width: "100%",
-                overflowX: "hidden", // Menghindari scroll horizontal
+                overflowX: "auto", // Tambahkan scroll horizontal jika perlu
+                overflowY: "auto", // Tambahkan scroll vertical
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace", // Pastikan font monospace konsisten
+                lineHeight: "1.5", // Tambahkan line height untuk readability
               }}
             >
               {htmltailwind}

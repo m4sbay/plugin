@@ -12,11 +12,11 @@ export function formatHTML(htmlString: string): string {
 
   try {
     return html(htmlString, {
-      indent_size: 2, // Indentasi 2 spasi
+      indent_size: 2, // Ubah dari 6 ke 2 untuk indentasi yang lebih kompak
       indent_char: " ",
       max_preserve_newlines: 2,
       preserve_newlines: true,
-      wrap_line_length: 120, // Wrap jika lebih dari 120 karakter
+      wrap_line_length: 80, // Kurangi dari 120 ke 80 untuk preview yang lebih baik
       wrap_attributes: "auto", // Auto wrap attributes jika panjang
       end_with_newline: false,
       indent_inner_html: true,

@@ -31,6 +31,7 @@ export default function () {
       label,
       borderRadius,
       fontSize,
+      fontWeight,
       padding,
       labelColor,
       htmltailwind,
@@ -72,9 +73,10 @@ export default function () {
       }
 
       try {
-        await loadInterFonts(["Regular"]);
+        const fontStyle = getFontStyle(fontWeight || "400");
+        await loadInterFonts([fontStyle, "Regular"]);
       } catch (error) {
-        figma.notify("Gagal memuat font 'Inter Regular': " + error);
+        figma.notify("Gagal memuat font 'Inter': " + error);
         return;
       }
 
@@ -114,7 +116,8 @@ export default function () {
 
       const text = figma.createText();
       text.characters = label;
-      text.fontName = { family: "Inter", style: "Regular" };
+      const fontStyle = getFontStyle(fontWeight || "400");
+      text.fontName = { family: "Inter", style: fontStyle };
       text.fontSize = fontSize;
       text.fills = [{ type: "SOLID", color: labelRgb }];
       text.layoutAlign = "INHERIT";
@@ -142,6 +145,7 @@ export default function () {
       component.setPluginData("label", label || "");
       component.setPluginData("borderRadius", borderRadius?.toString() || "");
       component.setPluginData("fontSize", fontSize?.toString() || "");
+      component.setPluginData("fontWeight", fontWeight || "400");
       component.setPluginData("padding", padding || "");
       component.setPluginData("labelColor", labelColor || "");
       component.setPluginData("borderWidth", borderWidth?.toString() || "");
@@ -205,6 +209,7 @@ export default function () {
           label: selectedNode.getPluginData("label") || "",
           borderRadius: selectedNode.getPluginData("borderRadius") || "",
           fontSize: selectedNode.getPluginData("fontSize") || "",
+          fontWeight: selectedNode.getPluginData("fontWeight") || "",
           padding: selectedNode.getPluginData("padding") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
           borderWidth: selectedNode.getPluginData("borderWidth") || "",
@@ -396,9 +401,9 @@ export default function () {
           activeBgColor: selectedNode.getPluginData("activeBgColor") || "",
           activeTextColor: selectedNode.getPluginData("activeTextColor") || "",
           inactiveTextColor: selectedNode.getPluginData("inactiveTextColor") || "",
-          tabPadding: selectedNode.getPluginData("tabPadding") || "",
           tabBorderRadius: selectedNode.getPluginData("tabBorderRadius") || "",
           tabGap: selectedNode.getPluginData("tabGap") || "",
+          textBorderGap: selectedNode.getPluginData("textBorderGap") || "",
           containerPadding: selectedNode.getPluginData("containerPadding") || "",
           panelContents: selectedNode.getPluginData("panelContents") || "",
           transitionType: selectedNode.getPluginData("transitionType") || "",
@@ -434,6 +439,7 @@ export default function () {
           label: selectedNode.getPluginData("label") || "",
           borderRadius: selectedNode.getPluginData("borderRadius") || "",
           fontSize: selectedNode.getPluginData("fontSize") || "",
+          fontWeight: selectedNode.getPluginData("fontWeight") || "",
           padding: selectedNode.getPluginData("padding") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
           borderWidth: selectedNode.getPluginData("borderWidth") || "",
@@ -626,9 +632,9 @@ export default function () {
           activeBgColor: selectedNode.getPluginData("activeBgColor") || "",
           activeTextColor: selectedNode.getPluginData("activeTextColor") || "",
           inactiveTextColor: selectedNode.getPluginData("inactiveTextColor") || "",
-          tabPadding: selectedNode.getPluginData("tabPadding") || "",
           tabBorderRadius: selectedNode.getPluginData("tabBorderRadius") || "",
           tabGap: selectedNode.getPluginData("tabGap") || "",
+          textBorderGap: selectedNode.getPluginData("textBorderGap") || "",
           containerPadding: selectedNode.getPluginData("containerPadding") || "",
           panelContents: selectedNode.getPluginData("panelContents") || "",
           transitionType: selectedNode.getPluginData("transitionType") || "",
@@ -1083,7 +1089,7 @@ export default function () {
   }
 
   on<CreateTabsHandler>("CREATE_TABS", async props => {
-    const { tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabPadding, tabGap, htmltailwind } = props;
+    const { tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabGap, textBorderGap, htmltailwind } = props;
 
     try {
       await loadInterFonts(["Regular", "Medium"]);
@@ -1095,10 +1101,9 @@ export default function () {
     // Parse values
     const labels = tabLabels.split(",").map(l => l.trim());
     const tabCountNum = parseInt(tabCount) || labels.length;
-    const py = parseFloat(tabPadding) || 12;
     const gap = parseFloat(tabGap) || 16;
     const fontSizeValue = parseFloat(fontSize) || 14;
-
+    const textBorderGapValue = parseFloat(textBorderGap) || 12;
     // Normalize hex colors dan konversi ke RGB
     const activeTextHex = normalizeHex(activeTextColor);
     const activeBorderHex = normalizeHex(activeBorderColor);
@@ -1119,7 +1124,7 @@ export default function () {
     component.paddingRight = 0;
     component.paddingTop = 0;
     component.paddingBottom = 0;
-    component.primaryAxisAlignItems = "MIN";
+    component.primaryAxisAlignItems = "CENTER";
     component.counterAxisAlignItems = "CENTER";
     component.fills = [];
 
@@ -1133,10 +1138,10 @@ export default function () {
       tabFrame.primaryAxisSizingMode = "AUTO";
       tabFrame.primaryAxisAlignItems = "CENTER";
       tabFrame.counterAxisAlignItems = "CENTER";
-      tabFrame.itemSpacing = 0;
+      tabFrame.itemSpacing = textBorderGapValue;
       tabFrame.paddingLeft = 0;
       tabFrame.paddingRight = 0;
-      tabFrame.paddingTop = py;
+      tabFrame.paddingTop = 0;
       tabFrame.paddingBottom = 0;
       tabFrame.fills = [];
 
@@ -1183,7 +1188,6 @@ export default function () {
     component.setPluginData("inactiveTextColor", inactiveTextColor);
     component.setPluginData("hoverTextColor", hoverTextColor);
     component.setPluginData("hoverBorderColor", hoverBorderColor);
-    component.setPluginData("tabPadding", tabPadding);
     component.setPluginData("tabGap", tabGap);
 
     // Tambahkan ke canvas dan seleksi
@@ -1195,188 +1199,77 @@ export default function () {
   });
 
   on<CreateSwitchHandler>("CREATE_SWITCH", async props => {
-    const {
-      switchCount,
-      switchLabels,
-      containerWidth,
-      headlineText,
-      headlineColor,
-      headlineFontSize,
-      labelColor,
-      labelFontSize,
-      switchWidth,
-      switchHeight,
-      toggleSize,
-      borderRadius,
-      uncheckedBorderColor,
-      uncheckedBgColor,
-      checkedBorderColor,
-      checkedBgColor,
-      toggleBgColor,
-      defaultCheckedStates,
-      disabledStates,
-      transitionType,
-      htmltailwind,
-    } = props;
-
-    try {
-      await loadInterFonts(["Regular", "Medium"]);
-    } catch (error) {
-      figma.notify("Gagal memuat font 'Inter': " + error);
-      return;
-    }
+    const { switchWidth, switchHeight, trackBorderRadius, uncheckedBgColor, checkedBgColor, thumbSize, thumbBgColor, transitionDuration, transitionEasing, defaultChecked, htmltailwind } = props;
 
     // Parse values
-    const count = parseInt(switchCount) || 1;
-    const labels = switchLabels.split(",").map(l => l.trim());
-    const checkedStates = defaultCheckedStates.split(",").map(c => c.trim() === "true");
-    const disabledStatesArray = disabledStates.split(",").map(d => d.trim() === "true");
-    const switchWidthValue = Number(switchWidth) || 44;
-    const switchHeightValue = Number(switchHeight) || 24;
-    const toggleSizeValue = Number(toggleSize) || 20;
-    const borderRadiusValue = Number(borderRadius) || 9999;
-    const labelFontSizeValue = Number(labelFontSize) || 14;
-    const headlineFontSizeValue = Number(headlineFontSize) || 18;
-    // Handle containerWidth: jika "100%" gunakan lebar viewport atau default 600px, jika angka gunakan angka tersebut
-    let containerWidthValue: number | null = null;
-    if (containerWidth === "100%") {
-      // Gunakan lebar viewport jika tersedia, atau default 600px
-      const viewportWidth = figma.viewport.bounds.width;
-      containerWidthValue = viewportWidth > 0 ? viewportWidth : 600;
-    } else if (containerWidth) {
-      const parsed = Number(containerWidth);
-      containerWidthValue = !isNaN(parsed) ? parsed : null;
+    const switchWidthValue = Number(switchWidth) || 51;
+    const switchHeightValue = Number(switchHeight) || 31;
+    const trackBorderRadiusValue = Number(trackBorderRadius) || 16;
+    const thumbSizeValue = Number(thumbSize) || 27;
+
+    // Parse rgba color untuk uncheckedBgColor jika format rgba
+    let uncheckedRgb = hexToRgb(uncheckedBgColor);
+    if (!uncheckedRgb && uncheckedBgColor.startsWith("rgba")) {
+      // Parse rgba string: rgba(118,118,128,0.12)
+      const rgbaMatch = uncheckedBgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+      if (rgbaMatch) {
+        uncheckedRgb = {
+          r: parseInt(rgbaMatch[1]) / 255,
+          g: parseInt(rgbaMatch[2]) / 255,
+          b: parseInt(rgbaMatch[3]) / 255,
+        };
+      }
+    }
+    if (!uncheckedRgb) {
+      uncheckedRgb = { r: 0.46, g: 0.46, b: 0.5 }; // Default rgba(118,118,128)
     }
 
-    // Buat component utama (container/card)
+    const checkedRgb = hexToRgb(checkedBgColor) || { r: 0, g: 0.74, b: 1 }; // Default #00BCFF
+    const thumbRgb = hexToRgb(thumbBgColor) || { r: 1, g: 1, b: 1 }; // Default white
+
+    // Parse defaultChecked
+    const isChecked = defaultChecked === "true";
+
+    // Buat component switch
     const component = figma.createComponent();
     component.name = "Switch";
-    component.layoutMode = "VERTICAL";
-    component.counterAxisSizingMode = "AUTO";
-    component.primaryAxisSizingMode = "AUTO"; // Set AUTO dulu, akan di-resize setelah semua switch dibuat
-    component.itemSpacing = 0;
-    component.paddingLeft = 24;
-    component.paddingRight = 24;
-    component.paddingTop = 24;
-    component.paddingBottom = 24;
-    component.fills = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }]; // White background
-    component.strokes = [{ type: "SOLID", color: { r: 0.89, g: 0.89, b: 0.89 } }]; // Border
-    component.strokeWeight = 1;
-    component.cornerRadius = 12;
+    component.resize(switchWidthValue, switchHeightValue);
+    component.fills = [];
 
-    // Buat headline text
-    if (headlineText) {
-      const headlineTextNode = figma.createText();
-      headlineTextNode.characters = headlineText;
-      headlineTextNode.fontName = { family: "Inter", style: "Medium" };
-      headlineTextNode.fontSize = headlineFontSizeValue;
-      headlineTextNode.fills = [{ type: "SOLID", color: hexToRgb(headlineColor) }];
-      headlineTextNode.name = "Headline";
-      headlineTextNode.constraints = { horizontal: "MIN", vertical: "MIN" };
-      headlineTextNode.layoutPositioning = "AUTO";
-      headlineTextNode.layoutAlign = "INHERIT";
-      component.appendChild(headlineTextNode);
-    }
+    // Buat frame untuk switch track (background)
+    const switchTrack = figma.createFrame();
+    switchTrack.name = "Switch Track";
+    switchTrack.resize(switchWidthValue, switchHeightValue);
+    switchTrack.cornerRadius = trackBorderRadiusValue;
+    // Gunakan checkedBgColor jika checked, uncheckedBgColor jika tidak
+    switchTrack.fills = [{ type: "SOLID", color: isChecked ? checkedRgb : uncheckedRgb }];
+    switchTrack.strokes = [];
 
-    // Array untuk menyimpan switch rows
-    const switchRows: FrameNode[] = [];
+    // Buat toggle circle (thumb)
+    const toggleCircle = figma.createEllipse();
+    toggleCircle.name = "Toggle Circle";
+    toggleCircle.resize(thumbSizeValue, thumbSizeValue);
+    toggleCircle.fills = [{ type: "SOLID", color: thumbRgb }];
+    toggleCircle.strokes = [];
+    toggleCircle.effects = [
+      {
+        type: "DROP_SHADOW",
+        color: { r: 0, g: 0, b: 0, a: 0.1 },
+        offset: { x: 0, y: 1 },
+        radius: 2,
+        visible: true,
+        blendMode: "NORMAL",
+      },
+    ];
 
-    // Buat setiap switch
-    for (let i = 0; i < count; i++) {
-      const label = labels[i] || `Switch ${i + 1}`;
-      const isChecked = checkedStates[i] || false;
-      const isDisabled = disabledStatesArray[i] || false;
+    // Posisikan toggle circle berdasarkan checked state
+    const translateX = isChecked ? switchWidthValue - thumbSizeValue - 2 : 2;
+    toggleCircle.x = translateX;
+    toggleCircle.y = (switchHeightValue - thumbSizeValue) / 2;
+    toggleCircle.constraints = isChecked ? { horizontal: "MAX", vertical: "CENTER" } : { horizontal: "MIN", vertical: "CENTER" };
 
-      // Buat frame untuk switch row (label + switch)
-      const switchRow = figma.createFrame();
-      switchRow.name = `Switch ${i + 1}`;
-      switchRow.layoutMode = "HORIZONTAL";
-      switchRow.counterAxisSizingMode = "AUTO";
-      switchRow.primaryAxisSizingMode = "AUTO"; // Set AUTO dulu, akan di-resize setelah children dibuat
-      switchRow.primaryAxisAlignItems = "SPACE_BETWEEN";
-      switchRow.counterAxisAlignItems = "CENTER";
-      switchRow.itemSpacing = 0;
-      switchRow.paddingLeft = 0;
-      switchRow.paddingRight = 0;
-      switchRow.paddingTop = 8;
-      switchRow.paddingBottom = 8;
-      switchRow.fills = [];
-      switchRow.opacity = isDisabled ? 0.5 : 1;
-
-      // Buat label text (dengan lebar AUTO/default sesuai konten)
-      const labelText = figma.createText();
-      labelText.characters = label;
-      labelText.fontName = { family: "Inter", style: "Medium" };
-      labelText.fontSize = labelFontSizeValue;
-      labelText.fills = [{ type: "SOLID", color: hexToRgb(labelColor) }];
-      labelText.name = "Label";
-      // Set constraints agar label tidak melebar, hanya sesuai konten
-      labelText.constraints = { horizontal: "MIN", vertical: "MIN" };
-      labelText.layoutPositioning = "AUTO";
-      labelText.layoutAlign = "INHERIT";
-      // Label akan menggunakan lebar AUTO sesuai panjang teks, tidak melebar
-      switchRow.appendChild(labelText);
-
-      // Buat frame untuk switch track (background)
-      // Tidak menggunakan autolayout agar toggle circle bisa diposisikan manual
-      const switchTrack = figma.createFrame();
-      switchTrack.name = "Switch Track";
-      switchTrack.resize(switchWidthValue, switchHeightValue);
-      switchTrack.cornerRadius = borderRadiusValue;
-      switchTrack.fills = [{ type: "SOLID", color: hexToRgb(isChecked ? checkedBgColor : uncheckedBgColor) }];
-      switchTrack.strokes = [{ type: "SOLID", color: hexToRgb(isChecked ? checkedBorderColor : uncheckedBorderColor) }];
-      switchTrack.strokeWeight = 1;
-
-      // Buat toggle circle
-      const toggleCircle = figma.createEllipse();
-      toggleCircle.name = "Toggle Circle";
-      toggleCircle.resize(toggleSizeValue, toggleSizeValue);
-      toggleCircle.fills = [{ type: "SOLID", color: hexToRgb(toggleBgColor) }];
-      toggleCircle.strokes = [];
-      toggleCircle.effects = [
-        {
-          type: "DROP_SHADOW",
-          color: { r: 0, g: 0, b: 0, a: 0.1 },
-          offset: { x: 0, y: 1 },
-          radius: 2,
-          visible: true,
-          blendMode: "NORMAL",
-        },
-      ];
-
-      // Posisikan toggle circle berdasarkan checked state
-      // Karena switchTrack tidak menggunakan autolayout, posisi manual akan bekerja
-      const translateX = isChecked ? switchWidthValue - toggleSizeValue - 2 : 2;
-      toggleCircle.x = translateX;
-      toggleCircle.y = (switchHeightValue - toggleSizeValue) / 2;
-
-      // Set constraints untuk anchor yang tepat
-      if (isChecked) {
-        toggleCircle.constraints = { horizontal: "MAX", vertical: "CENTER" };
-      } else {
-        toggleCircle.constraints = { horizontal: "MIN", vertical: "CENTER" };
-      }
-
-      switchTrack.appendChild(toggleCircle);
-      switchRow.appendChild(switchTrack);
-
-      // Tambahkan switch row ke component
-      component.appendChild(switchRow);
-      switchRows.push(switchRow);
-    }
-
-    // Set lebar container dan switch rows setelah semua dibuat
-    if (containerWidthValue) {
-      // Resize container
-      component.primaryAxisSizingMode = "FIXED";
-      component.resize(containerWidthValue, component.height);
-
-      // Resize setiap switch row
-      for (const switchRow of switchRows) {
-        switchRow.primaryAxisSizingMode = "FIXED";
-        switchRow.resize(containerWidthValue - 48, switchRow.height); // 24px padding kiri + 24px padding kanan
-      }
-    }
+    switchTrack.appendChild(toggleCircle);
+    component.appendChild(switchTrack);
 
     // Simpan data plugin
     const componentId = generateComponentId();
@@ -1385,33 +1278,23 @@ export default function () {
     component.setPluginData("switchProps", JSON.stringify(props));
 
     // Store styling data
-    component.setPluginData("switchCount", switchCount);
-    component.setPluginData("switchLabels", switchLabels);
-    component.setPluginData("containerWidth", containerWidth || "");
-    component.setPluginData("headlineText", headlineText || "");
-    component.setPluginData("headlineColor", headlineColor || "");
-    component.setPluginData("headlineFontSize", headlineFontSize || "");
-    component.setPluginData("labelColor", labelColor);
-    component.setPluginData("labelFontSize", labelFontSize);
     component.setPluginData("switchWidth", switchWidth);
     component.setPluginData("switchHeight", switchHeight);
-    component.setPluginData("toggleSize", toggleSize);
-    component.setPluginData("borderRadius", borderRadius);
-    component.setPluginData("uncheckedBorderColor", uncheckedBorderColor);
+    component.setPluginData("trackBorderRadius", trackBorderRadius);
     component.setPluginData("uncheckedBgColor", uncheckedBgColor);
-    component.setPluginData("checkedBorderColor", checkedBorderColor);
     component.setPluginData("checkedBgColor", checkedBgColor);
-    component.setPluginData("toggleBgColor", toggleBgColor);
-    component.setPluginData("defaultCheckedStates", defaultCheckedStates);
-    component.setPluginData("disabledStates", disabledStates);
-    component.setPluginData("transitionType", transitionType);
+    component.setPluginData("thumbSize", thumbSize);
+    component.setPluginData("thumbBgColor", thumbBgColor);
+    component.setPluginData("transitionDuration", transitionDuration);
+    component.setPluginData("transitionEasing", transitionEasing);
+    component.setPluginData("defaultChecked", defaultChecked);
 
     // Tambahkan ke canvas dan seleksi
     figma.currentPage.appendChild(component);
     figma.viewport.scrollAndZoomIntoView([component]);
     figma.currentPage.selection = [component];
 
-    figma.notify(`✅ Switch berhasil dibuat (${count} switch)!`);
+    figma.notify("✅ Switch berhasil dibuat!");
   });
 
   on<CreateAlertBannerHandler>("CREATE_ALERT_BANNER", async props => {

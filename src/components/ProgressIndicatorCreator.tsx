@@ -8,7 +8,7 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
 
 type ProgressIndicatorCreatorProps = {
@@ -29,7 +29,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
   };
   // State untuk Progress Indicator
   const [progressValue, setProgressValue] = useState("50");
-  const [width, setWidth] = useState("100%");
+  const [width, setWidth] = useState("");
   const [height, setHeight] = useState("12");
   const [progressColor, setProgressColor] = useState("#00BCFF");
   const [bgColor, setBgColor] = useState("#E5E7EB");
@@ -48,7 +48,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
 
   // Generate Tailwind code
   const generateCode = useCallback(() => {
-    const isFullWidth = width.trim() === "100%";
+    const isFullWidth = width.trim() === "";
     const classes = isFullWidth ? `bg-[${bgColor}] rounded-[${borderRadius}px] w-full h-[${height}px]` : `bg-[${bgColor}] rounded-[${borderRadius}px] w-[${width}px] h-[${height}px]`;
     const innerClasses = `bg-[${progressColor}] h-full rounded-[${borderRadius}px] transition-all duration-300`;
     const marginValue = showPercentage === "yes" ? percentageMargin : "0";
@@ -76,7 +76,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
         const parsed = JSON.parse(data);
         if (parsed?.componentType === "progress-indicator") {
           if (parsed.progressValue !== undefined) setProgressValue(parsed.progressValue || "50");
-          if (parsed.width !== undefined) setWidth(parsed.width || "150");
+          if (parsed.width !== undefined) setWidth(parsed.width || "");
           if (parsed.height !== undefined) setHeight(parsed.height || "12");
           if (parsed.progressColor !== undefined) setProgressColor(parsed.progressColor || "#00BCFF");
           if (parsed.bgColor !== undefined) setBgColor(parsed.bgColor || "#E5E7EB");
@@ -171,7 +171,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
           <VerticalSpace space="small" />
           <InputField label="Nilai Progress (%) :" value={progressValue} onChange={setProgressValue} placeholder="Contoh: 60" />
           <VerticalSpace space="small" />
-          <InputField label="Lebar (px) :" value={width} onChange={setWidth} placeholder="Contoh: 300" />
+          <InputField label="Lebar (px) :" value={width} onChange={setWidth} placeholder="Contoh: 300 (Kosongkan untuk full width)" />
           <VerticalSpace space="small" />
           <InputField label="Tinggi (px) :" value={height} onChange={setHeight} placeholder="Contoh: 12" />
           <VerticalSpace space="small" />
@@ -198,19 +198,23 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflow: "auto"
             }}
           >
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: width?.trim() === "100%" ? "flex-start" : "center",
-                width: width?.trim() === "100%" ? "100%" : "auto",
+                justifyContent: width?.trim() === "" ? "flex-start" : "center",
+                width: width?.trim() === "" ? "100%" : "auto",
               }}
             >
               <div
                 style={{
-                  width: width?.trim() === "100%" ? "100%" : width ? `${width}px` : "300px",
+                  width: width?.trim() === "" ? "100%" : width ? `${width}px` : "300px",
                   height: height ? `${height}px` : "12px",
                   background: bgColor,
                   borderRadius: `${borderRadius}px`,
@@ -251,14 +255,20 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
               fontSize: 13,
               color: theme.codeText,
               position: "relative",
-              overflow: "hidden",
+              overflow: "auto", // Ubah dari "hidden" ke "auto" untuk scroll
             }}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? shadesOfPurple : duotoneDark}
+              style={isDark ? shadesOfPurple : prism}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
-              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              lineProps={{
+                style: {
+                  whiteSpace: "pre", // Ubah dari "pre-wrap" ke "pre" untuk mempertahankan indentasi
+                  wordBreak: "normal", // Ubah dari "break-all" ke "normal"
+                  overflowWrap: "break-word", // Tambahkan untuk wrap yang lebih baik
+                },
+              }}
               customStyle={{
                 margin: 0,
                 padding: "16px",
@@ -266,7 +276,10 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
                 background: "transparent",
                 height: "100%",
                 width: "100%",
-                overflowX: "hidden", // Menghindari scroll horizontal
+                overflowX: "auto", // Tambahkan scroll horizontal jika perlu
+                overflowY: "auto", // Tambahkan scroll vertical
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace", // Pastikan font monospace konsisten
+                lineHeight: "1.5", // Tambahkan line height untuk readability
               }}
             >
               {htmltailwind}

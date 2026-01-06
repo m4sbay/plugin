@@ -9,7 +9,7 @@ import { ColorPicker } from "./ui/ColorPicker";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
 
 type ButtonCreatorProps = {
@@ -35,6 +35,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [label, setLabel] = useState("Tombol");
   const [borderRadius, setBorderRadius] = useState<number | null>(8);
   const [fontSize, setFontSize] = useState<number | null>(16);
+  const [fontWeight, setFontWeight] = useState("400");
   const [padding, setPadding] = useState("24,12");
   const [labelColor, setLabelColor] = useState("#FFFFFF");
   const [borderWidth, setBorderWidth] = useState<number | null>(0);
@@ -61,6 +62,9 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
   // Live preview state
   const [previewHtml, setPreviewHtml] = useState("");
+
+  // Tooltip state
+  const [showPaddingTooltip, setShowPaddingTooltip] = useState(false);
 
   // Get transition duration based on type
   const getTransitionDuration = (type: string): number => {
@@ -180,11 +184,13 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     }
 
     // Build inline styles (tanpa transform hover - hanya untuk kondisi normal)
+    const defaultFontWeight = fontWeight || "400";
     const styles: Record<string, string> = {
       backgroundColor: `#${cleanHexColor}`,
       color: `#${cleanHexLabelColor}`,
       borderRadius: `${defaultBorderRadius}px`,
       fontSize: `${defaultFontSize}px`,
+      fontWeight: String(Number(defaultFontWeight) || 400),
       padding: paddingStyle,
       border: defaultBorderWidth && defaultBorderWidth > 0 ? `${defaultBorderWidth}px solid #${defaultBorderColor.replace("#", "")}` : "none",
       fontFamily: "Inter, system-ui, sans-serif",
@@ -292,6 +298,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     label,
     borderRadius,
     fontSize,
+    fontWeight,
     padding,
     labelColor,
     borderWidth,
@@ -365,7 +372,10 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       const cleanHexLabelColor = defaultHexLabelColor.replace("#", "");
 
       // Base classes
-      let classes = `bg-[#${cleanHexColor}] rounded-[${defaultBorderRadius}px] text-[${defaultFontSize}px] ${tailwindWidth ? tailwindWidth + " " : ""}${tailwindPadding} text-[#${cleanHexLabelColor}] cursor-pointer`;
+      const defaultFontWeight = fontWeight || "400";
+      let classes = `bg-[#${cleanHexColor}] rounded-[${defaultBorderRadius}px] text-[${defaultFontSize}px] font-[${defaultFontWeight}] ${
+        tailwindWidth ? tailwindWidth + " " : ""
+      }${tailwindPadding} text-[#${cleanHexLabelColor}] cursor-pointer`;
 
       // Border styling
       if (defaultBorderWidth > 0) {
@@ -459,6 +469,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       label,
       borderRadius,
       fontSize,
+      fontWeight,
       padding,
       labelColor,
       borderWidth,
@@ -496,6 +507,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     label,
     borderRadius,
     fontSize,
+    fontWeight,
     padding,
     labelColor,
     borderWidth,
@@ -534,6 +546,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       finalLabel,
       finalBorderRadius,
       finalFontSize,
+      fontWeight || "400",
       padding,
       hexLabelColor,
       htmltailwind,
@@ -596,6 +609,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             if (buttonData.label) setLabel(buttonData.label);
             if (buttonData.borderRadius) setBorderRadius(Number(buttonData.borderRadius) || null);
             if (buttonData.fontSize) setFontSize(Number(buttonData.fontSize) || null);
+            if (buttonData.fontWeight) setFontWeight(buttonData.fontWeight || "400");
             if (buttonData.padding) setPadding(buttonData.padding);
             if (buttonData.labelColor) setLabelColor(buttonData.labelColor);
             if (buttonData.borderWidth) setBorderWidth(Number(buttonData.borderWidth) || null);
@@ -707,8 +721,80 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           <ColorPicker label="Warna Text :" value={labelColor} onChange={setLabelColor} />
           {/* Ukuran Font */}
           <InputField label="Ukuran Font (px) :" value={fontSize !== null ? String(fontSize) : ""} onChange={v => setFontSize(Number(v) || null)} placeholder="Contoh: 16" />
+          {/* Font Weight */}
+          <InputField label="Font weight :" value={fontWeight} onChange={setFontWeight} placeholder="Contoh: 500 (akan menjadi font-[500])" />
           {/* Padding Sumbu x dan y */}
-          <InputField label="Padding Sumbu x dan y (px) :" value={padding} onChange={setPadding} placeholder="Contoh: 24,12" />
+          <div style={{ position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+              <Text>
+                <Muted>Padding Sumbu x dan y (px) :</Muted>
+              </Text>
+              <div
+                style={{
+                  position: "relative",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onMouseEnter={() => setShowPaddingTooltip(true)}
+                onMouseLeave={() => setShowPaddingTooltip(false)}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{
+                    cursor: "pointer",
+                    color: theme.secondaryText,
+                  }}
+                >
+                  <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  <path d="M8 11V8M8 5H8.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                {showPaddingTooltip && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      marginBottom: 8,
+                      padding: "8px 12px",
+                      backgroundColor: theme.previewBackground,
+                      color: theme.primaryText,
+                      borderRadius: 6,
+                      fontSize: 12,
+                      whiteSpace: "nowrap",
+                      boxShadow: `0 2px 8px rgba(0, 0, 0, ${isDark ? 0.3 : 0.15})`,
+                      border: `1px solid ${theme.previewBorder}`,
+                      zIndex: 1000,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    gunakan padding x = "100" untuk full width
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: 0,
+                        height: 0,
+                        borderLeft: "6px solid transparent",
+                        borderRight: "6px solid transparent",
+                        borderTop: `6px solid ${theme.previewBackground}`,
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            <VerticalSpace space="small" />
+            <Textbox value={padding} onValueInput={setPadding} placeholder="Contoh: 24,12" />
+            <VerticalSpace space="medium" />
+          </div>
           {/* Border Radius */}
           <InputField label="Border Radius (px) :" value={borderRadius !== null ? String(borderRadius) : ""} onChange={v => setBorderRadius(Number(v) || null)} placeholder="Contoh: 8" />
           {/* Border Width */}
@@ -820,14 +906,20 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               fontSize: 13,
               color: theme.codeText,
               position: "relative",
-              overflow: "hidden",
+              overflow: "auto", // Ubah dari "hidden" ke "auto" untuk scroll
             }}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? shadesOfPurple : duotoneDark}
+              style={isDark ? shadesOfPurple : prism}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
-              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              lineProps={{
+                style: {
+                  whiteSpace: "pre", // Ubah dari "pre-wrap" ke "pre" untuk mempertahankan indentasi
+                  wordBreak: "normal", // Ubah dari "break-all" ke "normal"
+                  overflowWrap: "break-word", // Tambahkan untuk wrap yang lebih baik
+                },
+              }}
               customStyle={{
                 margin: 0,
                 padding: "16px",
@@ -835,7 +927,10 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
                 background: "transparent",
                 height: "100%",
                 width: "100%",
-                overflowX: "hidden", // Menghindari scroll horizontal
+                overflowX: "auto", // Tambahkan scroll horizontal jika perlu
+                overflowY: "auto", // Tambahkan scroll vertical
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace", // Pastikan font monospace konsisten
+                lineHeight: "1.5", // Tambahkan line height untuk readability
               }}
             >
               {htmltailwind}

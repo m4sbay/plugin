@@ -8,7 +8,7 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
 
 type TooltipCreatorProps = {
@@ -156,7 +156,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
           <InputField label="Ukuran teks tooltip (px) :" value={fontSize} onChange={setFontSize} placeholder="Contoh: 14" />
           <InputField label="Padding (y,x) :" value={padding} onChange={setPadding} placeholder="Contoh: 8,12" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 8" />
-          <InputField label="Jarak dari button (px) :" value={marginBottom} onChange={setMarginBottom} placeholder="Contoh: 16" />
+          <InputField label="Jarak dari komponen (px) :" value={marginBottom} onChange={setMarginBottom} placeholder="Contoh: 16" />
         </div>
 
         {/* Kolom 2: Live Preview & Kode */}
@@ -235,14 +235,20 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
               fontSize: 13,
               color: theme.codeText,
               position: "relative",
-              overflow: "hidden",
+              overflow: "auto", // Ubah dari "hidden" ke "auto" untuk scroll
             }}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? shadesOfPurple : duotoneDark}
+              style={isDark ? shadesOfPurple : prism}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
-              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              lineProps={{
+                style: {
+                  whiteSpace: "pre", // Ubah dari "pre-wrap" ke "pre" untuk mempertahankan indentasi
+                  wordBreak: "normal", // Ubah dari "break-all" ke "normal"
+                  overflowWrap: "break-word", // Tambahkan untuk wrap yang lebih baik
+                },
+              }}
               customStyle={{
                 margin: 0,
                 padding: "16px",
@@ -250,7 +256,10 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
                 background: "transparent",
                 height: "100%",
                 width: "100%",
-                overflowX: "hidden", // Menghindari scroll horizontal
+                overflowX: "auto", // Tambahkan scroll horizontal jika perlu
+                overflowY: "auto", // Tambahkan scroll vertical
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace", // Pastikan font monospace konsisten
+                lineHeight: "1.5", // Tambahkan line height untuk readability
               }}
             >
               {htmltailwind}

@@ -46,6 +46,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   // Helper function untuk normalize hex color (pastikan ada # di depan)
   const normalizeHex = useCallback((color: string): string => {
@@ -86,7 +87,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     const labelClasses = `text-[${labelSize}px] font-medium text-[${labelColorHex}] flex items-center gap-1`;
 
     // Input classes
-    let inputClasses = `rounded-[${borderRadiusValue}px] border border-[${borderColorHex}] px-[${paddingXValue}px] py-[${paddingYValue}px] text-[${labelSize}px] text-[${inputTextColorHex}] focus:ring-1 focus:ring-[${focusRingColorHex}]`;
+    let inputClasses = `rounded-[${borderRadiusValue}px] border border-[${borderColorHex}] px-[${paddingXValue}px] py-[${paddingYValue}px] text-[${labelSize}px] text-[${inputTextColorHex}] outline-none placeholder:text-[${inputTextColorHex}] placeholder:opacity-50 focus:ring-1 focus:ring-[${focusRingColorHex}]`;
 
     // Tambahkan width ke input jika ada
     if (width) {
@@ -254,24 +255,29 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
             style={{
-              border: `1px solid ${theme.panelBorder}`,
+              border: ` 1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.panelBackground,
               flex: 1,
               minHeight: 0,
               marginBottom: 24,
               padding: 24,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               width: "100%",
               maxWidth: "100%",
               boxSizing: "border-box",
               overflow: "hidden",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: `${gap.replace(/px/gi, "") || 12}px`, width: "100%", maxWidth: "100%", overflow: "hidden" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: `${gap.replace(/px/gi, "") || 12}px`, width: "100%", maxWidth: "100%", overflow: "visible" }}>
               <label style={{ fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`, fontWeight: 500, color: labelColor, display: "flex", alignItems: "center", gap: "4px" }}>{label}</label>
               <input
                 type="text"
                 placeholder={placeholder}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
                 style={{
                   borderRadius: `${borderRadius.replace(/px/gi, "") || 8}px`,
                   border: `1px solid ${borderColor}`,
@@ -283,6 +289,8 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
                   boxSizing: "border-box",
                   outline: "none",
                   background: bgColor,
+                  boxShadow: isFocused ? `0 0 0 1px ${focusRingColor}` : "none",
+                  transition: "box-shadow 0.15s ease-in-out",
                 }}
               />
             </div>
@@ -310,14 +318,20 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               fontSize: 13,
               color: theme.codeText,
               position: "relative",
-              overflow: "hidden",
+              overflow: "auto", // Ubah dari "hidden" ke "auto" untuk scroll
             }}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? shadesOfPurple : duotoneDark}
+              style={isDark ? shadesOfPurple : prism}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
-              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              lineProps={{
+                style: {
+                  whiteSpace: "pre", // Ubah dari "pre-wrap" ke "pre" untuk mempertahankan indentasi
+                  wordBreak: "normal", // Ubah dari "break-all" ke "normal"
+                  overflowWrap: "break-word", // Tambahkan untuk wrap yang lebih baik
+                },
+              }}
               customStyle={{
                 margin: 0,
                 padding: "16px",
@@ -325,7 +339,10 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
                 background: "transparent",
                 height: "100%",
                 width: "100%",
-                overflowX: "hidden", // Menghindari scroll horizontal
+                overflowX: "auto", // Tambahkan scroll horizontal jika perlu
+                overflowY: "auto", // Tambahkan scroll vertical
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace", // Pastikan font monospace konsisten
+                lineHeight: "1.5", // Tambahkan line height untuk readability
               }}
             >
               {htmltailwind}

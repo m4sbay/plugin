@@ -8,7 +8,7 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
-import { shadesOfPurple, duotoneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
 
 type TabsCreatorProps = {
@@ -35,13 +35,13 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
   // Warna sesuai template - menggunakan hex colors untuk arbitrary values
   const [activeTextColor, setActiveTextColor] = useState("#4F46E5"); // text color untuk tab aktif (indigo-600)
   const [activeBorderColor, setActiveBorderColor] = useState("#6366F1"); // border color untuk tab aktif (indigo-500)
-  const [inactiveTextColor, setInactiveTextColor] = useState("#64748B"); // text color untuk tab tidak aktif (slate-500)
-  const [hoverTextColor, setHoverTextColor] = useState("#334155"); // text color saat hover (slate-700)
+  const [inactiveTextColor, setInactiveTextColor] = useState("#707070"); // text color untuk tab tidak aktif (slate-500)
+  const [hoverTextColor, setHoverTextColor] = useState("#171717"); // text color saat hover (slate-700)
   const [hoverBorderColor, setHoverBorderColor] = useState("#CBD5E1"); // border color saat hover (slate-300)
 
   // Styling - menggunakan arbitrary values
-  const [tabPadding, setTabPadding] = useState("12"); // arbitrary value untuk py-[value]px
   const [tabGap, setTabGap] = useState("16"); // arbitrary value untuk gap-[value]px
+  const [textBorderGap, setTextBorderGap] = useState("12"); // jarak antara text dan border bottom
 
   // Transisi
   const [transitionType, setTransitionType] = useState("normal");
@@ -54,6 +54,7 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
+  const [hoveredTabIndex, setHoveredTabIndex] = useState<number | null>(null);
 
   // Helper function untuk normalize hex color (pastikan ada # di depan)
   const normalizeHex = useCallback((color: string): string => {
@@ -68,8 +69,8 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     const labels = tabLabels.split(",").map(l => l.trim());
     const tabCountNum = parseInt(tabCount) || labels.length;
     const gap = tabGap || "16";
-    const py = tabPadding || "12";
     const textSize = fontSize || "14";
+    const textBorderGapValue = textBorderGap || "12";
 
     // Normalize hex colors
     const activeTextHex = normalizeHex(activeTextColor);
@@ -79,17 +80,22 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     const hoverBorderHex = normalizeHex(hoverBorderColor);
 
     // Generate tab buttons dengan border-bottom style (menggunakan arbitrary values dengan hex)
+    // Menggunakan flex column dengan gap untuk jarak antara text dan border
     const tabButtonsHtml = labels
       .slice(0, tabCountNum)
       .map((label, idx) => {
         const isActive = idx === 0;
 
         if (isActive) {
-          // Tab aktif: border-[#hex] text-[#hex] dengan arbitrary values
-          return `          <button class="py-[${py}px] border-b-2 border-[${activeBorderHex}] text-[${textSize}px] font-medium text-[${activeTextHex}]">${label}</button>`;
+          // Tab aktif: menggunakan flex column dengan gap untuk jarak text dan border
+          return `          <button class="pb-[${textBorderGapValue}px] flex flex-col gap-[${textBorderGapValue}px] border-b-2 border-[${activeBorderHex}] text-[${textSize}px] font-medium text-[${activeTextHex}]">
+            <span>${label}</span>
+          </button>`;
         } else {
-          // Tab tidak aktif: border-transparent text-[#hex] dengan hover dan arbitrary values
-          return `          <button class="py-[${py}px] border-b-2 border-transparent text-[${textSize}px] font-medium text-[${inactiveTextHex}] hover:text-[${hoverTextHex}] hover:border-[${hoverBorderHex}]">${label}</button>`;
+          // Tab tidak aktif: menggunakan flex column dengan gap untuk jarak text dan border
+          return `          <button class="pb-0 flex flex-col gap-[${textBorderGapValue}px] border-b-2 border-transparent text-[${textSize}px] font-medium text-[${inactiveTextHex}] hover:text-[${hoverTextHex}] hover:border-[${hoverBorderHex}]">
+            <span>${label}</span>
+          </button>`;
         }
       })
       .join("\n\n");
@@ -102,7 +108,7 @@ ${tabButtonsHtml}
     const formattedHtml = formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
-  }, [tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabPadding, tabGap, normalizeHex]);
+  }, [tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabGap, textBorderGap, normalizeHex]);
 
   useEffect(() => {
     generateCode();
@@ -124,8 +130,8 @@ ${tabButtonsHtml}
           if (parsed.inactiveTextColor !== undefined) setInactiveTextColor(parsed.inactiveTextColor || "#64748B");
           if (parsed.hoverTextColor !== undefined) setHoverTextColor(parsed.hoverTextColor || "#334155");
           if (parsed.hoverBorderColor !== undefined) setHoverBorderColor(parsed.hoverBorderColor || "#CBD5E1");
-          if (parsed.tabPadding !== undefined) setTabPadding(parsed.tabPadding || "12");
           if (parsed.tabGap !== undefined) setTabGap(parsed.tabGap || "16");
+          if (parsed.textBorderGap !== undefined) setTextBorderGap(parsed.textBorderGap || "8");
           if (parsed.transitionType !== undefined) setTransitionType(parsed.transitionType || "normal");
           if (parsed.htmltailwind !== undefined) setHtmltailwind(parsed.htmltailwind || "");
         }
@@ -167,8 +173,8 @@ ${tabButtonsHtml}
       inactiveTextColor,
       hoverTextColor,
       hoverBorderColor,
-      tabPadding,
       tabGap,
+      textBorderGap,
       htmltailwind,
     });
   };
@@ -211,8 +217,8 @@ ${tabButtonsHtml}
           <ColorPicker label="Warna teks tab aktif :" value={activeTextColor} onChange={setActiveTextColor} />
           <ColorPicker label="Warna border tab aktif :" value={activeBorderColor} onChange={setActiveBorderColor} />
           <ColorPicker label="Warna teks tab tidak aktif :" value={inactiveTextColor} onChange={setInactiveTextColor} />
-          <InputField label="Padding vertikal tab (px) :" value={tabPadding} onChange={setTabPadding} placeholder="Contoh: 12 (akan menjadi py-[12px])" />
           <InputField label="Gap antar tab (px) :" value={tabGap} onChange={setTabGap} placeholder="Contoh: 16 (akan menjadi gap-[16px])" />
+          <InputField label="Jarak text dan border (px) :" value={textBorderGap} onChange={setTextBorderGap} placeholder="Contoh: 8" />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
@@ -256,15 +262,16 @@ ${tabButtonsHtml}
                 display: "flex",
                 gap: `${tabGap || "16"}px`,
                 justifyContent: "flex-start",
-                borderBottom: `1px solid ${theme.panelBorder}`,
-                paddingBottom: 8,
+                paddingBottom: 12,
+                paddingTop: 12,
               }}
             >
               {labels.slice(0, tabCountNum).map((label, idx) => {
                 const isActive = idx === 0;
+                const isHovered = hoveredTabIndex === idx;
                 // Gunakan nilai input langsung untuk preview
-                const paddingValue = `${tabPadding || "12"}px`;
                 const fontSizeValue = `${fontSize || "14"}px`;
+                const textBorderGapValue = `${textBorderGap || "8"}px`;
 
                 // Normalize hex colors untuk preview (pastikan ada #)
                 const normalizeHexForPreview = (color: string): string => {
@@ -272,27 +279,72 @@ ${tabButtonsHtml}
                   return color.startsWith("#") ? color : `#${color}`;
                 };
 
+                // Tentukan warna teks berdasarkan state
+                let textColor = normalizeHexForPreview(isActive ? activeTextColor : inactiveTextColor);
+                if (!isActive && isHovered) {
+                  textColor = normalizeHexForPreview(hoverTextColor);
+                }
+
+                // Tentukan warna border berdasarkan state
+                let borderColor = "transparent";
+                if (isActive) {
+                  borderColor = normalizeHexForPreview(activeBorderColor);
+                } else if (isHovered) {
+                  borderColor = normalizeHexForPreview(hoverBorderColor);
+                }
+
+                // Tentukan durasi transisi berdasarkan transitionType
+                const getTransitionDuration = () => {
+                  switch (transitionType) {
+                    case "none":
+                      return "0ms";
+                    case "fast":
+                      return "150ms";
+                    case "normal":
+                      return "300ms";
+                    case "slow":
+                      return "500ms";
+                    default:
+                      return "300ms";
+                  }
+                };
+
+                const transitionDuration = getTransitionDuration();
+
                 return (
                   <button
                     key={idx}
+                    onMouseEnter={() => setHoveredTabIndex(idx)}
+                    onMouseLeave={() => setHoveredTabIndex(null)}
                     style={{
                       background: "transparent",
-                      color: normalizeHexForPreview(isActive ? activeTextColor : inactiveTextColor),
+                      color: textColor,
                       fontSize: fontSizeValue,
-                      paddingTop: paddingValue,
-                      paddingBottom: paddingValue,
+                      paddingTop: 0,
+                      paddingBottom: 0,
                       paddingLeft: 0,
                       paddingRight: 0,
                       border: "none",
-                      borderBottom: `2px solid ${isActive ? normalizeHexForPreview(activeBorderColor) : "transparent"}`,
-                      cursor: "default",
+                      cursor: "pointer",
                       fontWeight: 500,
                       display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      flexDirection: "column",
+                      gap: textBorderGapValue,
+                      alignItems: "flex-start",
+                      justifyContent: "flex-start",
+                      minHeight: 0,
+                      transition: `color ${transitionDuration} ease, border-color ${transitionDuration} ease`,
                     }}
                   >
-                    {label}
+                    <span style={{ display: "block" }}>{label}</span>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "2px",
+                        backgroundColor: borderColor,
+                        transition: `background-color ${transitionDuration} ease`,
+                      }}
+                    />
                   </button>
                 );
               })}
@@ -320,14 +372,20 @@ ${tabButtonsHtml}
               fontSize: 13,
               color: theme.codeText,
               position: "relative",
-              overflow: "hidden",
+              overflow: "auto", // Ubah dari "hidden" ke "auto" untuk scroll
             }}
           >
             <SyntaxHighlighter
               language="html"
-              style={isDark ? shadesOfPurple : duotoneDark}
+              style={isDark ? shadesOfPurple : prism}
               wrapLines={true} // Mengaktifkan fitur wrap per baris
-              lineProps={{ style: { whiteSpace: "pre-wrap", wordBreak: "break-all" } }} // Memaksa teks wrap
+              lineProps={{
+                style: {
+                  whiteSpace: "pre", // Ubah dari "pre-wrap" ke "pre" untuk mempertahankan indentasi
+                  wordBreak: "normal", // Ubah dari "break-all" ke "normal"
+                  overflowWrap: "break-word", // Tambahkan untuk wrap yang lebih baik
+                },
+              }}
               customStyle={{
                 margin: 0,
                 padding: "16px",
@@ -335,7 +393,10 @@ ${tabButtonsHtml}
                 background: "transparent",
                 height: "100%",
                 width: "100%",
-                overflowX: "hidden", // Menghindari scroll horizontal
+                overflowX: "auto", // Tambahkan scroll horizontal jika perlu
+                overflowY: "auto", // Tambahkan scroll vertical
+                fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace", // Pastikan font monospace konsisten
+                lineHeight: "1.5", // Tambahkan line height untuk readability
               }}
             >
               {htmltailwind}

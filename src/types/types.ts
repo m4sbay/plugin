@@ -7,6 +7,7 @@ export interface CreateButtonHandler extends EventHandler {
     label: string,
     borderRadius: number,
     fontSize: number,
+    fontWeight: string,
     padding: string,
     labelColor: string,
     htmltailwind: string,
@@ -82,8 +83,8 @@ export interface CreateTabsHandler extends EventHandler {
     inactiveTextColor: string;
     hoverTextColor: string;
     hoverBorderColor: string;
-    tabPadding: string;
     tabGap: string;
+    textBorderGap: string;
     htmltailwind: string;
   }) => void;
 }
@@ -91,35 +92,35 @@ export interface CreateTabsHandler extends EventHandler {
 export interface CreateSwitchHandler extends EventHandler {
   name: "CREATE_SWITCH";
   handler: (props: {
-    switchCount: string;
-    switchLabels: string;
-    containerWidth: string;
-    headlineText: string;
-    headlineColor: string;
-    headlineFontSize: string;
-    labelColor: string;
-    labelFontSize: string;
     switchWidth: string;
     switchHeight: string;
-    toggleSize: string;
-    borderRadius: string;
-    uncheckedBorderColor: string;
+    trackBorderRadius: string;
     uncheckedBgColor: string;
-    checkedBorderColor: string;
     checkedBgColor: string;
-    toggleBgColor: string;
-    defaultCheckedStates: string;
-    disabledStates: string;
-    focusRingWidth: string;
-    focusRingColor: string;
-    transitionType: string;
+    thumbSize: string;
+    thumbBgColor: string;
+    transitionDuration: string;
+    transitionEasing: string;
+    defaultChecked: string;
     htmltailwind: string;
   }) => void;
 }
 
 export interface CreateProgressIndicatorHandler extends EventHandler {
   name: "CREATE_PROGRESS_INDICATOR";
-  handler: (props: { progressValue: string; progressType: string; width: string; height: string; progressColor: string; bgColor: string; borderRadius: string; percentageTextColor: string; percentageMargin: string; showPercentage: string; htmltailwind: string }) => void;
+  handler: (props: {
+    progressValue: string;
+    progressType: string;
+    width: string;
+    height: string;
+    progressColor: string;
+    bgColor: string;
+    borderRadius: string;
+    percentageTextColor: string;
+    percentageMargin: string;
+    showPercentage: string;
+    htmltailwind: string;
+  }) => void;
 }
 
 export interface CreateDataTableHandler extends EventHandler {
@@ -143,16 +144,7 @@ export interface CreateDataTableHandler extends EventHandler {
 
 export interface CreateTooltipHandler extends EventHandler {
   name: "CREATE_TOOLTIP";
-  handler: (props: {
-    tooltipText: string;
-    bgColor: string;
-    textColor: string;
-    fontSize: string;
-    padding: string;
-    borderRadius: string;
-    marginBottom: string;
-    htmltailwind: string;
-  }) => void;
+  handler: (props: { tooltipText: string; bgColor: string; textColor: string; fontSize: string; padding: string; borderRadius: string; marginBottom: string; htmltailwind: string }) => void;
 }
 
 export interface CreateRadioButtonHandler extends EventHandler {
