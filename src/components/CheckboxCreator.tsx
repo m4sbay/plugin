@@ -212,7 +212,7 @@ ${checkboxItem}
 
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4 }}>
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4, paddingRight: 16 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
           <VerticalSpace space="small" />
 
@@ -330,7 +330,7 @@ ${checkboxItem}
           </div>
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth secondary onClick={onBack}>
+            <Button fullWidth danger onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateCheckbox}>
@@ -384,7 +384,7 @@ ${checkboxItem}
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

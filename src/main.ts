@@ -260,9 +260,6 @@ export default function () {
         const radioData = {
           componentType: "radio-button",
           htmltailwind: htmltailwind,
-          headingLabel: selectedNode.getPluginData("headingLabel") || "",
-          headingFontSize: selectedNode.getPluginData("headingFontSize") || "",
-          headingColor: selectedNode.getPluginData("headingColor") || "",
           radioLabels: selectedNode.getPluginData("radioLabels") || "",
           radioCount: selectedNode.getPluginData("radioCount") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
@@ -491,9 +488,6 @@ export default function () {
         const radioData = {
           componentType: "radio-button",
           htmltailwind: htmltailwind,
-          headingLabel: selectedNode.getPluginData("headingLabel") || "",
-          headingFontSize: selectedNode.getPluginData("headingFontSize") || "",
-          headingColor: selectedNode.getPluginData("headingColor") || "",
           radioLabels: selectedNode.getPluginData("radioLabels") || "",
           radioCount: selectedNode.getPluginData("radioCount") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
@@ -1802,10 +1796,6 @@ export default function () {
 
   on<CreateRadioButtonHandler>("CREATE_RADIO_BUTTON", async props => {
     const {
-      headingLabel,
-      headingFontSize,
-      headingFontWeight,
-      headingColor,
       radioLabels,
       radioCount,
       labelColor,
@@ -1833,21 +1823,21 @@ export default function () {
       return;
     }
 
-    // Parse values
-    const gapValue = Number(gapBetweenItems.replace(/px/gi, "").trim()) || 16;
-    const gapRadioLabel = Number(gapBetweenRadioAndLabel.replace(/px/gi, "").trim()) || 12;
+    // Parse values dengan default
+    const gapValue = Number((gapBetweenItems || "16").replace(/px/gi, "").trim()) || 16;
+    const gapRadioLabel = Number((gapBetweenRadioAndLabel || "12").replace(/px/gi, "").trim()) || 12;
     const radioSizeValue = Number(radioSize.replace(/px/gi, "").trim()) || 20;
-    const borderWidthValue = Number(borderWidth.replace(/px/gi, "").trim()) || 2;
-    const innerDotSizeValue = Number(innerDotSize.replace(/px/gi, "").trim()) || 10;
+    const borderWidthValue = Number((borderWidth || "2").replace(/px/gi, "").trim()) || 2;
+    // Auto-calculate inner dot size: 50% dari radio size
+    const innerDotSizeValue = innerDotSize ? Number(innerDotSize.replace(/px/gi, "").trim()) : Math.round(radioSizeValue * 0.5);
 
     // Convert hex colors to RGB
-    const headingRgb = customConvertHexColorToRgbColor(headingColor);
     const defaultBorderRgb = customConvertHexColorToRgbColor(defaultBorderColor);
     const checkedRgb = customConvertHexColorToRgbColor(checkedColor);
     const labelRgb = customConvertHexColorToRgbColor(labelColor);
     const labelCheckedRgb = customConvertHexColorToRgbColor(labelColorChecked);
 
-    if (!headingRgb || !defaultBorderRgb || !checkedRgb || !labelRgb || !labelCheckedRgb) {
+    if (!defaultBorderRgb || !checkedRgb || !labelRgb || !labelCheckedRgb) {
       figma.notify("Warna tidak valid");
       return;
     }
@@ -1864,15 +1854,6 @@ export default function () {
     component.paddingTop = 0;
     component.paddingBottom = 0;
     component.fills = [];
-
-    // Buat heading text
-    const headingText = figma.createText();
-    headingText.characters = headingLabel;
-    headingText.fontName = { family: "Inter", style: getFontStyle(headingFontWeight) };
-    headingText.fontSize = Number(headingFontSize) || 14;
-    headingText.fills = [{ type: "SOLID", color: headingRgb }];
-    headingText.name = "Heading";
-    component.appendChild(headingText);
 
     // Parse labels
     const count = parseInt(radioCount) || 1;
@@ -1924,7 +1905,7 @@ export default function () {
       // Buat label text
       const labelText = figma.createText();
       labelText.characters = labels[i];
-      const labelWeight = isChecked ? labelFontWeightChecked : labelFontWeight;
+      const labelWeight = isChecked ? labelFontWeightChecked || "600" : labelFontWeight || "500";
       labelText.fontName = {
         family: "Inter",
         style: getFontStyle(labelWeight),
@@ -1947,27 +1928,24 @@ export default function () {
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("radioButtonProps", JSON.stringify(props));
 
-    // Store styling data
-    component.setPluginData("headingLabel", headingLabel);
-    component.setPluginData("headingFontSize", headingFontSize);
-    component.setPluginData("headingFontWeight", headingFontWeight);
-    component.setPluginData("headingColor", headingColor);
+    // Store styling data (hanya simpan yang penting, nilai default tidak perlu disimpan)
     component.setPluginData("radioLabels", radioLabels);
     component.setPluginData("radioCount", radioCount);
     component.setPluginData("labelColor", labelColor);
     component.setPluginData("labelFontSize", labelFontSize);
-    component.setPluginData("labelFontWeight", labelFontWeight);
-    component.setPluginData("labelFontWeightChecked", labelFontWeightChecked);
     component.setPluginData("labelColorChecked", labelColorChecked);
     component.setPluginData("checkedColor", checkedColor);
-    component.setPluginData("gapBetweenItems", gapBetweenItems);
-    component.setPluginData("gapBetweenRadioAndLabel", gapBetweenRadioAndLabel);
     component.setPluginData("radioSize", radioSize);
-    component.setPluginData("borderWidth", borderWidth);
     component.setPluginData("defaultBorderColor", defaultBorderColor);
     component.setPluginData("hoverBorderColor", hoverBorderColor);
-    component.setPluginData("innerDotSize", innerDotSize);
-    component.setPluginData("transitionDuration", transitionDuration);
+    // Simpan nilai default untuk kompatibilitas dengan komponen lama
+    if (labelFontWeight) component.setPluginData("labelFontWeight", labelFontWeight);
+    if (labelFontWeightChecked) component.setPluginData("labelFontWeightChecked", labelFontWeightChecked);
+    if (gapBetweenItems) component.setPluginData("gapBetweenItems", gapBetweenItems);
+    if (gapBetweenRadioAndLabel) component.setPluginData("gapBetweenRadioAndLabel", gapBetweenRadioAndLabel);
+    if (borderWidth) component.setPluginData("borderWidth", borderWidth);
+    if (innerDotSize) component.setPluginData("innerDotSize", innerDotSize);
+    if (transitionDuration) component.setPluginData("transitionDuration", transitionDuration);
 
     // Tambahkan ke canvas dan seleksi
     figma.currentPage.appendChild(component);

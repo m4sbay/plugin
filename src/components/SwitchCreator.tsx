@@ -270,7 +270,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
           </div>
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth secondary onClick={onBack}>
+            <Button fullWidth danger onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateSwitch}>
@@ -322,7 +322,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

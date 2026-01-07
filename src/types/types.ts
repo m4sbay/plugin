@@ -150,10 +150,6 @@ export interface CreateTooltipHandler extends EventHandler {
 export interface CreateRadioButtonHandler extends EventHandler {
   name: "CREATE_RADIO_BUTTON";
   handler: (props: {
-    headingLabel: string;
-    headingFontSize: string;
-    headingFontWeight: string;
-    headingColor: string;
     radioLabels: string;
     radioCount: string;
     labelColor: string;

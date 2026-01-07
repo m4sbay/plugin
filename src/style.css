@@ -3,11 +3,13 @@
   height: 40px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  cursor: pointer;
 }
 
 .primaryButton {
   background: #189eff;
   color: #fff;
+  padding: 4px 12px;
 }
 .primaryButton:hover {
   background: #0f7cd9; /* warna hover */
@@ -102,4 +104,9 @@ textarea::placeholder {
 .create-figma-plugin_textbox__input::placeholder {
   color: #b0b0b0 !important;
   opacity: 1;
+}
+
+/* Cursor pointer untuk button dari @create-figma-plugin/ui */
+button:hover:not(:disabled) {
+  cursor: pointer !important;
 }

@@ -695,7 +695,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       }}
     >
       {/* Judul dan ikon panah */}
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 0 }}>
         <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
           <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
             <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -710,7 +710,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       </div>
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4 }}>
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "hidden", flex: 1, minWidth: 260, paddingTop: 4, paddingRight: 0 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Statis :</Text>
           <VerticalSpace space="small" />
           {/* Label/Text */}
@@ -725,7 +725,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           <InputField label="Font weight :" value={fontWeight} onChange={setFontWeight} placeholder="Contoh: 500 (akan menjadi font-[500])" />
           {/* Padding Sumbu x dan y */}
           <div style={{ position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 0 }}>
               <Text>
                 <Muted>Padding Sumbu x dan y (px) :</Muted>
               </Text>
@@ -881,7 +881,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             )}
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth onClick={onBack}>
+            <Button fullWidth danger  onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateButtonClick}>
@@ -937,7 +937,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

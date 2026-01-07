@@ -152,11 +152,11 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
         </button>
         <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Progress Indicator</Text>
       </div>
-      <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Pengaturan :</Text>
+      <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
       <VerticalSpace space="small" />
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingRight: 16 }}>
           <VerticalSpace space="small" />
           <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 10, color: theme.secondaryText }}>Tampilkan Presentase :</Text>
           <Dropdown options={showPercentageOptions} value={showPercentage} onValueChange={setShowPercentage} />
@@ -235,7 +235,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
             </div>
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth secondary onClick={onBack}>
+            <Button fullWidth danger onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateProgressIndicator}>
@@ -286,7 +286,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

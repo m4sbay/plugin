@@ -220,7 +220,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
       </div>
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4 }}>
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4, paddingRight: 16 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Statis :</Text>
           <VerticalSpace space="small" />
           <InputField label="Label Input :" value={label} onChange={setLabel} placeholder="Contoh: Nama Lengkap" />
@@ -245,13 +245,13 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           <ColorPicker label="Warna teks input :" value={inputTextColor} onChange={setInputTextColor} />
         </div>
         {/* Kolom 2: Style Dinamis */}
-        <div style={{ flex: 1, minWidth: 260 }}>
+        <div style={{ flex: 0.3, minWidth: 160}}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
           <ColorPicker label="Warna ring saat focus :" value={focusRingColor} onChange={setFocusRingColor} />
         </div>
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+        <div style={{ flex: 1.9, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
             style={{
@@ -296,7 +296,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
             </div>
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth secondary onClick={onBack}>
+            <Button fullWidth danger onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateTextField}>
@@ -349,7 +349,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

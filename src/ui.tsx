@@ -14,9 +14,21 @@ import { TooltipCreator } from "./components/TooltipCreator";
 import { ProgressIndicatorCreator } from "./components/ProgressIndicatorCreator";
 import { DataTableCreator } from "./components/DataTableCreator";
 
-
 function Plugin() {
-  const [page, setPage] = useState <"dashboard" | "component-list" | "button-creator" | "checkbox-creator" | "text-field-creator" | "radio-button" | "tabs-creator" | "switch-creator" | "alert-banner-creator" | "tooltip-creator" | "progress-indicator-creator" | "data-table-creator">("dashboard");
+  const [page, setPage] = useState<
+    | "dashboard"
+    | "component-list"
+    | "button-creator"
+    | "checkbox-creator"
+    | "text-field-creator"
+    | "radio-button"
+    | "tabs-creator"
+    | "switch-creator"
+    | "alert-banner-creator"
+    | "tooltip-creator"
+    | "progress-indicator-creator"
+    | "data-table-creator"
+  >("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -30,9 +42,8 @@ function Plugin() {
     return () => media.removeEventListener("change", updateMode);
   }, []);
 
-
   if (page === "dashboard") {
-    return <Dashboard onStart={() => setPage("component-list")} isDark={isDarkMode} />;
+    return <Dashboard onStart={() => setPage("component-list")} />;
   }
   if (page === "component-list") {
     return (

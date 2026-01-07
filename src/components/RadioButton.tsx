@@ -1,4 +1,4 @@
-import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Text, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect } from "preact/hooks";
@@ -29,47 +29,44 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
+  // Constants untuk nilai default
+  const DEFAULT_GAP_BETWEEN_ITEMS = "16";
+  const DEFAULT_GAP_RADIO_LABEL = "12";
+  const DEFAULT_BORDER_WIDTH = "2";
+  const DEFAULT_LABEL_FONT_WEIGHT = "500";
+  const DEFAULT_LABEL_FONT_WEIGHT_CHECKED = "600";
+  const DEFAULT_TRANSITION_DURATION = "200";
+
   // State Style Statis
-  const [headingLabel, setHeadingLabel] = useState("Select Role");
-  const [headingFontSize, setHeadingFontSize] = useState("14");
-  const [headingFontWeight, setHeadingFontWeight] = useState("600");
-  const [headingColor, setHeadingColor] = useState("#00BCFF");
   const [radioLabels, setRadioLabels] = useState("UI Designer,Frontend Developer");
   const [radioCount, setRadioCount] = useState("2");
   const [labelColor, setLabelColor] = useState("#00BCFF");
   const [labelFontSize, setLabelFontSize] = useState("14");
-  const [labelFontWeight, setLabelFontWeight] = useState("500");
-  const [labelFontWeightChecked, setLabelFontWeightChecked] = useState("600");
   const [labelColorChecked, setLabelColorChecked] = useState("#4F46E5");
   const [checkedColor, setCheckedColor] = useState("#4F46E5");
-  const [gapBetweenItems, setGapBetweenItems] = useState("16");
-  const [gapBetweenRadioAndLabel, setGapBetweenRadioAndLabel] = useState("12");
   const [radioSize, setRadioSize] = useState("20");
-  const [borderWidth, setBorderWidth] = useState("2");
   const [defaultBorderColor, setDefaultBorderColor] = useState("#CBD5E1");
-  const [innerDotSize, setInnerDotSize] = useState("10");
 
   // State Style Dinamis
   const [hoverBorderColor, setHoverBorderColor] = useState("#818CF8");
-  const [transitionDuration, setTransitionDuration] = useState("200");
 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
   // Generate Tailwind code
   const generateCode = useCallback(() => {
-    // Parse values
-    const gapValue = gapBetweenItems.replace(/px/gi, "").trim() || "16";
-    const gapRadioLabel = gapBetweenRadioAndLabel.replace(/px/gi, "").trim() || "12";
+    // Parse values dengan default
+    const gapValue = DEFAULT_GAP_BETWEEN_ITEMS;
+    const gapRadioLabel = DEFAULT_GAP_RADIO_LABEL;
     const radioSizeValue = radioSize.replace(/px/gi, "").trim() || "20";
-    const borderWidthValue = borderWidth.replace(/px/gi, "").trim() || "2";
-    const innerDotSizeValue = innerDotSize.replace(/px/gi, "").trim() || "10";
-    const headingSize = headingFontSize.replace(/px/gi, "").trim() || "14";
+    const borderWidthValue = DEFAULT_BORDER_WIDTH;
+    // Auto-calculate inner dot size: 50% dari radio size
+    const radioSizeNum = Number(radioSizeValue) || 20;
+    const innerDotSizeValue = Math.round(radioSizeNum * 0.5).toString();
     const labelSize = labelFontSize.replace(/px/gi, "").trim() || "14";
-    const transitionMs = transitionDuration.replace(/ms/gi, "").trim() || "200";
+    const transitionMs = DEFAULT_TRANSITION_DURATION;
 
     // Normalize hex colors
-    const headingColorHex = normalizeHex(headingColor);
     const defaultBorderColorHex = normalizeHex(defaultBorderColor);
     const hoverBorderColorHex = normalizeHex(hoverBorderColor);
     const checkedColorHex = normalizeHex(checkedColor);
@@ -82,51 +79,25 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
       .map(l => l.trim())
       .slice(0, count);
 
-    // Generate heading
-    const heading = `<p class="text-[${headingSize}px] font-[${headingFontWeight}] text-[${headingColorHex}]">${headingLabel}</p>`;
-
     // Generate radio items
     const radioItems = labels
       .map(
         (label, i) => `  <label class="flex items-center gap-[${gapRadioLabel}px] cursor-pointer group">
     <input type="radio" name="role_clean" class="peer sr-only" ${i === 0 ? "checked" : ""} />
     <div class="flex items-center justify-center w-[${radioSizeValue}px] h-[${radioSizeValue}px] rounded-[50%] border-[${borderWidthValue}px] border-[${defaultBorderColorHex}] group-hover:border-[${hoverBorderColorHex}] peer-checked:border-[${checkedColorHex}] transition-colors duration-[${transitionMs}ms] after:content-[''] after:w-[${innerDotSizeValue}px] after:h-[${innerDotSizeValue}px] after:rounded-[50%] after:bg-[${checkedColorHex}] after:scale-[0] peer-checked:after:scale-[1] after:transition-transform after:duration-[${transitionMs}ms]"></div>
-    <span class="text-[${labelSize}px] font-[${labelFontWeight}] text-[${labelColorHex}] transition-colors duration-[${transitionMs}ms] peer-checked:text-[${labelColorCheckedHex}] peer-checked:font-[${labelFontWeightChecked}]">${label}</span>
+    <span class="text-[${labelSize}px] font-[${DEFAULT_LABEL_FONT_WEIGHT}] text-[${labelColorHex}] transition-colors duration-[${transitionMs}ms] peer-checked:text-[${labelColorCheckedHex}] peer-checked:font-[${DEFAULT_LABEL_FONT_WEIGHT_CHECKED}]">${label}</span>
   </label>`
       )
       .join("\n\n");
 
     const html = `<div class="space-y-[${gapValue}px]">
-${heading}
 ${radioItems}
 </div>`;
 
     const formattedHtml = formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
-  }, [
-    headingLabel,
-    headingFontSize,
-    headingFontWeight,
-    headingColor,
-    radioLabels,
-    radioCount,
-    labelColor,
-    labelFontSize,
-    labelFontWeight,
-    labelFontWeightChecked,
-    labelColorChecked,
-    checkedColor,
-    gapBetweenItems,
-    gapBetweenRadioAndLabel,
-    radioSize,
-    borderWidth,
-    defaultBorderColor,
-    innerDotSize,
-    hoverBorderColor,
-    transitionDuration,
-    normalizeHex,
-  ]);
+  }, [radioLabels, radioCount, labelColor, labelFontSize, labelColorChecked, checkedColor, radioSize, defaultBorderColor, hoverBorderColor, normalizeHex]);
 
   useEffect(() => {
     generateCode();
@@ -140,26 +111,15 @@ ${radioItems}
       try {
         const parsed = JSON.parse(data);
         if (parsed?.componentType === "radio-button") {
-          if (parsed.headingLabel !== undefined) setHeadingLabel(parsed.headingLabel || "");
-          if (parsed.headingFontSize !== undefined) setHeadingFontSize(parsed.headingFontSize || "14");
-          if (parsed.headingFontWeight !== undefined) setHeadingFontWeight(parsed.headingFontWeight || "600");
-          if (parsed.headingColor !== undefined) setHeadingColor(parsed.headingColor || "#334155");
           if (parsed.radioLabels !== undefined) setRadioLabels(parsed.radioLabels || "");
           if (parsed.radioCount !== undefined) setRadioCount(parsed.radioCount || "2");
           if (parsed.labelColor !== undefined) setLabelColor(parsed.labelColor || "#64748B");
           if (parsed.labelFontSize !== undefined) setLabelFontSize(parsed.labelFontSize || "14");
-          if (parsed.labelFontWeight !== undefined) setLabelFontWeight(parsed.labelFontWeight || "500");
-          if (parsed.labelFontWeightChecked !== undefined) setLabelFontWeightChecked(parsed.labelFontWeightChecked || "600");
           if (parsed.labelColorChecked !== undefined) setLabelColorChecked(parsed.labelColorChecked || "#4F46E5");
           if (parsed.checkedColor !== undefined) setCheckedColor(parsed.checkedColor || "#4F46E5");
-          if (parsed.gapBetweenItems !== undefined) setGapBetweenItems(parsed.gapBetweenItems || "16");
-          if (parsed.gapBetweenRadioAndLabel !== undefined) setGapBetweenRadioAndLabel(parsed.gapBetweenRadioAndLabel || "12");
           if (parsed.radioSize !== undefined) setRadioSize(parsed.radioSize || "20");
-          if (parsed.borderWidth !== undefined) setBorderWidth(parsed.borderWidth || "2");
           if (parsed.defaultBorderColor !== undefined) setDefaultBorderColor(parsed.defaultBorderColor || "#CBD5E1");
           if (parsed.hoverBorderColor !== undefined) setHoverBorderColor(parsed.hoverBorderColor || "#818CF8");
-          if (parsed.innerDotSize !== undefined) setInnerDotSize(parsed.innerDotSize || "10");
-          if (parsed.transitionDuration !== undefined) setTransitionDuration(parsed.transitionDuration || "200");
           if (parsed.htmltailwind !== undefined) setHtmltailwind(parsed.htmltailwind || "");
         }
       } catch (error) {
@@ -178,27 +138,27 @@ ${radioItems}
 
   // Emit ke Figma
   const handleCreateRadioButton = () => {
+    // Auto-calculate inner dot size
+    const radioSizeNum = Number(radioSize.replace(/px/gi, "").trim()) || 20;
+    const innerDotSizeValue = Math.round(radioSizeNum * 0.5).toString();
+
     emit("CREATE_RADIO_BUTTON", {
-      headingLabel,
-      headingFontSize,
-      headingFontWeight,
-      headingColor,
       radioLabels,
       radioCount,
       labelColor,
       labelFontSize,
-      labelFontWeight,
-      labelFontWeightChecked,
+      labelFontWeight: DEFAULT_LABEL_FONT_WEIGHT,
+      labelFontWeightChecked: DEFAULT_LABEL_FONT_WEIGHT_CHECKED,
       labelColorChecked,
       checkedColor,
-      gapBetweenItems,
-      gapBetweenRadioAndLabel,
+      gapBetweenItems: DEFAULT_GAP_BETWEEN_ITEMS,
+      gapBetweenRadioAndLabel: DEFAULT_GAP_RADIO_LABEL,
       radioSize,
-      borderWidth,
+      borderWidth: DEFAULT_BORDER_WIDTH,
       defaultBorderColor,
       hoverBorderColor,
-      innerDotSize,
-      transitionDuration,
+      innerDotSize: innerDotSizeValue,
+      transitionDuration: DEFAULT_TRANSITION_DURATION,
       htmltailwind,
     });
   };
@@ -232,7 +192,6 @@ ${radioItems}
           </button>
           <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Radio Button</Text>
         </div>
-        <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Pengaturan :</Text>
       </div>
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
@@ -241,36 +200,25 @@ ${radioItems}
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
 
           <VerticalSpace space="small" />
-          <InputField label="Heading Radio Button :" value={headingLabel} onChange={setHeadingLabel} placeholder="Contoh: Select Role" />
-          <InputField label="Ukuran font heading (px) :" value={headingFontSize} onChange={setHeadingFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
-          <InputField label="Font weight heading :" value={headingFontWeight} onChange={setHeadingFontWeight} placeholder="Contoh: 600 (akan menjadi font-[600])" />
-          <ColorPicker label="Warna heading :" value={headingColor} onChange={setHeadingColor} />
-          <InputField label="Gap antar radio button (px) :" value={gapBetweenItems} onChange={setGapBetweenItems} placeholder="Contoh: 16 (akan menjadi space-y-[16px])" />
           <InputField label="Jumlah Radio :" value={radioCount} onChange={setRadioCount} placeholder="Contoh: 2" />
           <InputField label="Label Radio (pisahkan dengan koma) :" value={radioLabels} onChange={setRadioLabels} placeholder="Contoh: UI Designer,Frontend Developer" />
-          <InputField label="Gap antara radio dan label (px) :" value={gapBetweenRadioAndLabel} onChange={setGapBetweenRadioAndLabel} placeholder="Contoh: 12 (akan menjadi gap-[12px])" />
           <InputField label="Ukuran radio button (px) :" value={radioSize} onChange={setRadioSize} placeholder="Contoh: 20 (akan menjadi w-[20px] h-[20px])" />
-          <InputField label="Border width (px) :" value={borderWidth} onChange={setBorderWidth} placeholder="Contoh: 2 (akan menjadi border-[2px])" />
           <ColorPicker label="Warna border default :" value={defaultBorderColor} onChange={setDefaultBorderColor} />
           <ColorPicker label="Warna checked :" value={checkedColor} onChange={setCheckedColor} />
-          <InputField label="Ukuran inner dot (px) :" value={innerDotSize} onChange={setInnerDotSize} placeholder="Contoh: 10 (akan menjadi after:w-[10px] after:h-[10px])" />
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
-          <InputField label="Font weight label default :" value={labelFontWeight} onChange={setLabelFontWeight} placeholder="Contoh: 500 (akan menjadi font-[500])" />
-          <InputField label="Font weight label checked :" value={labelFontWeightChecked} onChange={setLabelFontWeightChecked} placeholder="Contoh: 600 (akan menjadi peer-checked:font-[600])" />
           <ColorPicker label="Warna label saat checked :" value={labelColorChecked} onChange={setLabelColorChecked} />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
-        <div style={{ flex: 1, minWidth: 260 }}>
+        <div style={{ flex: 0.3, minWidth: 160}}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
           <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
-          <InputField label="Durasi transisi (ms) :" value={transitionDuration} onChange={setTransitionDuration} placeholder="Contoh: 200 (akan menjadi duration-[200ms])" />
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+        <div style={{ flex: 1.9, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
           <div
             style={{
@@ -282,66 +230,68 @@ ${radioItems}
               padding: 24,
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: `${gapBetweenItems.replace(/px/gi, "") || 16}px` }}>
-              {/* Heading */}
-              <p style={{ fontSize: `${headingFontSize.replace(/px/gi, "") || 14}px`, fontWeight: Number(headingFontWeight) || 600, color: headingColor, margin: 0 }}>{headingLabel}</p>
-
+            <div style={{ display: "flex", flexDirection: "column", gap: `${DEFAULT_GAP_BETWEEN_ITEMS}px` }}>
               {/* Radio Buttons */}
-              {labels.map((label, i) => (
-                <label key={i} style={{ display: "flex", alignItems: "center", gap: `${gapBetweenRadioAndLabel.replace(/px/gi, "") || 12}px`, cursor: "pointer" }}>
-                  <input type="radio" name="radio-preview" defaultChecked={i === 0} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} />
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: `${radioSize.replace(/px/gi, "") || 20}px`,
-                      height: `${radioSize.replace(/px/gi, "") || 20}px`,
-                      borderRadius: "50%",
-                      border: `${borderWidth.replace(/px/gi, "") || 2}px solid ${defaultBorderColor}`,
-                      position: "relative",
-                      transition: `border-color ${transitionDuration.replace(/ms/gi, "") || 200}ms`,
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.borderColor = hoverBorderColor;
-                    }}
-                    onMouseLeave={e => {
-                      const radio = e.currentTarget.previousElementSibling as HTMLInputElement;
-                      if (radio?.checked) {
-                        e.currentTarget.style.borderColor = checkedColor;
-                      } else {
-                        e.currentTarget.style.borderColor = defaultBorderColor;
-                      }
-                    }}
-                  >
+              {labels.map((label, i) => {
+                const radioSizeNum = Number(radioSize.replace(/px/gi, "") || 20);
+                const innerDotSizeValue = Math.round(radioSizeNum * 0.5);
+
+                return (
+                  <label key={i} style={{ display: "flex", alignItems: "center", gap: `${DEFAULT_GAP_RADIO_LABEL}px`, cursor: "pointer" }}>
+                    <input type="radio" name="radio-preview" defaultChecked={i === 0} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} />
                     <div
                       style={{
-                        width: `${innerDotSize.replace(/px/gi, "") || 10}px`,
-                        height: `${innerDotSize.replace(/px/gi, "") || 10}px`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: `${radioSizeNum}px`,
+                        height: `${radioSizeNum}px`,
                         borderRadius: "50%",
-                        backgroundColor: checkedColor,
-                        transform: `scale(${i === 0 ? 1 : 0})`,
-                        transition: `transform ${transitionDuration.replace(/ms/gi, "") || 200}ms`,
+                        border: `${DEFAULT_BORDER_WIDTH}px solid ${defaultBorderColor}`,
+                        position: "relative",
+                        transition: `border-color ${DEFAULT_TRANSITION_DURATION}ms`,
                       }}
-                    />
-                  </div>
-                  <span
-                    style={{
-                      fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`,
-                      fontWeight: i === 0 ? Number(labelFontWeightChecked) || 600 : Number(labelFontWeight) || 500,
-                      color: i === 0 ? labelColorChecked : labelColor,
-                      transition: `color ${transitionDuration.replace(/ms/gi, "") || 200}ms, font-weight ${transitionDuration.replace(/ms/gi, "") || 200}ms`,
-                    }}
-                  >
-                    {label}
-                  </span>
-                </label>
-              ))}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = hoverBorderColor;
+                      }}
+                      onMouseLeave={e => {
+                        const radio = e.currentTarget.previousElementSibling as HTMLInputElement;
+                        if (radio?.checked) {
+                          e.currentTarget.style.borderColor = checkedColor;
+                        } else {
+                          e.currentTarget.style.borderColor = defaultBorderColor;
+                        }
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${innerDotSizeValue}px`,
+                          height: `${innerDotSizeValue}px`,
+                          borderRadius: "50%",
+                          backgroundColor: checkedColor,
+                          transform: `scale(${i === 0 ? 1 : 0})`,
+                          transition: `transform ${DEFAULT_TRANSITION_DURATION}ms`,
+                        }}
+                      />
+                    </div>
+                    <span
+                      style={{
+                        fontSize: `${labelFontSize.replace(/px/gi, "") || 14}px`,
+                        fontWeight: i === 0 ? Number(DEFAULT_LABEL_FONT_WEIGHT_CHECKED) : Number(DEFAULT_LABEL_FONT_WEIGHT),
+                        color: i === 0 ? labelColorChecked : labelColor,
+                        transition: `color ${DEFAULT_TRANSITION_DURATION}ms, font-weight ${DEFAULT_TRANSITION_DURATION}ms`,
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth secondary onClick={onBack}>
+            <Button fullWidth danger onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateRadioButton}>
@@ -393,7 +343,7 @@ ${radioItems}
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode} secondary style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>
