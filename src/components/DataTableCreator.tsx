@@ -196,7 +196,7 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
           <VerticalSpace space="small" />
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
           <VerticalSpace space="small" />
-          <InputField label="Kolom (pisahkan dengan koma) :" value={columns} onChange={setColumns} placeholder="Contoh: Name,Email,Role" />
+          <InputField label=" Label Kolom (pisahkan dengan koma) :" value={columns} onChange={setColumns} placeholder="Contoh: Name,Email,Role" />
           <InputField label="Jumlah Baris :" value={rows} onChange={setRows} placeholder="Contoh: 3" />
           <ColorPicker label="Warna latar header :" value={headerBgColor} onChange={setHeaderBgColor} />
           <ColorPicker label="Warna teks header :" value={headerTextColor} onChange={setHeaderTextColor} />

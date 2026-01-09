@@ -228,8 +228,8 @@ ${tabButtonsHtml}
           <VerticalSpace space="small" />
           <ColorPicker label="Warna teks saat hover :" value={hoverTextColor} onChange={setHoverTextColor} />
           <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
-          <div style={{ marginTop: 8 }}>
-            <Text style={{ fontSize: 14, fontWeight: 500, marginBottom: 8, display: "block", color: theme.primaryText }}>Tipe Transisi :</Text>
+          <div>
+          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom:10, color: "#6b7280" }}>Tipe Transisi :</Text>
             <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
           </div>
         </div>

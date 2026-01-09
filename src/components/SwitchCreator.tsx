@@ -185,15 +185,14 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
 
         {/* Kolom 2: Style Dinamis */}
         <div style={{ flex: 1, minWidth: 260 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
-          <VerticalSpace space="small" />
+          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 20, color: theme.primaryText }}>Style Dinamis :</Text>
+          <VerticalSpace space="large" />
 
           <InputField label="Durasi transisi (ms) :" value={transitionDuration} onChange={setTransitionDuration} placeholder="Contoh: 300" />
-          <VerticalSpace space="small" />
 
-          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>Easing Transisi :</Text>
+          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>Tipe Transisi :</Text>
           <Dropdown options={transitionEasingOptions} value={transitionEasing} onValueChange={setTransitionEasing} />
-          <VerticalSpace space="small" />
+          <VerticalSpace space="large" />
 
           <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>Default State :</Text>
           <Dropdown
@@ -322,7 +321,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

@@ -987,9 +987,9 @@ export default function () {
 
     // Parse values
     const fontSizeValue = parsePx(fontSize, 14);
-    const paddingY = padding.split(",")[0]?.trim().replace(/px/gi, "") || "8";
-    const paddingX = padding.split(",")[1]?.trim().replace(/px/gi, "") || "12";
-    const paddingXValue = Number(paddingX) || 12;
+    const paddingX = padding.split(",")[0]?.trim().replace(/px/gi, "") || "14";
+    const paddingY = padding.split(",")[1]?.trim().replace(/px/gi, "") || "8";
+    const paddingXValue = Number(paddingX) || 14;
     const paddingYValue = Number(paddingY) || 8;
     const borderRadiusValue = parsePx(borderRadius, 8);
     const marginBottomValue = parsePx(marginBottom, 16);

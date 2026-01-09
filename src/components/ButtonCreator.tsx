@@ -50,7 +50,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [focusRingSize, setFocusRingSize] = useState<number | null>(2);
   const [activeBgColor, setActiveBgColor] = useState("#525252");
   const [activeShadowSize, setActiveShadowSize] = useState<number | null>(4);
-  const [transitionEasing, setTransitionEasing] = useState("ease-in-out");
   const [transitionDelay, setTransitionDelay] = useState<number | null>(0);
   const [transitionType, setTransitionType] = useState("normal");
   const [hoverScaleType, setHoverScaleType] = useState("none");
@@ -311,7 +310,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     activeBgColor,
     activeShadowSize,
     transitionType,
-    transitionEasing,
     transitionDelay,
     hoverScaleType,
     hoverOpacity,
@@ -482,7 +480,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       activeBgColor,
       activeShadowSize,
       transitionType,
-      transitionEasing,
       transitionDelay,
       hoverScaleType,
       hoverOpacity,
@@ -520,7 +517,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     activeBgColor,
     activeShadowSize,
     transitionType,
-    transitionEasing,
     transitionDelay,
     hoverScaleType,
     hoverOpacity,
@@ -560,7 +556,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       activeBgColor,
       activeShadowSize?.toString() || undefined,
       transitionType,
-      transitionEasing,
       transitionDelay?.toString() || undefined,
       hoverScaleType,
       hoverOpacity?.toString() || undefined,
@@ -587,7 +582,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     activeBgColor,
     activeShadowSize,
     transitionType,
-    transitionEasing,
     transitionDelay,
     hoverScaleType,
     hoverOpacity,
@@ -622,7 +616,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             if (buttonData.activeBgColor) setActiveBgColor(buttonData.activeBgColor);
             if (buttonData.activeShadowSize) setActiveShadowSize(Number(buttonData.activeShadowSize) || null);
             if (buttonData.transitionType) setTransitionType(buttonData.transitionType);
-            if (buttonData.transitionEasing) setTransitionEasing(buttonData.transitionEasing);
             if (buttonData.transitionDelay) setTransitionDelay(Number(buttonData.transitionDelay) || null);
             if (buttonData.hoverScaleType) setHoverScaleType(buttonData.hoverScaleType);
             // Only update state if data exists, is not empty string, and is a valid number
@@ -881,7 +874,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             )}
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button fullWidth danger  onClick={onBack}>
+            <Button fullWidth danger onClick={onBack}>
               Tutup
             </Button>
             <Button fullWidth onClick={handleCreateButtonClick}>
@@ -937,7 +930,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

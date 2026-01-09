@@ -31,7 +31,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
   const [bgColor, setBgColor] = useState("#00BCFF");
   const [textColor, setTextColor] = useState("#FFFFFF");
   const [fontSize, setFontSize] = useState("14");
-  const [padding, setPadding] = useState("8,12");
+  const [padding, setPadding] = useState("14,8");
   const [borderRadius, setBorderRadius] = useState("8");
   const [marginBottom, setMarginBottom] = useState("16");
 
@@ -42,8 +42,8 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
   const generateCode = useCallback(() => {
     // Parse values
     const fontSizeValue = fontSize.replace(/px/gi, "").trim() || "14";
-    const paddingY = padding.split(",")[0]?.trim().replace(/px/gi, "") || "8";
-    const paddingX = padding.split(",")[1]?.trim().replace(/px/gi, "") || "12";
+    const paddingX = padding.split(",")[0]?.trim().replace(/px/gi, "") || "8";
+    const paddingY = padding.split(",")[1]?.trim().replace(/px/gi, "") || "12";
     const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "8";
     const marginBottomValue = marginBottom.replace(/px/gi, "").trim() || "16";
 
@@ -154,7 +154,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
           <ColorPicker label="Warna latar tooltip :" value={bgColor} onChange={setBgColor} />
           <ColorPicker label="Warna teks tooltip :" value={textColor} onChange={setTextColor} />
           <InputField label="Ukuran teks tooltip (px) :" value={fontSize} onChange={setFontSize} placeholder="Contoh: 14" />
-          <InputField label="Padding (y,x) :" value={padding} onChange={setPadding} placeholder="Contoh: 8,12" />
+          <InputField label="Padding (x,y) :" value={padding} onChange={setPadding} placeholder="Contoh: 8,12" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 8" />
           <InputField label="Jarak dari komponen (px) :" value={marginBottom} onChange={setMarginBottom} placeholder="Contoh: 16" />
         </div>
@@ -175,6 +175,10 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
               justifyContent: "center",
               alignItems: "center",
               position: "relative",
+              overflow: "hidden",
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
             }}
           >
             <div style={{ position: "relative", display: "inline-block" }}>
@@ -189,12 +193,13 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
                   background: bgColor,
                   color: textColor,
                   fontSize: fontSize ? `${fontSize.replace(/px/gi, "").trim()}px` : "14px",
-                  padding: padding ? `${padding.split(",")[0]?.trim().replace(/px/gi, "") || "8"}px ${padding.split(",")[1]?.trim().replace(/px/gi, "") || "12"}px` : "8px 12px",
+                  padding: padding ? `${padding.split(",")[1]?.trim().replace(/px/gi, "") || "12"}px ${padding.split(",")[0]?.trim().replace(/px/gi, "") || "8"}px` : "12px 8px",
                   borderRadius: borderRadius ? `${borderRadius.replace(/px/gi, "").trim() || "8"}px` : "8px",
                   whiteSpace: "nowrap",
                   boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
                   zIndex: 10,
-                  maxWidth: "288px",
+                  width: "auto",
+                  maxWidth: "100%",
                 }}
               >
                 {tooltipText}
@@ -266,7 +271,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>
