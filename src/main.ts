@@ -42,10 +42,8 @@ export default function () {
       hoverBorderColor,
       focusBorderColor,
       focusRingSize,
-      activeScale,
       activeBgColor,
       activeShadowSize,
-      transitionDuration,
       transitionEasing,
       transitionDelay,
       transitionType,
@@ -85,7 +83,7 @@ export default function () {
       let paddingTop = 0;
       let paddingBottom = 0;
       if (padding) {
-        const values = padding.split(",").map(val => parseInt(val.trim(), 10));
+        const values = padding.split(",").map((val: string) => parseInt(val.trim(), 10));
         if (values.length === 1 && !isNaN(values[0])) {
           paddingLeft = values[0];
           paddingRight = values[0];
@@ -157,10 +155,8 @@ export default function () {
       component.setPluginData("hoverBorderColor", hoverBorderColor || "");
       component.setPluginData("focusBorderColor", focusBorderColor || "");
       component.setPluginData("focusRingSize", focusRingSize?.toString() || "");
-      component.setPluginData("activeScale", activeScale?.toString() || "");
       component.setPluginData("activeBgColor", activeBgColor || "");
       component.setPluginData("activeShadowSize", activeShadowSize?.toString() || "");
-      component.setPluginData("transitionDuration", transitionDuration?.toString() || "");
       component.setPluginData("transitionEasing", transitionEasing || "");
       component.setPluginData("transitionDelay", transitionDelay?.toString() || "");
       component.setPluginData("transitionType", transitionType || "");
