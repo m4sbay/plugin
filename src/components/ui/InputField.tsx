@@ -20,3 +20,4 @@ export function InputField({ label, value, onChange, placeholder }: InputFieldPr
     </>
   );
 }
+
