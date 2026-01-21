@@ -69,7 +69,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
   }, []);
 
   // Generate Tailwind class berdasarkan struktur baru
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     // Parse values
     const labelSize = labelFontSize.replace(/px/gi, "").trim() || "14";
     const gapValue = gap.replace(/px/gi, "").trim() || "12";
@@ -103,13 +103,15 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
   <input type="text" placeholder="${placeholder}" class="${inputClasses}" />
 </div>`;
 
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [label, labelColor, labelFontSize, placeholder, width, borderRadius, borderColor, paddingX, paddingY, gap, inputTextColor, focusRingColor, normalizeHex]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   // Load data when text field component is selected

@@ -47,7 +47,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
   const [copied, setCopied] = useState(false);
 
   // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     const isFullWidth = width.trim() === "";
     const classes = isFullWidth ? `bg-[${bgColor}] rounded-[${borderRadius}px] w-full h-[${height}px]` : `bg-[${bgColor}] rounded-[${borderRadius}px] w-[${width}px] h-[${height}px]`;
     const innerClasses = `bg-[${progressColor}] h-full rounded-[${borderRadius}px] transition-all duration-300`;
@@ -59,12 +59,14 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
   </div>
   ${percentage}
 </div>`;
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
   }, [progressValue, width, height, progressColor, bgColor, borderRadius, percentageTextColor, percentageMargin, showPercentage]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   useEffect(() => {

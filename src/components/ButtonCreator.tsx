@@ -326,7 +326,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   }, [generatePreviewWithInlineStyles]);
 
   const generateCode = useCallback(
-    (hexColor: string, label: string, borderRadius: number, fontSize: number, padding: string, hexLabelColor: string) => {
+    async (hexColor: string, label: string, borderRadius: number, fontSize: number, padding: string, hexLabelColor: string) => {
       // Default values jika parameter kosong
       const defaultHexColor = hexColor || "#171717";
       const defaultLabel = label || "Tombol";
@@ -458,7 +458,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       }
 
       const htmltailwind = `<button class="${classes}">${defaultLabel}</button>`;
-      const formattedHtml = formatHTML(htmltailwind);
+      const formattedHtml = await formatHTML(htmltailwind);
       setHtmltailwind(formattedHtml);
       return { htmltailwind: formattedHtml };
     },
@@ -492,13 +492,15 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
   // Generate code on mount and when dependencies change
   useEffect(() => {
-    // Gunakan default jika null/kosong
-    const hexColor = color ? cleanHexColor(color) : "#171717";
-    const hexLabelColor = labelColor ? cleanHexColor(labelColor) : "#FFFFFF";
-    const finalBorderRadius = borderRadius !== null ? borderRadius : 8;
-    const finalFontSize = fontSize !== null ? fontSize : 16;
-    const finalLabel = label || "Tombol";
-    generateCode(hexColor, finalLabel, finalBorderRadius, finalFontSize, padding, hexLabelColor);
+    (async () => {
+      // Gunakan default jika null/kosong
+      const hexColor = color ? cleanHexColor(color) : "#171717";
+      const hexLabelColor = labelColor ? cleanHexColor(labelColor) : "#FFFFFF";
+      const finalBorderRadius = borderRadius !== null ? borderRadius : 8;
+      const finalFontSize = fontSize !== null ? fontSize : 16;
+      const finalLabel = label || "Tombol";
+      await generateCode(hexColor, finalLabel, finalBorderRadius, finalFontSize, padding, hexLabelColor);
+    })();
   }, [
     color,
     label,
@@ -527,7 +529,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     generateCode,
   ]);
 
-  const handleCreateButtonClick = useCallback(() => {
+  const handleCreateButtonClick = useCallback(async () => {
     // Gunakan default jika null/kosong
     const hexColor = color ? cleanHexColor(color) : "#171717";
     const hexLabelColor = labelColor ? cleanHexColor(labelColor) : "#FFFFFF";
@@ -535,7 +537,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     const finalFontSize = fontSize !== null ? fontSize : 16;
     const finalLabel = label || "Tombol";
     console.log(`Creating button with color: ${hexColor}, labelColor: ${hexLabelColor}`);
-    const { htmltailwind } = generateCode(hexColor, finalLabel, finalBorderRadius, finalFontSize, padding, hexLabelColor);
+    const { htmltailwind } = await generateCode(hexColor, finalLabel, finalBorderRadius, finalFontSize, padding, hexLabelColor);
     emit<CreateButtonHandler>(
       "CREATE_BUTTON",
       hexColor,

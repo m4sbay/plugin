@@ -1,32 +1,51 @@
-import { html } from "js-beautify";
+import * as prettier from "prettier";
 
 /**
- * Format HTML code dengan indentasi konsisten
+ * Format HTML code menggunakan Prettier
  * @param htmlString - String HTML yang akan di-format
  * @returns HTML yang sudah di-format dengan rapi
  */
-export function formatHTML(htmlString: string): string {
+export async function formatHTML(htmlString: string): Promise<string> {
   if (!htmlString || htmlString.trim() === "") {
     return htmlString;
   }
 
   try {
-    return html(htmlString, {
-      indent_size: 2, // Ubah dari 6 ke 2 untuk indentasi yang lebih kompak
-      indent_char: " ",
-      max_preserve_newlines: 2,
-      preserve_newlines: true,
-      wrap_line_length: 80, // Kurangi dari 120 ke 80 untuk preview yang lebih baik
-      wrap_attributes: "auto", // Auto wrap attributes jika panjang
-      end_with_newline: false,
-      indent_inner_html: true,
-      indent_scripts: "keep",
-      unformatted: [], // Format semua elemen
-      extra_liners: [], // Tidak menambahkan line break ekstra
+    const formatted = await prettier.format(htmlString, {
+      
+    arrowParens: "always",
+          bracketSameLine: false,
+        objectWrap: "preserve",
+        bracketSpacing: true,
+        semi: true,
+        experimentalOperatorPosition: "end",
+        experimentalTernaries: false,
+        singleQuote: false,
+        jsxSingleQuote: false,
+        quoteProps: "as-needed",
+        trailingComma: "all",
+        singleAttributePerLine: false,
+        htmlWhitespaceSensitivity: "css",
+          vueIndentScriptAndStyle: false,
+        proseWrap: "preserve",
+        endOfLine: "lf",
+        insertPragma: false,
+        printWidth: 100,
+        requirePragma: false,
+        tabWidth: 2,
+        useTabs: false,
+        embeddedLanguageFormatting: "auto"
+      
     });
+
+    return formatted.trim();
   } catch (error) {
     // Jika terjadi error saat formatting, return original string
     console.error("Error formatting HTML:", error);
     return htmlString;
   }
 }
+
+
+
+

@@ -65,7 +65,7 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
   }, []);
 
   // Generate Tailwind code - border-bottom tabs (UI statis saja, hanya Tailwind classes dengan arbitrary values)
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     const labels = tabLabels.split(",").map(l => l.trim());
     const tabCountNum = parseInt(tabCount) || labels.length;
     const gap = tabGap || "16";
@@ -105,13 +105,15 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
 ${tabButtonsHtml}
 </div>`;
 
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabGap, textBorderGap, normalizeHex]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   useEffect(() => {

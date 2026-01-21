@@ -161,7 +161,7 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
   const [copied, setCopied] = useState(false);
 
   // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     const defaultColors = getAlertColors();
     const roundedClass = borderRadius ? `rounded-[${borderRadius}px]` : "rounded-md";
     const widthClass = width ? `w-[${width}px]` : "";
@@ -173,13 +173,15 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
     ${message}
   </p>
 </div>`;
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [alertType, title, message, borderRadius, width, padding]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   useEffect(() => {

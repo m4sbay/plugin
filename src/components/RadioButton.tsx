@@ -54,7 +54,7 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
   const [copied, setCopied] = useState(false);
 
   // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     // Parse values dengan default
     const gapValue = DEFAULT_GAP_BETWEEN_ITEMS;
     const gapRadioLabel = DEFAULT_GAP_RADIO_LABEL;
@@ -94,13 +94,15 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
 ${radioItems}
 </div>`;
 
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [radioLabels, radioCount, labelColor, labelFontSize, labelColorChecked, checkedColor, radioSize, defaultBorderColor, hoverBorderColor, normalizeHex]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   useEffect(() => {

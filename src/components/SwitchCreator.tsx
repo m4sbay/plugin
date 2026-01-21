@@ -54,7 +54,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   const [previewChecked, setPreviewChecked] = useState(false);
 
   // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     const translateX = parseInt(switchWidth) - parseInt(thumbSize) - 4; // 2px left + 2px spacing
     const isChecked = defaultChecked === "true";
 
@@ -64,13 +64,15 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   <div class="absolute top-[2px] left-[2px] h-[${thumbSize}px] w-[${thumbSize}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateX}px]"></div>
 </label>`;
 
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [switchWidth, switchHeight, trackBorderRadius, uncheckedBgColor, checkedBgColor, thumbSize, thumbBgColor, transitionDuration, transitionEasing, defaultChecked]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   // Update preview checked state when defaultChecked changes

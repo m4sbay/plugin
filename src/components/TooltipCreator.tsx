@@ -39,7 +39,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
   const [copied, setCopied] = useState(false);
 
   // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     // Parse values
     const fontSizeValue = fontSize.replace(/px/gi, "").trim() || "14";
     const paddingX = padding.split(",")[0]?.trim().replace(/px/gi, "") || "8";
@@ -54,13 +54,15 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
 </div> 
 <!-- Pastikan komponen yang ingin diberi tooltip terbungkus dalam "div" dengan class "relative" dan "group" -->`;
 
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [tooltipText, bgColor, textColor, fontSize, padding, borderRadius, marginBottom]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   useEffect(() => {

@@ -51,7 +51,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   const [checkedStates, setCheckedStates] = useState<boolean[]>([]);
 
   // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     // Parse values
     const checkboxSizeValue = checkboxSize.replace(/px/gi, "").trim() || "20";
     const gapValue = gapBetweenCheckboxLabel.replace(/px/gi, "").trim();
@@ -96,7 +96,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
 ${checkboxItem}
 </div>`;
 
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [
@@ -118,7 +118,9 @@ ${checkboxItem}
   ]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   // Load data when checkbox component is selected

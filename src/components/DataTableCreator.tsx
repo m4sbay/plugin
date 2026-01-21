@@ -56,7 +56,7 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
   const [copied, setCopied] = useState(false);
 
   // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  const generateCode = useCallback(async () => {
     const columnList = columns
       .split(",")
       .map(c => c.trim())
@@ -88,13 +88,15 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
   <thead>${headerRow}</thead>
   <tbody>${dataRows}</tbody>
 </table>`;
-    const formattedHtml = formatHTML(html);
+    const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;
   }, [columns, rows, headerBgColor, headerTextColor, rowBgColor, stripedRowBgColor, rowTextColor, borderColor, fontSize, padding, stripedRows, textAlignment]);
 
   useEffect(() => {
-    generateCode();
+    (async () => {
+      await generateCode();
+    })();
   }, [generateCode]);
 
   useEffect(() => {
