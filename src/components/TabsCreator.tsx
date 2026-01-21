@@ -101,9 +101,7 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
       .join("\n\n");
 
     // HTML structure dengan border-bottom tabs (menggunakan arbitrary values)
-    const html = `<div class="flex gap-[${gap}px]">
-${tabButtonsHtml}
-</div>`;
+    const html = `<div class="flex gap-[${gap}px]">${tabButtonsHtml}</div>`;
 
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);

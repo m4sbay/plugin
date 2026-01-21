@@ -90,9 +90,7 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
       )
       .join("\n\n");
 
-    const html = `<div class="space-y-[${gapValue}px]">
-${radioItems}
-</div>`;
+    const html = `<div class="space-y-[${gapValue}px]">${radioItems}</div>`;
 
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);

@@ -98,10 +98,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     }
 
     // Generate HTML sesuai struktur baru
-    const html = `<div class="flex flex-col gap-[${gapValue}px]">
-  <label class="${labelClasses}">${label}</label>
-  <input type="text" placeholder="${placeholder}" class="${inputClasses}" />
-</div>`;
+    const html = `<div class="flex flex-col gap-[${gapValue}px]"><label class="${labelClasses}">${label}</label><input type="text" placeholder="${placeholder}" class="${inputClasses}" /></div>`;
 
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);

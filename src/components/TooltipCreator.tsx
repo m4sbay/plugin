@@ -47,12 +47,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
     const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "8";
     const marginBottomValue = marginBottom.replace(/px/gi, "").trim() || "16";
 
-    const html = `<!-- Tooltip -->
-<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-[${marginBottomValue}px] hidden group-hover:block w-max max-w-xs px-[${paddingX}px] py-[${paddingY}px] text-[${fontSizeValue}px] text-[${textColor}] bg-[${bgColor}] rounded-[${borderRadiusValue}px] z-10">
-  ${tooltipText}
-  <div class="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[${bgColor}] rotate-45 -mt-1"></div>
-</div> 
-<!-- Pastikan komponen yang ingin diberi tooltip terbungkus dalam "div" dengan class "relative" dan "group" -->`;
+    const html = `<!-- Tooltip --><div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-[${marginBottomValue}px] hidden group-hover:block w-max max-w-xs px-[${paddingX}px] py-[${paddingY}px] text-[${fontSizeValue}px] text-[${textColor}] bg-[${bgColor}] rounded-[${borderRadiusValue}px] z-10">${tooltipText}<div class="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[${bgColor}] rotate-45 -mt-1"></div></div><!-- Pastikan komponen yang ingin diberi tooltip terbungkus dalam "div" dengan class "relative" dan "group" -->`;
 
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);

@@ -167,12 +167,7 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
     const widthClass = width ? `w-[${width}px]` : "";
     const paddingClass = padding ? `p-[${padding}px]` : "p-4";
 
-    const html = `<div role="alert" class="flex flex-col gap-1 ${roundedClass} border ${defaultColors.border} ${defaultColors.bg} ${paddingClass} ${widthClass}">
-  <div class="font-semibold text-sm ${defaultColors.titleColor}">${title}</div>
-  <p class="text-sm ${defaultColors.messageColor} text-justify">
-    ${message}
-  </p>
-</div>`;
+    const html = `<div role="alert" class="flex flex-col gap-1 ${roundedClass} border ${defaultColors.border} ${defaultColors.bg} ${paddingClass} ${widthClass}"><div class="font-semibold text-sm ${defaultColors.titleColor}">${title}</div><p class="text-sm ${defaultColors.messageColor} text-justify">${message}</p></div>`;
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
     return formattedHtml;

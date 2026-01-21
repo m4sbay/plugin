@@ -92,9 +92,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   ${description ? `<div class="ml-[${descriptionIndent}px]"><p class="text-[${descriptionFontSize}px] text-[${descriptionColorHex}]">${description}</p></div>` : ""}
 </div>`;
 
-    const html = `<div>
-${checkboxItem}
-</div>`;
+    const html = `<div>${checkboxItem}</div>`;
 
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);

@@ -53,12 +53,7 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
     const innerClasses = `bg-[${progressColor}] h-full rounded-[${borderRadius}px] transition-all duration-300`;
     const marginValue = showPercentage === "yes" ? percentageMargin : "0";
     const percentage = showPercentage === "yes" ? `<span class="text-sm" style="color:${percentageTextColor}; margin-left:${marginValue}px">${progressValue}%</span>` : "";
-    const html = `<div class="flex items-center">
-  <div class="${classes} overflow-hidden">
-    <div class="${innerClasses}" style="width:${progressValue}%"></div>
-  </div>
-  ${percentage}
-</div>`;
+    const html = `<div class="flex items-center"><div class="${classes} overflow-hidden"><div class="${innerClasses}" style="width:${progressValue}%"></div></div>${percentage}</div>`;
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
   }, [progressValue, width, height, progressColor, bgColor, borderRadius, percentageTextColor, percentageMargin, showPercentage]);

@@ -58,11 +58,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
     const translateX = parseInt(switchWidth) - parseInt(thumbSize) - 4; // 2px left + 2px spacing
     const isChecked = defaultChecked === "true";
 
-    const html = `<label for="toggle-switch" class="relative inline-flex cursor-pointer items-center">
-  <input type="checkbox" id="toggle-switch" class="peer sr-only" ${isChecked ? "checked" : ""} />
-  <div class="peer flex h-[${switchHeight}px] w-[${switchWidth}px] items-center rounded-[${trackBorderRadius}px] bg-[${uncheckedBgColor}] transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:bg-[${checkedBgColor}] peer-focus:outline-none"></div>
-  <div class="absolute top-[2px] left-[2px] h-[${thumbSize}px] w-[${thumbSize}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateX}px]"></div>
-</label>`;
+    const html = `<label for="toggle-switch" class="relative inline-flex cursor-pointer items-center"><input type="checkbox" id="toggle-switch" class="peer sr-only" ${isChecked ? "checked" : ""} /><div class="peer flex h-[${switchHeight}px] w-[${switchWidth}px] items-center rounded-[${trackBorderRadius}px] bg-[${uncheckedBgColor}] transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:bg-[${checkedBgColor}] peer-focus:outline-none"></div><div class="absolute top-[2px] left-[2px] h-[${thumbSize}px] w-[${thumbSize}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateX}px]"></div></label>`;
 
     const formattedHtml = await formatHTML(html);
     setHtmltailwind(formattedHtml);
