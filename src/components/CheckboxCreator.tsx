@@ -1,7 +1,7 @@
 import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { SelectionChangeHandler } from "../types/types";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
@@ -50,8 +50,8 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   const [copied, setCopied] = useState(false);
   const [checkedStates, setCheckedStates] = useState<boolean[]>([]);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     // Parse values
     const checkboxSizeValue = checkboxSize.replace(/px/gi, "").trim() || "20";
     const gapValue = gapBetweenCheckboxLabel.replace(/px/gi, "").trim();
@@ -92,11 +92,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   ${description ? `<div class="ml-[${descriptionIndent}px]"><p class="text-[${descriptionFontSize}px] text-[${descriptionColorHex}]">${description}</p></div>` : ""}
 </div>`;
 
-    const html = `<div>${checkboxItem}</div>`;
-
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<div>${checkboxItem}</div>`;
   }, [
     checkboxLabel,
     checkboxDescription,
@@ -108,18 +104,18 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     checkboxSize,
     borderRadius,
     checkedBgColor,
-    uncheckedBgColor,
     gapBetweenCheckboxLabel,
     checkmarkSize,
     checkmarkColor,
-    normalizeHex,
   ]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   // Load data when checkbox component is selected
   useEffect(() => {

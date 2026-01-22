@@ -1,7 +1,7 @@
 import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -53,23 +53,21 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   const [copied, setCopied] = useState(false);
   const [previewChecked, setPreviewChecked] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     const translateX = parseInt(switchWidth) - parseInt(thumbSize) - 4; // 2px left + 2px spacing
     const isChecked = defaultChecked === "true";
 
-    const html = `<label for="toggle-switch" class="relative inline-flex cursor-pointer items-center"><input type="checkbox" id="toggle-switch" class="peer sr-only" ${isChecked ? "checked" : ""} /><div class="peer flex h-[${switchHeight}px] w-[${switchWidth}px] items-center rounded-[${trackBorderRadius}px] bg-[${uncheckedBgColor}] transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:bg-[${checkedBgColor}] peer-focus:outline-none"></div><div class="absolute top-[2px] left-[2px] h-[${thumbSize}px] w-[${thumbSize}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateX}px]"></div></label>`;
-
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<label for="toggle-switch" class="relative inline-flex cursor-pointer items-center"><input type="checkbox" id="toggle-switch" class="peer sr-only" ${isChecked ? "checked" : ""} /><div class="peer flex h-[${switchHeight}px] w-[${switchWidth}px] items-center rounded-[${trackBorderRadius}px] bg-[${uncheckedBgColor}] transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:bg-[${checkedBgColor}] peer-focus:outline-none"></div><div class="absolute top-[2px] left-[2px] h-[${thumbSize}px] w-[${thumbSize}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateX}px]"></div></label>`;
   }, [switchWidth, switchHeight, trackBorderRadius, uncheckedBgColor, checkedBgColor, thumbSize, thumbBgColor, transitionDuration, transitionEasing, defaultChecked]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   // Update preview checked state when defaultChecked changes
   useEffect(() => {

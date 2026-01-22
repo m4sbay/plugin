@@ -1,7 +1,7 @@
 import { Button, Muted, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import "../style.css";
 import { CloseHandler, CreateButtonHandler, SelectionChangeHandler } from "../types/types";
 import { InputField } from "./ui/InputField";
@@ -59,9 +59,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [hoverRotate, setHoverRotate] = useState<number | null>(0);
   const [hoverScaleDuration, setHoverScaleDuration] = useState<number | null>(300);
 
-  // Live preview state
-  const [previewHtml, setPreviewHtml] = useState("");
-
   // Tooltip state
   const [showPaddingTooltip, setShowPaddingTooltip] = useState(false);
 
@@ -108,8 +105,8 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     return cleaned;
   };
 
-  // Convert Tailwind classes to inline styles for preview
-  const generatePreviewWithInlineStyles = useCallback(() => {
+  // Convert Tailwind classes to inline styles for preview menggunakan useMemo
+  const previewHtml = useMemo(() => {
     // Default values jika input kosong
     const defaultBorderRadius = borderRadius !== null ? borderRadius : 8;
     const defaultFontSize = fontSize !== null ? fontSize : 16;
@@ -318,12 +315,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     hoverTranslateX,
     hoverRotate,
   ]);
-
-  // Update preview with inline styles
-  useEffect(() => {
-    const preview = generatePreviewWithInlineStyles();
-    setPreviewHtml(preview);
-  }, [generatePreviewWithInlineStyles]);
 
   const generateCode = useCallback(
     async (hexColor: string, label: string, borderRadius: number, fontSize: number, padding: string, hexLabelColor: string) => {

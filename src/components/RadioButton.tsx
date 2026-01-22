@@ -1,7 +1,7 @@
 import { Button, Text, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -53,8 +53,8 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     // Parse values dengan default
     const gapValue = DEFAULT_GAP_BETWEEN_ITEMS;
     const gapRadioLabel = DEFAULT_GAP_RADIO_LABEL;
@@ -90,18 +90,16 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
       )
       .join("\n\n");
 
-    const html = `<div class="space-y-[${gapValue}px]">${radioItems}</div>`;
+    return `<div class="space-y-[${gapValue}px]">${radioItems}</div>`;
+  }, [radioLabels, radioCount, labelColor, labelFontSize, labelColorChecked, checkedColor, radioSize, defaultBorderColor, hoverBorderColor]);
 
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
-  }, [radioLabels, radioCount, labelColor, labelFontSize, labelColorChecked, checkedColor, radioSize, defaultBorderColor, hoverBorderColor, normalizeHex]);
-
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {

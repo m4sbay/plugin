@@ -1,7 +1,7 @@
 import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { SelectionChangeHandler } from "../types/types";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
@@ -68,8 +68,8 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     return `${x}, ${y}`;
   }, []);
 
-  // Generate Tailwind class berdasarkan struktur baru
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     // Parse values
     const labelSize = labelFontSize.replace(/px/gi, "").trim() || "14";
     const gapValue = gap.replace(/px/gi, "").trim() || "12";
@@ -98,18 +98,16 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     }
 
     // Generate HTML sesuai struktur baru
-    const html = `<div class="flex flex-col gap-[${gapValue}px]"><label class="${labelClasses}">${label}</label><input type="text" placeholder="${placeholder}" class="${inputClasses}" /></div>`;
-
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<div class="flex flex-col gap-[${gapValue}px]"><label class="${labelClasses}">${label}</label><input type="text" placeholder="${placeholder}" class="${inputClasses}" /></div>`;
   }, [label, labelColor, labelFontSize, placeholder, width, borderRadius, borderColor, paddingX, paddingY, gap, inputTextColor, focusRingColor, normalizeHex]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   // Load data when text field component is selected
   useEffect(() => {

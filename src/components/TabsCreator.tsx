@@ -1,7 +1,7 @@
 import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -64,8 +64,8 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     return `#${cleanColor}`;
   }, []);
 
-  // Generate Tailwind code - border-bottom tabs (UI statis saja, hanya Tailwind classes dengan arbitrary values)
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     const labels = tabLabels.split(",").map(l => l.trim());
     const tabCountNum = parseInt(tabCount) || labels.length;
     const gap = tabGap || "16";
@@ -101,18 +101,16 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
       .join("\n\n");
 
     // HTML structure dengan border-bottom tabs (menggunakan arbitrary values)
-    const html = `<div class="flex gap-[${gap}px]">${tabButtonsHtml}</div>`;
-
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<div class="flex gap-[${gap}px]">${tabButtonsHtml}</div>`;
   }, [tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabGap, textBorderGap, normalizeHex]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {

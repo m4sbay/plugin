@@ -1,7 +1,7 @@
 import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useMemo, useEffect } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
@@ -95,6 +95,7 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
   const [borderRadius, setBorderRadius] = useState("6");
   const [width, setWidth] = useState("");
   const [padding, setPadding] = useState("16");
+  const [htmltailwind, setHtmltailwind] = useState("");
 
   const alertTypeOptions = [
     { value: "information", text: "Information" },
@@ -157,27 +158,26 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
     }
   };
 
-  const [htmltailwind, setHtmltailwind] = useState("");
+
   const [copied, setCopied] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     const defaultColors = getAlertColors();
     const roundedClass = borderRadius ? `rounded-[${borderRadius}px]` : "rounded-md";
     const widthClass = width ? `w-[${width}px]` : "";
     const paddingClass = padding ? `p-[${padding}px]` : "p-4";
 
-    const html = `<div role="alert" class="flex flex-col gap-1 ${roundedClass} border ${defaultColors.border} ${defaultColors.bg} ${paddingClass} ${widthClass}"><div class="font-semibold text-sm ${defaultColors.titleColor}">${title}</div><p class="text-sm ${defaultColors.messageColor} text-justify">${message}</p></div>`;
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<div role="alert" class="flex flex-col gap-1 ${roundedClass} border ${defaultColors.border} ${defaultColors.bg} ${paddingClass} ${widthClass}"><div class="font-semibold text-sm ${defaultColors.titleColor}">${title}</div><p class="text-sm ${defaultColors.messageColor} text-justify">${message}</p></div>`;
   }, [alertType, title, message, borderRadius, width, padding]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {

@@ -1,7 +1,7 @@
 import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -38,8 +38,8 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     // Parse values
     const fontSizeValue = fontSize.replace(/px/gi, "").trim() || "14";
     const paddingX = padding.split(",")[0]?.trim().replace(/px/gi, "") || "8";
@@ -47,18 +47,16 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
     const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "8";
     const marginBottomValue = marginBottom.replace(/px/gi, "").trim() || "16";
 
-    const html = `<!-- Tooltip --><div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-[${marginBottomValue}px] hidden group-hover:block w-max max-w-xs px-[${paddingX}px] py-[${paddingY}px] text-[${fontSizeValue}px] text-[${textColor}] bg-[${bgColor}] rounded-[${borderRadiusValue}px] z-10">${tooltipText}<div class="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[${bgColor}] rotate-45 -mt-1"></div></div><!-- Pastikan komponen yang ingin diberi tooltip terbungkus dalam "div" dengan class "relative" dan "group" -->`;
-
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<!-- Tooltip --><div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-[${marginBottomValue}px] hidden group-hover:block w-max max-w-xs px-[${paddingX}px] py-[${paddingY}px] text-[${fontSizeValue}px] text-[${textColor}] bg-[${bgColor}] rounded-[${borderRadiusValue}px] z-10">${tooltipText}<div class="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[${bgColor}] rotate-45 -mt-1"></div></div><!-- Pastikan komponen yang ingin diberi tooltip terbungkus dalam "div" dengan class "relative" dan "group" -->`;
   }, [tooltipText, bgColor, textColor, fontSize, padding, borderRadius, marginBottom]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {

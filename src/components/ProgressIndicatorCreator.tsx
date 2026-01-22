@@ -1,7 +1,7 @@
 import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -46,23 +46,23 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     const isFullWidth = width.trim() === "";
     const classes = isFullWidth ? `bg-[${bgColor}] rounded-[${borderRadius}px] w-full h-[${height}px]` : `bg-[${bgColor}] rounded-[${borderRadius}px] w-[${width}px] h-[${height}px]`;
     const innerClasses = `bg-[${progressColor}] h-full rounded-[${borderRadius}px] transition-all duration-300`;
     const marginValue = showPercentage === "yes" ? percentageMargin : "0";
     const percentage = showPercentage === "yes" ? `<span class="text-sm" style="color:${percentageTextColor}; margin-left:${marginValue}px">${progressValue}%</span>` : "";
-    const html = `<div class="flex items-center"><div class="${classes} overflow-hidden"><div class="${innerClasses}" style="width:${progressValue}%"></div></div>${percentage}</div>`;
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
+    return `<div class="flex items-center"><div class="${classes} overflow-hidden"><div class="${innerClasses}" style="width:${progressValue}%"></div></div>${percentage}</div>`;
   }, [progressValue, width, height, progressColor, bgColor, borderRadius, percentageTextColor, percentageMargin, showPercentage]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {

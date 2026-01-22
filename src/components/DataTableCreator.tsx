@@ -1,7 +1,7 @@
 import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -55,8 +55,8 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(async () => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     const columnList = columns
       .split(",")
       .map(c => c.trim())
@@ -64,7 +64,6 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
     const rowCount = parseInt(rows) || 3;
 
     if (columnList.length === 0) {
-      setHtmltailwind("");
       return "";
     }
 
@@ -84,20 +83,23 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
       return `<tr class="${bgClass} text-[${rowTextColor}]">${columnList.map(() => `<td class="${cellClasses}">Data</td>`).join("")}</tr>`;
     }).join("");
 
-    const html = `<table class="${tableClasses}">
+    return `<table class="${tableClasses}">
   <thead>${headerRow}</thead>
   <tbody>${dataRows}</tbody>
 </table>`;
-    const formattedHtml = await formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
   }, [columns, rows, headerBgColor, headerTextColor, rowBgColor, stripedRowBgColor, rowTextColor, borderColor, fontSize, padding, stripedRows, textAlignment]);
 
+  // Format HTML secara async
   useEffect(() => {
     (async () => {
-      await generateCode();
+      if (htmlCode === "") {
+        setHtmltailwind("");
+        return;
+      }
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [generateCode]);
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
