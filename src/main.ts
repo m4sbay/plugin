@@ -1,29 +1,14 @@
 import { once, on, showUI, emit } from "@create-figma-plugin/utilities";
-import {
-  CloseHandler,
-  CreateButtonHandler,
-  SelectionChangeHandler,
-  CreateTabsHandler,
-  CreateSwitchHandler,
-  CreateAlertBannerHandler,
-  CreateTooltipHandler,
-  CreateProgressIndicatorHandler,
-  CreateDataTableHandler,
-  CreateRadioButtonHandler,
-} from "./types/types";
-import { VerticalSpace } from "@create-figma-plugin/ui";
+import {CloseHandler,CreateButtonHandler,CreateTabsHandler,CreateSwitchHandler,CreateAlertBannerHandler,CreateTooltipHandler,CreateProgressIndicatorHandler,CreateDataTableHandler,CreateRadioButtonHandler,CreateCheckboxHandler,CreateTextFieldHandler,SelectionChangeHandler,}
+from "./types/types";
 import { getFontStyle, loadAllInterFonts, loadInterFonts } from "./utils/fontUtils";
 import { hexToRgb, hexToRgbOrNull } from "./utils/colorUtils";
 import { parsePx, parseMs, parseNumber } from "./utils/numberUtils";
 import { generateComponentId, setPluginDataBatch } from "./utils/componentUtils";
 
-// Alias untuk backward compatibility (menggunakan versi yang bisa return null untuk validasi)
 const customConvertHexColorToRgbColor = hexToRgbOrNull;
 
 export default function () {
-  // Dipanggil dari UI ButtonCreator.tsx ketika pengguna menekan tombol "Buat".
-  // Menerima seluruh properti styling (statis & dinamis), membuat komponen Button di Figma,
-  // menyimpan nilai-nilai tersebut di pluginData (agar bisa direload), lalu menaruh komponen di canvas.
   on<CreateButtonHandler>(
     "CREATE_BUTTON",
     async (
@@ -369,17 +354,17 @@ export default function () {
           headlineFontSize: selectedNode.getPluginData("headlineFontSize") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
           labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
-          switchWidth: selectedNode.getPluginData("switchWidth") || "",
-          switchHeight: selectedNode.getPluginData("switchHeight") || "",
-          toggleSize: selectedNode.getPluginData("toggleSize") || "",
-          borderRadius: selectedNode.getPluginData("borderRadius") || "",
           uncheckedBorderColor: selectedNode.getPluginData("uncheckedBorderColor") || "",
           uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
           checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
           checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
+          thumbBgColor: selectedNode.getPluginData("thumbBgColor") || "",
           toggleBgColor: selectedNode.getPluginData("toggleBgColor") || "",
+          defaultChecked: selectedNode.getPluginData("defaultChecked") || "",
           defaultCheckedStates: selectedNode.getPluginData("defaultCheckedStates") || "",
           disabledStates: selectedNode.getPluginData("disabledStates") || "",
+          transitionDuration: selectedNode.getPluginData("transitionDuration") || "",
+          transitionEasing: selectedNode.getPluginData("transitionEasing") || "",
           transitionType: selectedNode.getPluginData("transitionType") || "",
         };
         emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(switchData));
@@ -597,17 +582,17 @@ export default function () {
           headlineFontSize: selectedNode.getPluginData("headlineFontSize") || "",
           labelColor: selectedNode.getPluginData("labelColor") || "",
           labelFontSize: selectedNode.getPluginData("labelFontSize") || "",
-          switchWidth: selectedNode.getPluginData("switchWidth") || "",
-          switchHeight: selectedNode.getPluginData("switchHeight") || "",
-          toggleSize: selectedNode.getPluginData("toggleSize") || "",
-          borderRadius: selectedNode.getPluginData("borderRadius") || "",
           uncheckedBorderColor: selectedNode.getPluginData("uncheckedBorderColor") || "",
           uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
           checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
           checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
+          thumbBgColor: selectedNode.getPluginData("thumbBgColor") || "",
           toggleBgColor: selectedNode.getPluginData("toggleBgColor") || "",
+          defaultChecked: selectedNode.getPluginData("defaultChecked") || "",
           defaultCheckedStates: selectedNode.getPluginData("defaultCheckedStates") || "",
           disabledStates: selectedNode.getPluginData("disabledStates") || "",
+          transitionDuration: selectedNode.getPluginData("transitionDuration") || "",
+          transitionEasing: selectedNode.getPluginData("transitionEasing") || "",
           transitionType: selectedNode.getPluginData("transitionType") || "",
         };
         emit<SelectionChangeHandler>("SELECTION_CHANGE", JSON.stringify(switchData));
@@ -703,23 +688,23 @@ export default function () {
     figma.currentPage.selection = [component];
   });
 
-  on("CREATE_CHECKBOX", async props => {
+  on<CreateCheckboxHandler>("CREATE_CHECKBOX", async props => {
     const {
-      checkboxLabel,
-      checkboxDescription,
-      labelColor,
-      labelFontSize,
-      labelFontWeight,
-      descriptionColor,
-      descriptionFontSize,
-      checkboxSize,
-      borderRadius,
-      checkedBgColor,
-      uncheckedBgColor,
-      gapBetweenCheckboxLabel,
-      checkmarkSize,
-      checkmarkColor,
-      htmltailwind,
+      checkboxLabel = "",
+      checkboxDescription = "",
+      labelColor = "",
+      labelFontSize = "",
+      labelFontWeight = "",
+      descriptionColor = "",
+      descriptionFontSize = "",
+      checkboxSize = "",
+      borderRadius = "",
+      checkedBgColor = "",
+      uncheckedBgColor = "",
+      gapBetweenCheckboxLabel = "",
+      checkmarkSize = "",
+      checkmarkColor = "",
+      htmltailwind = "",
     } = props;
 
     // Load font berdasarkan weight yang digunakan
@@ -834,8 +819,8 @@ export default function () {
     figma.notify("✅ Checkbox berhasil dibuat!");
   });
 
-  on("CREATE_TEXT_FIELD", async props => {
-    const { label, labelColor, fontSize, placeholder, width, height, bgColor, borderRadius, borderColor, paddingX, paddingY, gap, inputTextColor, focusRingColor, htmltailwind } = props;
+  on<CreateTextFieldHandler>("CREATE_TEXT_FIELD", async props => {
+    const { label = "", labelColor = "", fontSize = "", placeholder = "", width = "", height = "", bgColor = "", borderRadius = "", borderColor = "", paddingX = "", paddingY = "", gap = "", inputTextColor = "", focusRingColor = "", htmltailwind = "" } = props;
 
     try {
       await loadInterFonts(["Regular"]);
@@ -1189,13 +1174,13 @@ export default function () {
   });
 
   on<CreateSwitchHandler>("CREATE_SWITCH", async props => {
-    const { switchWidth, switchHeight, trackBorderRadius, uncheckedBgColor, checkedBgColor, thumbSize, thumbBgColor, transitionDuration, transitionEasing, defaultChecked, htmltailwind } = props;
+    const { uncheckedBgColor, checkedBgColor, thumbBgColor, transitionDuration, transitionEasing, defaultChecked, htmltailwind } = props;
 
-    // Parse values
-    const switchWidthValue = Number(switchWidth) || 51;
-    const switchHeightValue = Number(switchHeight) || 31;
-    const trackBorderRadiusValue = Number(trackBorderRadius) || 16;
-    const thumbSizeValue = Number(thumbSize) || 27;
+    // Ukuran pakai default (kelas default)
+    const switchWidthValue = 51;
+    const switchHeightValue = 31;
+    const trackBorderRadiusValue = 16;
+    const thumbSizeValue = 27;
 
     // Parse rgba color untuk uncheckedBgColor jika format rgba
     let uncheckedRgb = hexToRgb(uncheckedBgColor);
@@ -1267,13 +1252,9 @@ export default function () {
     component.setPluginData("htmltailwind", htmltailwind || "");
     component.setPluginData("switchProps", JSON.stringify(props));
 
-    // Store styling data
-    component.setPluginData("switchWidth", switchWidth);
-    component.setPluginData("switchHeight", switchHeight);
-    component.setPluginData("trackBorderRadius", trackBorderRadius);
+    // Store styling data (tanpa ukuran; ukuran pakai default)
     component.setPluginData("uncheckedBgColor", uncheckedBgColor);
     component.setPluginData("checkedBgColor", checkedBgColor);
-    component.setPluginData("thumbSize", thumbSize);
     component.setPluginData("thumbBgColor", thumbBgColor);
     component.setPluginData("transitionDuration", transitionDuration);
     component.setPluginData("transitionEasing", transitionEasing);

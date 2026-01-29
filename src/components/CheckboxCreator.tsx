@@ -64,9 +64,10 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     // Normalize hex colors
     const checkedBgColorHex = normalizeHex(checkedBgColor);
     const checkmarkColorHex = normalizeHex(checkmarkColor);
+    const uncheckedBgColorHex = normalizeHex(uncheckedBgColor);
 
     // Classes untuk checkbox input
-    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] focus:outline-none`;
+    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] bg-[${uncheckedBgColorHex}] focus:outline-none`;
 
     // Normalize colors untuk label dan deskripsi
     const labelColorHex = normalizeHex(labelColor);
@@ -107,6 +108,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     gapBetweenCheckboxLabel,
     checkmarkSize,
     checkmarkColor,
+    uncheckedBgColor,
   ]);
 
   // Format HTML secara async

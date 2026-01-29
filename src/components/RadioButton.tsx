@@ -86,7 +86,7 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
     <input type="radio" name="role_clean" class="peer sr-only" ${i === 0 ? "checked" : ""} />
     <div class="flex items-center justify-center w-[${radioSizeValue}px] h-[${radioSizeValue}px] rounded-[50%] border-[${borderWidthValue}px] border-[${defaultBorderColorHex}] group-hover:border-[${hoverBorderColorHex}] peer-checked:border-[${checkedColorHex}] transition-colors duration-[${transitionMs}ms] after:content-[''] after:w-[${innerDotSizeValue}px] after:h-[${innerDotSizeValue}px] after:rounded-[50%] after:bg-[${checkedColorHex}] after:scale-[0] peer-checked:after:scale-[1] after:transition-transform after:duration-[${transitionMs}ms]"></div>
     <span class="text-[${labelSize}px] font-[${DEFAULT_LABEL_FONT_WEIGHT}] text-[${labelColorHex}] transition-colors duration-[${transitionMs}ms] peer-checked:text-[${labelColorCheckedHex}] peer-checked:font-[${DEFAULT_LABEL_FONT_WEIGHT_CHECKED}]">${label}</span>
-  </label>`
+  </label>`,
       )
       .join("\n\n");
 
@@ -203,13 +203,13 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
           <InputField label="Ukuran radio button (px) :" value={radioSize} onChange={setRadioSize} placeholder="Contoh: 20 (akan menjadi w-[20px] h-[20px])" />
           <ColorPicker label="Warna border default :" value={defaultBorderColor} onChange={setDefaultBorderColor} />
           <ColorPicker label="Warna checked :" value={checkedColor} onChange={setCheckedColor} />
-          <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
+          <ColorPicker label="Warna label checked :" value={labelColorChecked} onChange={setLabelColorChecked} />
+          <ColorPicker label="Warna label unchecked :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
-          <ColorPicker label="Warna label saat checked :" value={labelColorChecked} onChange={setLabelColorChecked} />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
-        <div style={{ flex: 0.3, minWidth: 160}}>
+        <div style={{ flex: 0.3, minWidth: 160 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
           <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
@@ -341,7 +341,7 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             {copied ? "Tersalin!" : "Copy"}
           </Button>
         </div>

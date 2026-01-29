@@ -40,7 +40,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [labelColor, setLabelColor] = useState("#FFFFFF");
   const [borderWidth, setBorderWidth] = useState<number | null>(0);
   const [borderColor, setBorderColor] = useState("");
-  const [htmltailwind, setHtmltailwind] = useState("");
 
   // Dynamic styling properties
   const [hoverTextColor, setHoverTextColor] = useState("#FFFFFF");
@@ -59,8 +58,9 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [hoverRotate, setHoverRotate] = useState<number | null>(0);
   const [hoverScaleDuration, setHoverScaleDuration] = useState<number | null>(300);
 
-  // Tooltip state
   const [showPaddingTooltip, setShowPaddingTooltip] = useState(false);
+
+  const [htmltailwind, setHtmltailwind] = useState("");
 
   // Get transition duration based on type
   const getTransitionDuration = (type: string): number => {
@@ -478,7 +478,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       hoverScaleDuration,
       hoverTranslateX,
       hoverRotate,
-    ]
+    ],
   );
 
   // Generate code on mount and when dependencies change
@@ -521,7 +521,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   ]);
 
   const handleCreateButtonClick = useCallback(async () => {
-    // Gunakan default jika null/kosong
     const hexColor = color ? cleanHexColor(color) : "#171717";
     const hexLabelColor = labelColor ? cleanHexColor(labelColor) : "#FFFFFF";
     const finalBorderRadius = borderRadius !== null ? borderRadius : 8;
@@ -555,7 +554,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       hoverScale?.toString() || undefined,
       hoverScaleDuration?.toString() || undefined,
       hoverTranslateX?.toString() || undefined,
-      hoverRotate?.toString() || undefined
+      hoverRotate?.toString() || undefined,
     );
   }, [
     color,
