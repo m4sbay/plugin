@@ -1,4 +1,4 @@
-import { Button, IconClose16, IconDev16, IconWand16, Muted, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, IconClose16, IconDev16, IconInfo16, IconWand16, Muted, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
@@ -30,20 +30,24 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // Static styling properties - semua kosong, default di-generate di fungsi
-  const [color, setColor] = useState("#00BCFF");
+  // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
   const [label, setLabel] = useState("Tombol");
-  const [borderRadius, setBorderRadius] = useState<number | null>(8);
+  const [color, setColor] = useState("#00BCFF");
+  const [labelColor, setLabelColor] = useState("#FFFFFF");
   const [fontSize, setFontSize] = useState<number | null>(16);
   const [fontWeight, setFontWeight] = useState("400");
   const [padding, setPadding] = useState("24,12");
-  const [labelColor, setLabelColor] = useState("#FFFFFF");
+  const [borderRadius, setBorderRadius] = useState<number | null>(8);
   const [borderWidth, setBorderWidth] = useState<number | null>(0);
   const [borderColor, setBorderColor] = useState("");
 
-  // Dynamic styling properties
-  const [hoverTextColor, setHoverTextColor] = useState("#FFFFFF");
+  // --- Style Dinamis (urutan sesuai input di UI Kolom 2) ---
   const [hoverBgColor, setHoverBgColor] = useState("#404040");
+  const [hoverTextColor, setHoverTextColor] = useState("#FFFFFF");
+  const [hoverScale, setHoverScale] = useState<number | null>(105);
+  const [hoverScaleDuration, setHoverScaleDuration] = useState<number | null>(300);
+
+  // --- Default (tidak ada input di UI, ter-generate otomatis) ---
   const [hoverBorderColor, setHoverBorderColor] = useState("");
   const [focusBorderColor, setFocusBorderColor] = useState("#3B82F6");
   const [focusRingSize, setFocusRingSize] = useState<number | null>(2);
@@ -53,13 +57,11 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   const [transitionType, setTransitionType] = useState("normal");
   const [hoverScaleType, setHoverScaleType] = useState("none");
   const [hoverOpacity, setHoverOpacity] = useState<number | null>(90);
-  const [hoverScale, setHoverScale] = useState<number | null>(105);
   const [hoverTranslateX, setHoverTranslateX] = useState<number | null>(0);
   const [hoverRotate, setHoverRotate] = useState<number | null>(0);
-  const [hoverScaleDuration, setHoverScaleDuration] = useState<number | null>(300);
 
+  // --- UI state (bukan properti komponen) ---
   const [showPaddingTooltip, setShowPaddingTooltip] = useState(false);
-
   const [htmltailwind, setHtmltailwind] = useState("");
 
   // Get transition duration based on type
@@ -681,7 +683,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     >
       {/* Judul dan ikon panah */}
       <div style={{ marginBottom: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
             <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -693,11 +695,12 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Button</Text>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
+      <VerticalSpace space="large" />
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-start", paddingTop: 12 }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "hidden", flex: 1, minWidth: 260, paddingTop: 4, paddingRight: 0 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
+        <div style={{ flex: 1, minWidth: 260 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18 }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
           {/* Label/Text */}
           <InputField label="Label/Text :" value={label} onChange={setLabel} placeholder="Contoh: Tombol" />
           {/* Warna Latar */}
@@ -710,7 +713,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           <InputField label="Font weight :" value={fontWeight} onChange={setFontWeight} placeholder="Contoh: 500 (akan menjadi font-[500])" />
           {/* Padding Sumbu x dan y */}
           <div style={{ position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Text>
                 <Muted>Padding Sumbu x dan y (px) :</Muted>
               </Text>
@@ -724,20 +727,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
                 onMouseEnter={() => setShowPaddingTooltip(true)}
                 onMouseLeave={() => setShowPaddingTooltip(false)}
               >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{
-                    cursor: "pointer",
-                    color: theme.secondaryText,
-                  }}
-                >
-                  <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                  <path d="M8 11V8M8 5H8.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
+                <IconInfo16 style={{ cursor: "pointer", color: theme.secondaryText }} />
                 {showPaddingTooltip && (
                   <div
                     style={{
@@ -778,7 +768,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             </div>
             <VerticalSpace space="small" />
             <Textbox value={padding} onValueInput={setPadding} placeholder="Contoh: 24,12" />
-            <VerticalSpace space="medium" />
+            <VerticalSpace space="large" />
           </div>
           {/* Border Radius */}
           <InputField label="Border Radius (px) :" value={borderRadius !== null ? String(borderRadius) : ""} onChange={v => setBorderRadius(Number(v) || null)} placeholder="Contoh: 8" />
@@ -789,8 +779,8 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
         </div>
         {/* Kolom 2: Style Dinamis */}
         <div style={{ flex: 1, minWidth: 260 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Dinamis :</Text>
-          <VerticalSpace space="small" />
+          <Text style={{ fontWeight: 600, fontSize: 18 }}>Style Dinamis :</Text>
+          <VerticalSpace space="large" />
           {/* Perubahan warna button */}
           <ColorPicker label="Perubahan warna button :" value={hoverBgColor} onChange={setHoverBgColor} />
           {/* Perubahan warna text */}
@@ -817,8 +807,9 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           />
         </div>
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+          <Text style={{ fontWeight: 600, fontSize: 18 }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: ` 1px solid ${theme.previewBorder}`,
@@ -826,7 +817,6 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               background: theme.previewBackground,
               flex: 1,
               minHeight: 0,
-              marginBottom: 24,
               padding: 24,
               display: "flex",
               alignItems: "center",
@@ -865,7 +855,8 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               </Text>
             )}
           </div>
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <IconClose16 />
@@ -880,11 +871,10 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
             </Button>
           </div>
           <VerticalSpace space="large" />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={{ fontWeight: 600, fontSize: 16 }}>Kode :</Text>
-            <VerticalSpace space="small" />
           </div>
-          {/* Kolom 3: Live Preview & Kode */}
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.surfaceBorder}`,
@@ -927,7 +917,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
+          <VerticalSpace space="large" />
           <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <IconDev16 />

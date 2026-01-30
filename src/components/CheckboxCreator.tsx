@@ -196,7 +196,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
           <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -208,11 +208,12 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
         <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Checkbox</Text>
       </div>
 
+      <VerticalSpace space="large" />
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4, paddingRight: 16 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
+        <div style={{ maxHeight: "calc(100vh - 120px)", paddingTop: 12, overflowY: "auto", flex: 1, minWidth: 260, paddingRight: 16 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
 
           <InputField label="Label Checkbox :" value={checkboxLabel} onChange={setCheckboxLabel} placeholder="Contoh: Offers" />
 
@@ -235,15 +236,15 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
         </div>
 
         {/* Kolom 2: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.panelBackground,
               minHeight: 120,
-              marginBottom: 24,
               padding: 24,
             }}
           >
@@ -327,7 +328,8 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
             })()}
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <IconClose16 />
@@ -342,9 +344,11 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
             </Button>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
           </div>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -387,7 +391,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
+          <VerticalSpace space="large" />
           <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <IconDev16 />

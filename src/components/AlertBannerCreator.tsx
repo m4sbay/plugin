@@ -245,8 +245,8 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+      <div>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
             <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -258,15 +258,17 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
           <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Alert Banner</Text>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
+      <VerticalSpace space="large" />
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-start",}}>
         {/* Kolom 1: Pengaturan */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
-          <div style={{ marginBottom: 16 }}>
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
+          <div>
             <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: theme.secondaryText }}>Jenis Alert :</Text>
             <Dropdown options={alertTypeOptions} value={alertType} onValueChange={setAlertType} />
           </div>
+          <VerticalSpace space="large" />
           <InputField label="Judul Alert :" value={title} onChange={setTitle} placeholder="Contoh: Information" />
           <InputField label="Pesan Alert :" value={message} onChange={setMessage} placeholder="Contoh: This is an informational alert with important details." />
           <InputField label="Lebar (px) :" value={width} onChange={setWidth} placeholder="Kosongkan untuk auto" />
@@ -275,8 +277,9 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
         </div>
 
         {/* Kolom 2: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -284,7 +287,6 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
               background: theme.panelBackground,
               flex: 1,
               minHeight: 0,
-              marginBottom: 24,
               padding: 24,
               overflow: "auto",
               display: "flex",
@@ -296,7 +298,8 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
               <AlertPreview alertType={alertType} title={title} message={message} borderRadius={borderRadius} width={width} padding={padding} />
             </div>
           </div>
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <IconClose16 />
@@ -310,7 +313,9 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
               </span>
             </Button>
           </div>
-          <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
+          <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -353,7 +358,7 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
+          <VerticalSpace space="large" />
           <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <IconDev16 />

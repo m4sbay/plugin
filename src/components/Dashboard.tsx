@@ -122,9 +122,7 @@ export function Dashboard({ onStart }: DashboardProps) {
           fullWidth={false}
           onClick={onStart}
         >
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            Mulai Sekarang
-          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>Mulai Sekarang</span>
         </Button>
 
         <VerticalSpace space="medium" />

@@ -1,4 +1,4 @@
-import { Button, IconClose16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
@@ -204,7 +204,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
           <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -215,11 +215,12 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
         </button>
         <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Text Field</Text>
       </div>
+      <VerticalSpace space="large" />
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4, paddingRight: 16 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
+        <div style={{ flex: 1, minWidth: 260, paddingRight: 16 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18 }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
           <InputField label="Label Input :" value={label} onChange={setLabel} placeholder="Contoh: Nama Lengkap" />
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran teks label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
@@ -243,13 +244,14 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
         </div>
         {/* Kolom 2: Style Dinamis */}
         <div style={{ flex: 0.3, minWidth: 160 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Dinamis :</Text>
-          <VerticalSpace space="small" />
+          <Text style={{ fontWeight: 600, fontSize: 18 }}>Style Dinamis :</Text>
+          <VerticalSpace space="large" />
           <ColorPicker label="Warna ring saat focus :" value={focusRingColor} onChange={setFocusRingColor} />
         </div>
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1.9, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1.9, minWidth: 320, maxWidth: 500, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: ` 1px solid ${theme.panelBorder}`,
@@ -257,7 +259,6 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               background: theme.panelBackground,
               flex: 1,
               minHeight: 0,
-              marginBottom: 24,
               padding: 24,
               display: "flex",
               alignItems: "center",
@@ -292,7 +293,8 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               />
             </div>
           </div>
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <IconClose16 />
@@ -306,9 +308,11 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               </span>
             </Button>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
           </div>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -351,7 +355,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
+          <VerticalSpace space="large" />
           <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <IconDev16 />

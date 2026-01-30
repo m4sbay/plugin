@@ -127,7 +127,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
           <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -138,13 +138,12 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
         </button>
         <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Tooltip</Text>
       </div>
-      <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
+      <VerticalSpace space="large" />
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-start", paddingTop: 24 }}>
         {/* Kolom 1: Style */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
-          <VerticalSpace space="small" />
-
-          <VerticalSpace space="small" />
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
           <InputField label="Teks Tooltip :" value={tooltipText} onChange={setTooltipText} placeholder="Contoh: Click Me" />
           <ColorPicker label="Warna latar tooltip :" value={bgColor} onChange={setBgColor} />
           <ColorPicker label="Warna teks tooltip :" value={textColor} onChange={setTextColor} />
@@ -155,8 +154,9 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
         </div>
 
         {/* Kolom 2: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -164,7 +164,6 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
               background: theme.panelBackground,
               flex: 1,
               minHeight: 0,
-              marginBottom: 24,
               padding: 24,
               display: "flex",
               justifyContent: "center",
@@ -214,7 +213,8 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <IconClose16 />
@@ -228,7 +228,9 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
               </span>
             </Button>
           </div>
-          <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
+          <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -271,7 +273,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
+          <VerticalSpace space="large" />
           <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <IconDev16 />
