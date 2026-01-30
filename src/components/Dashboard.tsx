@@ -1,4 +1,4 @@
-import { Button, Text, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, IconWidget24, Text, VerticalSpace } from "@create-figma-plugin/ui";
 import { h } from "preact";
 import { useState } from "react";
 
@@ -122,7 +122,9 @@ export function Dashboard({ onStart }: DashboardProps) {
           fullWidth={false}
           onClick={onStart}
         >
-          Mulai Sekarang
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Mulai Sekarang
+          </span>
         </Button>
 
         <VerticalSpace space="medium" />

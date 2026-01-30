@@ -1,4 +1,4 @@
-import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Dropdown, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
@@ -250,10 +250,16 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateSwitch}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
 
@@ -302,7 +308,10 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
           </div>
           <VerticalSpace space="small" />
           <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, IconClose16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
@@ -242,7 +242,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           <ColorPicker label="Warna teks input :" value={inputTextColor} onChange={setInputTextColor} />
         </div>
         {/* Kolom 2: Style Dinamis */}
-        <div style={{ flex: 0.3, minWidth: 160}}>
+        <div style={{ flex: 0.3, minWidth: 160 }}>
           <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Style Dinamis :</Text>
           <VerticalSpace space="small" />
           <ColorPicker label="Warna ring saat focus :" value={focusRingColor} onChange={setFocusRingColor} />
@@ -294,10 +294,16 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateTextField}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
@@ -346,8 +352,11 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>

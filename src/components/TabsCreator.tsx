@@ -1,4 +1,4 @@
-import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Dropdown, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
@@ -227,7 +227,7 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
           <ColorPicker label="Warna teks saat hover :" value={hoverTextColor} onChange={setHoverTextColor} />
           <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
           <div>
-          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom:10, color: "#6b7280" }}>Tipe Transisi :</Text>
+            <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 10, color: "#6b7280" }}>Tipe Transisi :</Text>
             <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
           </div>
         </div>
@@ -350,10 +350,16 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
           </div>
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateTabs}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
 
@@ -401,8 +407,11 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
             </SyntaxHighlighter>
           </div>
           <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>
