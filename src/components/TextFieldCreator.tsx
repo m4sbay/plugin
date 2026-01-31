@@ -26,24 +26,25 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State Style Statis
+  // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
   const [label, setLabel] = useState("Nama Lengkap");
   const [labelColor, setLabelColor] = useState("#64748B");
   const [labelFontSize, setLabelFontSize] = useState("14");
   const [placeholder, setPlaceholder] = useState("Masukkan nama lengkap kamu");
   const [width, setWidth] = useState("");
-  const [bgColor, setBgColor] = useState("#FFFFFF");
+  const [gap, setGap] = useState("10");
   const [borderRadius, setBorderRadius] = useState("8");
   const [borderColor, setBorderColor] = useState("#CBD5E1");
   const [paddingX, setPaddingX] = useState("12");
   const [paddingY, setPaddingY] = useState("8");
   const [padding, setPadding] = useState("12, 8");
-  const [gap, setGap] = useState("10");
+  const [bgColor, setBgColor] = useState("#FFFFFF");
   const [inputTextColor, setInputTextColor] = useState("#111827");
 
-  // State Style Dinamis
+  // --- Style Dinamis (urutan sesuai input di UI Kolom 2) ---
   const [focusRingColor, setFocusRingColor] = useState("#6366F1");
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [isFocused, setIsFocused] = useState(false);

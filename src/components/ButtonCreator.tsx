@@ -63,6 +63,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
   // --- UI state (bukan properti komponen) ---
   const [showPaddingTooltip, setShowPaddingTooltip] = useState(false);
   const [htmltailwind, setHtmltailwind] = useState("");
+  const [isPreviewHovered, setIsPreviewHovered] = useState(false);
 
   // Get transition duration based on type
   const getTransitionDuration = (type: string): number => {
@@ -107,32 +108,32 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     return cleaned;
   };
 
-  // Convert Tailwind classes to inline styles for preview menggunakan useMemo
-  const previewHtml = useMemo(() => {
-    // Default values jika input kosong
+  // Objek style untuk panel Live Preview (komponen React, tanpa dangerouslySetInnerHTML)
+  const previewStyles = useMemo(() => {
     const defaultBorderRadius = borderRadius !== null ? borderRadius : 8;
     const defaultFontSize = fontSize !== null ? fontSize : 16;
     const defaultColor = color || "#171717";
     const defaultLabelColor = labelColor || "#FFFFFF";
-    const defaultLabel = label || "Tombol";
     const defaultBorderWidth = borderWidth !== null ? borderWidth : 0;
     const defaultBorderColor = borderColor || "#000000";
 
-    const cleanHexColor = defaultColor.replace("#", "");
-    const cleanHexLabelColor = defaultLabelColor.replace("#", "");
+    const cleanHex = (hex: string): string => {
+      if (!hex || hex.trim() === "") return "";
+      let cleaned = hex.trim().toUpperCase();
+      if (!cleaned.startsWith("#")) cleaned = `#${cleaned}`;
+      if (cleaned.length === 4) cleaned = `#${cleaned[1]}${cleaned[1]}${cleaned[2]}${cleaned[2]}${cleaned[3]}${cleaned[3]}`;
+      return /^#[0-9A-F]{6}$/.test(cleaned) ? cleaned : "";
+    };
 
-    // Calculate padding - default 10px jika kosong
     let paddingStyle = "10px";
-    let widthStyle = "";
+    let widthStyle: "100%" | "auto" = "auto";
     if (padding) {
       const parts = padding
         .split(",")
         .map(val => val.trim())
         .filter(val => val !== "");
       const values = parts.map(val => parseInt(val, 10)).filter(val => !isNaN(val));
-
       if (values.length === 1) {
-        // Hanya satu nilai (lebar atau tinggi saja)
         if (values[0] === 100) {
           widthStyle = "100%";
           paddingStyle = "10px";
@@ -140,31 +141,23 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           paddingStyle = `${values[0]}px`;
         }
       } else if (values.length === 2) {
-        // Dua nilai (sumbu x, sumbu y)
         if (values[0] === 100) {
-          // Jika sumbu x = 100, gunakan width 100% dan padding hanya untuk sumbu y
           widthStyle = "100%";
           paddingStyle = `${values[1]}px`;
         } else {
-          // Format normal: py px
           paddingStyle = `${values[1]}px ${values[0]}px`;
         }
       }
     }
 
-    // Check if there are transform properties for hover
     const hasHoverTransform = hoverScale !== null || hoverScaleType !== "none" || (hoverTranslateX !== null && hoverTranslateX !== 0) || (hoverRotate !== null && hoverRotate !== 0);
 
-    // Build transition string
     let transitionString = "none";
     if (transitionType !== "none" || (hasHoverTransform && hoverScaleDuration !== null)) {
       const transitions: string[] = [];
-
-      // Transition untuk semua properties (kecuali transform jika ada hoverScaleDuration)
       if (transitionType !== "none") {
         const baseDuration = getTransitionDuration(transitionType);
         if (hasHoverTransform && hoverScaleDuration !== null) {
-          // Jika ada hoverScaleDuration, gunakan untuk transform, base duration untuk yang lain
           transitions.push(`transform ${hoverScaleDuration}ms ease-in-out`);
           transitions.push(`background-color ${baseDuration}ms ease-in-out`);
           transitions.push(`color ${baseDuration}ms ease-in-out`);
@@ -174,123 +167,60 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
           transitions.push(`all ${baseDuration}ms ease-in-out`);
         }
       } else if (hasHoverTransform && hoverScaleDuration !== null) {
-        // Hanya transition untuk transform jika tidak ada transitionType
         transitions.push(`transform ${hoverScaleDuration}ms ease-in-out`);
       }
-
       transitionString = transitions.length > 0 ? transitions.join(", ") : "none";
     }
 
-    // Build inline styles (tanpa transform hover - hanya untuk kondisi normal)
     const defaultFontWeight = fontWeight || "400";
-    const styles: Record<string, string> = {
-      backgroundColor: `#${cleanHexColor}`,
-      color: `#${cleanHexLabelColor}`,
+    const baseStyles: Record<string, string | number> = {
+      backgroundColor: cleanHexColor(defaultColor),
+      color: cleanHexColor(defaultLabelColor),
       borderRadius: `${defaultBorderRadius}px`,
       fontSize: `${defaultFontSize}px`,
-      fontWeight: String(Number(defaultFontWeight) || 400),
+      fontWeight: Number(defaultFontWeight) || 400,
       padding: paddingStyle,
-      border: defaultBorderWidth && defaultBorderWidth > 0 ? `${defaultBorderWidth}px solid #${defaultBorderColor.replace("#", "")}` : "none",
+      border: defaultBorderWidth > 0 ? `${defaultBorderWidth}px solid ${defaultBorderColor ? cleanHexColor(defaultBorderColor) : "#000000"}` : "none",
       fontFamily: "Inter, system-ui, sans-serif",
       cursor: "pointer",
       transition: transitionString,
-      display: "inline-flex",
+      display: widthStyle === "100%" ? "flex" : "inline-flex",
       alignItems: "center",
       justifyContent: "center",
       outline: "none",
     };
-
-    // Jika widthStyle di-set (sumbu x = 100), tambahkan width dan ubah display menjadi flex
-    if (widthStyle) {
-      styles.width = widthStyle;
-      styles.display = "flex";
+    if (widthStyle === "100%") {
+      baseStyles.width = "100%";
     }
 
-    // Convert styles object to string
-    const styleString = Object.entries(styles)
-      .map(([key, value]) => `${key.replace(/([A-Z])/g, "-$1").toLowerCase()}: ${value}`)
-      .join("; ");
-
-    // Build hover styles
-    const hoverStyles: string[] = [];
-
-    // Helper function untuk membersihkan hex color tanpa side effects
-    const cleanHexForStyle = (hex: string): string => {
-      if (!hex || hex.trim() === "") return "";
-      let cleaned = hex.trim().toUpperCase();
-      if (!cleaned.startsWith("#")) {
-        cleaned = `#${cleaned}`;
-      }
-      if (cleaned.length === 4) {
-        cleaned = `#${cleaned[1]}${cleaned[1]}${cleaned[2]}${cleaned[2]}${cleaned[3]}${cleaned[3]}`;
-      }
-      if (!/^#[0-9A-F]{6}$/.test(cleaned)) {
-        return "";
-      }
-      return cleaned;
-    };
-
-    // Hover background color - terapkan jika ada nilai yang valid
-    if (hoverBgColor && hoverBgColor.trim() !== "") {
-      const cleanedHoverBgColor = cleanHexForStyle(hoverBgColor);
-      if (cleanedHoverBgColor) {
-        hoverStyles.push(`background-color: ${cleanedHoverBgColor} !important`);
-      }
+    const hoverStyles: Record<string, string | number> = {};
+    const hoverBg = cleanHex(hoverBgColor);
+    if (hoverBg) hoverStyles.backgroundColor = hoverBg;
+    const hoverText = cleanHex(hoverTextColor);
+    if (hoverText) hoverStyles.color = hoverText;
+    if (defaultBorderWidth > 0) {
+      const hoverBorder = cleanHex(hoverBorderColor);
+      if (hoverBorder) hoverStyles.borderColor = hoverBorder;
     }
-
-    // Hover text color - terapkan jika ada nilai yang valid
-    if (hoverTextColor && hoverTextColor.trim() !== "") {
-      const cleanedHoverTextColor = cleanHexForStyle(hoverTextColor);
-      if (cleanedHoverTextColor) {
-        hoverStyles.push(`color: ${cleanedHoverTextColor} !important`);
-      }
-    }
-
-    // Hover border color - terapkan jika ada nilai dan ada border
-    if (hoverBorderColor && hoverBorderColor.trim() !== "" && defaultBorderWidth > 0) {
-      const cleanedHoverBorderColor = cleanHexForStyle(hoverBorderColor);
-      if (cleanedHoverBorderColor) {
-        hoverStyles.push(`border-color: ${cleanedHoverBorderColor} !important`);
-      }
-    }
-
-    // Hover opacity (jika di-set dan bukan 100%)
     if (hoverOpacity !== null && hoverOpacity !== 100) {
-      hoverStyles.push(`opacity: ${hoverOpacity / 100}`);
+      hoverStyles.opacity = hoverOpacity / 100;
     }
-
-    // Combine all transform properties into one
-    const transformProps: string[] = [];
+    const transformParts: string[] = [];
     if (hoverScale !== null || hoverScaleType !== "none") {
       const scaleValue = hoverScale !== null ? hoverScale : getHoverScaleValue(hoverScaleType);
-      transformProps.push(`scale(${scaleValue / 100})`);
+      transformParts.push(`scale(${scaleValue / 100})`);
     }
     if (hoverTranslateX !== null && hoverTranslateX !== 0) {
-      transformProps.push(`translateX(${hoverTranslateX}px)`);
+      transformParts.push(`translateX(${hoverTranslateX}px)`);
     }
     if (hoverRotate !== null && hoverRotate !== 0) {
-      transformProps.push(`rotate(${hoverRotate}deg)`);
+      transformParts.push(`rotate(${hoverRotate}deg)`);
+    }
+    if (transformParts.length > 0) {
+      hoverStyles.transform = transformParts.join(" ");
     }
 
-    // Add combined transform if any transform properties exist
-    if (transformProps.length > 0) {
-      hoverStyles.push(`transform: ${transformProps.join(" ")}`);
-    }
-
-    // Generate unique ID for this button instance
-    const buttonId = `preview-button-${Math.random().toString(36).substr(2, 9)}`;
-
-    // Build CSS hover rules
-    let hoverCss = "";
-    if (hoverStyles.length > 0) {
-      hoverCss = `<style type="text/css">
-        #${buttonId}:hover {
-          ${hoverStyles.join("; ")}
-        }
-      </style>`;
-    }
-
-    return `${hoverCss}<button id="${buttonId}" style="${styleString}">${defaultLabel}</button>`;
+    return { paddingStyle, widthStyle, baseStyles, hoverStyles };
   }, [
     color,
     label,
@@ -318,218 +248,152 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     hoverRotate,
   ]);
 
-  const generateCode = useCallback(
-    async (hexColor: string, label: string, borderRadius: number, fontSize: number, padding: string, hexLabelColor: string) => {
-      // Default values jika parameter kosong
-      const defaultHexColor = hexColor || "#171717";
-      const defaultLabel = label || "Tombol";
-      const defaultBorderRadius = borderRadius || 8;
-      const defaultFontSize = fontSize || 16;
-      const defaultHexLabelColor = hexLabelColor || "#FFFFFF";
-      const defaultBorderWidth = borderWidth !== null ? borderWidth : 0;
-      const defaultBorderColor = borderColor || "#000000";
+  // Raw HTML string untuk panel kode (format async di useEffect)
+  const htmlCode = useMemo(() => {
+    const defaultHexColor = color ? cleanHexColor(color) : "#171717";
+    const defaultLabel = label || "Tombol";
+    const defaultBorderRadius = borderRadius !== null ? borderRadius : 8;
+    const defaultFontSize = fontSize !== null ? fontSize : 16;
+    const defaultHexLabelColor = labelColor ? cleanHexColor(labelColor) : "#FFFFFF";
+    const defaultBorderWidth = borderWidth !== null ? borderWidth : 0;
+    const defaultBorderColor = borderColor || "#000000";
 
-      let tailwindPadding = "p-[10px]"; // default
-      let tailwindWidth = ""; // untuk w-full jika sumbu x = 100
-      if (padding) {
-        const parts = padding
-          .split(",")
-          .map(val => val.trim())
-          .filter(val => val !== "");
-        const values = parts.map(val => parseInt(val, 10)).filter(val => !isNaN(val));
+    let tailwindPadding = "p-[10px]"; // default
+    let tailwindWidth = ""; // untuk w-full jika sumbu x = 100
+    if (padding) {
+      const parts = padding
+        .split(",")
+        .map(val => val.trim())
+        .filter(val => val !== "");
+      const values = parts.map(val => parseInt(val, 10)).filter(val => !isNaN(val));
 
-        if (values.length === 1) {
-          // Hanya satu nilai (lebar atau tinggi saja)
-          if (values[0] === 100) {
-            tailwindWidth = "w-full";
-            tailwindPadding = "p-[10px]";
-          } else {
-            tailwindPadding = `p-[${values[0]}px]`;
-          }
-        } else if (values.length === 2) {
-          // Dua nilai (sumbu x, sumbu y)
-          if (values[0] === 100) {
-            // Jika sumbu x = 100, gunakan w-full dan padding hanya untuk sumbu y
-            tailwindWidth = "w-full";
-            tailwindPadding = `py-[${values[1]}px]`;
-          } else {
-            // Format normal: py px
-            tailwindPadding = `py-[${values[1]}px] px-[${values[0]}px]`;
-          }
+      if (values.length === 1) {
+        if (values[0] === 100) {
+          tailwindWidth = "w-full";
+          tailwindPadding = "p-[10px]";
+        } else {
+          tailwindPadding = `p-[${values[0]}px]`;
+        }
+      } else if (values.length === 2) {
+        if (values[0] === 100) {
+          tailwindWidth = "w-full";
+          tailwindPadding = `py-[${values[1]}px]`;
+        } else {
+          tailwindPadding = `py-[${values[1]}px] px-[${values[0]}px]`;
         }
       }
+    }
 
-      const cleanHexColor = defaultHexColor.replace("#", "");
-      const cleanHexLabelColor = defaultHexLabelColor.replace("#", "");
+    const cleanHex = defaultHexColor.replace("#", "");
+    const cleanHexLabel = defaultHexLabelColor.replace("#", "");
 
-      // Base classes
-      const defaultFontWeight = fontWeight || "400";
-      let classes = `bg-[#${cleanHexColor}] rounded-[${defaultBorderRadius}px] text-[${defaultFontSize}px] font-[${defaultFontWeight}] ${
-        tailwindWidth ? tailwindWidth + " " : ""
-      }${tailwindPadding} text-[#${cleanHexLabelColor}] cursor-pointer`;
+    const defaultFontWeight = fontWeight || "400";
+    let classes = `bg-[#${cleanHex}] rounded-[${defaultBorderRadius}px] text-[${defaultFontSize}px] font-[${defaultFontWeight}] ${tailwindWidth ? tailwindWidth + " " : ""}${tailwindPadding} text-[#${cleanHexLabel}] cursor-pointer`;
 
-      // Border styling
-      if (defaultBorderWidth > 0) {
-        const cleanBorderColor = defaultBorderColor.replace("#", "");
-        classes += ` border-[#${cleanBorderColor}] border-[${defaultBorderWidth}px]`;
-      }
+    if (defaultBorderWidth > 0) {
+      const cleanBorderColor = defaultBorderColor.replace("#", "");
+      classes += ` border-[#${cleanBorderColor}] border-[${defaultBorderWidth}px]`;
+    }
 
-      // Dynamic styling classes
-      // Hover text color - selalu tambahkan jika ada nilai
-      if (hoverTextColor && hoverTextColor.trim() !== "") {
-        const cleanHoverTextColor = hoverTextColor.replace("#", "");
-        classes += ` hover:text-[#${cleanHoverTextColor}]`;
-      }
+    if (hoverTextColor && hoverTextColor.trim() !== "") {
+      const cleanHoverTextColor = hoverTextColor.replace("#", "");
+      classes += ` hover:text-[#${cleanHoverTextColor}]`;
+    }
+    if (hoverBgColor && hoverBgColor.trim() !== "") {
+      const cleanHoverBgColor = hoverBgColor.replace("#", "");
+      classes += ` hover:bg-[#${cleanHoverBgColor}]`;
+    }
+    if (hoverBorderColor && hoverBorderColor.trim() !== "") {
+      const cleanHoverBorderColor = hoverBorderColor.replace("#", "");
+      classes += ` hover:border-[#${cleanHoverBorderColor}]`;
+    }
+    if (focusBorderColor !== "#3B82F6") {
+      const cleanFocusBorderColor = focusBorderColor.replace("#", "");
+      classes += ` focus:border-[#${cleanFocusBorderColor}]`;
+    }
+    if (focusRingSize !== null && focusRingSize !== 2) {
+      classes += ` focus:outline-none focus:ring-${focusRingSize}`;
+    }
+    if (activeBgColor !== "#525252") {
+      const cleanActiveBgColor = activeBgColor.replace("#", "");
+      classes += ` active:bg-[#${cleanActiveBgColor}]`;
+    }
+    if (activeShadowSize !== null && activeShadowSize !== 4) {
+      classes += ` active:shadow-${activeShadowSize}`;
+    }
 
-      // Hover background color - selalu tambahkan jika ada nilai
-      if (hoverBgColor && hoverBgColor.trim() !== "") {
-        const cleanHoverBgColor = hoverBgColor.replace("#", "");
-        classes += ` hover:bg-[#${cleanHoverBgColor}]`;
-      }
+    let hasHoverScale = false;
+    if (hoverScale !== null && hoverScale > 0) {
+      classes += ` hover:scale-[${hoverScale / 100}]`;
+      hasHoverScale = true;
+    } else if (hoverScaleType !== "none") {
+      const scaleValue = getHoverScaleValue(hoverScaleType);
+      classes += ` hover:scale-[${scaleValue / 100}]`;
+      hasHoverScale = true;
+    }
 
-      // Hover border color - selalu tambahkan jika ada nilai
-      if (hoverBorderColor && hoverBorderColor.trim() !== "") {
-        const cleanHoverBorderColor = hoverBorderColor.replace("#", "");
-        classes += ` hover:border-[#${cleanHoverBorderColor}]`;
-      }
+    const hasHoverTransform = hasHoverScale || (hoverTranslateX !== null && hoverTranslateX !== 0) || (hoverRotate !== null && hoverRotate !== 0);
+    if (hasHoverTransform && hoverScaleDuration !== null && hoverScaleDuration > 0) {
+      classes += ` transition-all duration-[${hoverScaleDuration}ms] ease-in-out`;
+    } else if (transitionType !== "none") {
+      const duration = getTransitionDuration(transitionType);
+      classes += ` transition-all duration-[${duration}ms] ease-in-out`;
+    }
+    if (transitionDelay !== null && transitionDelay !== 0) {
+      classes += ` delay-[${transitionDelay}ms]`;
+    }
+    if (hoverOpacity !== null && hoverOpacity !== 90) {
+      classes += ` hover:opacity-[${hoverOpacity}]`;
+    }
+    if (hoverTranslateX !== null && hoverTranslateX !== 0) {
+      classes += ` hover:translate-x-[${hoverTranslateX}px]`;
+    }
+    if (hoverRotate !== null && hoverRotate !== 0) {
+      classes += ` hover:rotate-[${hoverRotate}deg]`;
+    }
 
-      if (focusBorderColor !== "#3B82F6") {
-        const cleanFocusBorderColor = focusBorderColor.replace("#", "");
-        classes += ` focus:border-[#${cleanFocusBorderColor}]`;
-      }
+    return `<button class="${classes}">${defaultLabel}</button>`;
+  }, [
+    color,
+    label,
+    borderRadius,
+    fontSize,
+    fontWeight,
+    padding,
+    labelColor,
+    borderWidth,
+    borderColor,
+    hoverTextColor,
+    hoverBgColor,
+    hoverBorderColor,
+    focusBorderColor,
+    focusRingSize,
+    activeBgColor,
+    activeShadowSize,
+    transitionType,
+    transitionDelay,
+    hoverScaleType,
+    hoverOpacity,
+    hoverScale,
+    hoverScaleDuration,
+    hoverTranslateX,
+    hoverRotate,
+  ]);
 
-      if (focusRingSize !== null && focusRingSize !== 2) {
-        classes += ` focus:outline-none focus:ring-${focusRingSize}`;
-      }
-
-      if (activeBgColor !== "#525252") {
-        const cleanActiveBgColor = activeBgColor.replace("#", "");
-        classes += ` active:bg-[#${cleanActiveBgColor}]`;
-      }
-
-      if (activeShadowSize !== null && activeShadowSize !== 4) {
-        classes += ` active:shadow-${activeShadowSize}`;
-      }
-
-      // Hover scale - prioritaskan input manual, jika tidak ada gunakan hoverScaleType
-      // Selalu tambahkan jika ada nilai yang valid (bukan null dan lebih dari 0)
-      let hasHoverScale = false;
-      if (hoverScale !== null && hoverScale > 0) {
-        classes += ` hover:scale-[${hoverScale / 100}]`;
-        hasHoverScale = true;
-      } else if (hoverScaleType !== "none") {
-        const scaleValue = getHoverScaleValue(hoverScaleType);
-        classes += ` hover:scale-[${scaleValue / 100}]`;
-        hasHoverScale = true;
-      }
-
-      // Transition - gunakan hoverScaleDuration jika ada untuk hover transform, atau transitionType
-      const hasHoverTransform = hasHoverScale || (hoverTranslateX !== null && hoverTranslateX !== 0) || (hoverRotate !== null && hoverRotate !== 0);
-
-      // Gunakan hoverScaleDuration untuk durasi transition jika ada hover transform dan hoverScaleDuration di-set
-      if (hasHoverTransform && hoverScaleDuration !== null && hoverScaleDuration > 0) {
-        classes += ` transition-all duration-[${hoverScaleDuration}ms] ease-in-out`;
-      } else if (transitionType !== "none") {
-        const duration = getTransitionDuration(transitionType);
-        classes += ` transition-all duration-[${duration}ms] ease-in-out`;
-      }
-
-      if (transitionDelay !== null && transitionDelay !== 0) {
-        classes += ` delay-[${transitionDelay}ms]`;
-      }
-
-      if (hoverOpacity !== null && hoverOpacity !== 90) {
-        classes += ` hover:opacity-[${hoverOpacity}]`;
-      }
-
-      if (hoverTranslateX !== null && hoverTranslateX !== 0) {
-        classes += ` hover:translate-x-[${hoverTranslateX}px]`;
-      }
-
-      if (hoverRotate !== null && hoverRotate !== 0) {
-        classes += ` hover:rotate-[${hoverRotate}deg]`;
-      }
-
-      const htmltailwind = `<button class="${classes}">${defaultLabel}</button>`;
-      const formattedHtml = await formatHTML(htmltailwind);
-      setHtmltailwind(formattedHtml);
-      return { htmltailwind: formattedHtml };
-    },
-    [
-      color,
-      label,
-      borderRadius,
-      fontSize,
-      fontWeight,
-      padding,
-      labelColor,
-      borderWidth,
-      borderColor,
-      hoverTextColor,
-      hoverBgColor,
-      hoverBorderColor,
-      focusBorderColor,
-      focusRingSize,
-      activeBgColor,
-      activeShadowSize,
-      transitionType,
-      transitionDelay,
-      hoverScaleType,
-      hoverOpacity,
-      hoverScale,
-      hoverScaleDuration,
-      hoverTranslateX,
-      hoverRotate,
-    ],
-  );
-
-  // Generate code on mount and when dependencies change
   useEffect(() => {
     (async () => {
-      // Gunakan default jika null/kosong
-      const hexColor = color ? cleanHexColor(color) : "#171717";
-      const hexLabelColor = labelColor ? cleanHexColor(labelColor) : "#FFFFFF";
-      const finalBorderRadius = borderRadius !== null ? borderRadius : 8;
-      const finalFontSize = fontSize !== null ? fontSize : 16;
-      const finalLabel = label || "Tombol";
-      await generateCode(hexColor, finalLabel, finalBorderRadius, finalFontSize, padding, hexLabelColor);
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
     })();
-  }, [
-    color,
-    label,
-    borderRadius,
-    fontSize,
-    fontWeight,
-    padding,
-    labelColor,
-    borderWidth,
-    borderColor,
-    hoverTextColor,
-    hoverBgColor,
-    hoverBorderColor,
-    focusBorderColor,
-    focusRingSize,
-    activeBgColor,
-    activeShadowSize,
-    transitionType,
-    transitionDelay,
-    hoverScaleType,
-    hoverOpacity,
-    hoverScale,
-    hoverScaleDuration,
-    hoverTranslateX,
-    hoverRotate,
-    generateCode,
-  ]);
+  }, [htmlCode]);
 
-  const handleCreateButtonClick = useCallback(async () => {
+  const handleCreateButtonClick = useCallback(() => {
     const hexColor = color ? cleanHexColor(color) : "#171717";
     const hexLabelColor = labelColor ? cleanHexColor(labelColor) : "#FFFFFF";
     const finalBorderRadius = borderRadius !== null ? borderRadius : 8;
     const finalFontSize = fontSize !== null ? fontSize : 16;
     const finalLabel = label || "Tombol";
     console.log(`Creating button with color: ${hexColor}, labelColor: ${hexLabelColor}`);
-    const { htmltailwind } = await generateCode(hexColor, finalLabel, finalBorderRadius, finalFontSize, padding, hexLabelColor);
     emit<CreateButtonHandler>(
       "CREATE_BUTTON",
       hexColor,
@@ -539,7 +403,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       fontWeight || "400",
       padding,
       hexLabelColor,
-      htmltailwind,
+      htmltailwind, // dari state (di-update oleh useEffect saat htmlCode berubah)
       borderWidth || undefined,
       borderColor,
       hoverTextColor,
@@ -549,6 +413,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       focusRingSize?.toString() || undefined,
       activeBgColor,
       activeShadowSize?.toString() || undefined,
+      undefined, // transitionEasing - tidak ada di UI ButtonCreator
       transitionType,
       transitionDelay?.toString() || undefined,
       hoverScaleType,
@@ -556,7 +421,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       hoverScale?.toString() || undefined,
       hoverScaleDuration?.toString() || undefined,
       hoverTranslateX?.toString() || undefined,
-      hoverRotate?.toString() || undefined,
+      hoverRotate?.toString() || undefined
     );
   }, [
     color,
@@ -567,7 +432,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
     labelColor,
     borderWidth,
     borderColor,
-    generateCode,
+    htmltailwind,
     hoverTextColor,
     hoverBgColor,
     hoverBorderColor,
@@ -827,33 +692,25 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
               overflow: "hidden",
             }}
           >
-            {previewHtml ? (
-              <div
+            <div
+              style={{
+                width: previewStyles.widthStyle,
+                maxWidth: "100%",
+                boxSizing: "border-box",
+              }}
+            >
+              <button
+                type="button"
                 style={{
-                  width: (() => {
-                    // Cek apakah sumbu x = 100
-                    if (padding) {
-                      const parts = padding
-                        .split(",")
-                        .map(val => val.trim())
-                        .filter(val => val !== "");
-                      const values = parts.map(val => parseInt(val, 10)).filter(val => !isNaN(val));
-                      if (values.length >= 1 && values[0] === 100) {
-                        return "100%";
-                      }
-                    }
-                    return "auto";
-                  })(),
-                  maxWidth: "100%",
-                  boxSizing: "border-box",
+                  ...previewStyles.baseStyles,
+                  ...(isPreviewHovered ? previewStyles.hoverStyles : {}),
                 }}
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-              />
-            ) : (
-              <Text>
-                <Muted>Preview akan muncul di sini...</Muted>
-              </Text>
-            )}
+                onMouseEnter={() => setIsPreviewHovered(true)}
+                onMouseLeave={() => setIsPreviewHovered(false)}
+              >
+                {label || "Tombol"}
+              </button>
+            </div>
           </div>
           <VerticalSpace space="large" />
           <div style={{ display: "flex", gap: 12 }}>

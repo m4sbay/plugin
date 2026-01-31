@@ -27,7 +27,7 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State untuk Data Table
+  // --- Style Statis (urutan sesuai input di UI) ---
   const [columns, setColumns] = useState("Name,Email,Role");
   const [rows, setRows] = useState("3");
   const [headerBgColor, setHeaderBgColor] = useState("#F3F4F6");
@@ -38,8 +38,8 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
   const [borderColor, setBorderColor] = useState("#E5E7EB");
   const [fontSize, setFontSize] = useState("14");
   const [padding, setPadding] = useState("12px,16px");
-  const [stripedRows, setStripedRows] = useState("yes");
   const [textAlignment, setTextAlignment] = useState("left");
+  const [stripedRows, setStripedRows] = useState("yes");
 
   const stripedRowsOptions = [
     { value: "yes", text: "Ya" },
@@ -52,6 +52,7 @@ export function DataTableCreator({ onBack, isDark = false }: DataTableCreatorPro
     { value: "right", text: "Rata Kanan" },
   ];
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 

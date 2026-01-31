@@ -88,13 +88,15 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State untuk Alert Banner - hanya properti standar
+  // --- Properti (urutan sesuai input di UI) ---
   const [alertType, setAlertType] = useState("information");
   const [title, setTitle] = useState("Information");
   const [message, setMessage] = useState("This is an informational alert with important details.");
-  const [borderRadius, setBorderRadius] = useState("6");
   const [width, setWidth] = useState("");
   const [padding, setPadding] = useState("16");
+  const [borderRadius, setBorderRadius] = useState("6");
+
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
 
   const alertTypeOptions = [

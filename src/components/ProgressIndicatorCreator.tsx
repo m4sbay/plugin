@@ -27,22 +27,23 @@ export function ProgressIndicatorCreator({ onBack, isDark = false }: ProgressInd
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State untuk Progress Indicator
+  // --- Style Statis (urutan sesuai input di UI) ---
+  const [showPercentage, setShowPercentage] = useState("yes");
+  const [percentageTextColor, setPercentageTextColor] = useState("#00BCFF");
+  const [percentageMargin, setPercentageMargin] = useState("12");
   const [progressValue, setProgressValue] = useState("50");
   const [width, setWidth] = useState("");
   const [height, setHeight] = useState("12");
   const [progressColor, setProgressColor] = useState("#00BCFF");
   const [bgColor, setBgColor] = useState("#E5E7EB");
   const [borderRadius, setBorderRadius] = useState("100");
-  const [percentageTextColor, setPercentageTextColor] = useState("#00BCFF");
-  const [percentageMargin, setPercentageMargin] = useState("12");
-  const [showPercentage, setShowPercentage] = useState("yes");
 
   const showPercentageOptions = [
     { value: "yes", text: "Ya" },
     { value: "no", text: "Tidak" },
   ];
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 

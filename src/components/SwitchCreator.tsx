@@ -32,12 +32,12 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State Style Statis - Warna saja
+  // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
   const [uncheckedBgColor, setUncheckedBgColor] = useState("#e9ecef"); // bg unchecked
   const [checkedBgColor, setCheckedBgColor] = useState("#00BCFF"); // peer-checked:bg
   const [thumbBgColor, setThumbBgColor] = useState("#FFFFFF"); // bg-white
 
-  // State Style Dinamis - Transition
+  // --- Style Dinamis (urutan sesuai input di UI Kolom 2) ---
   const [transitionDuration, setTransitionDuration] = useState("300"); // duration-300
   const [transitionEasing, setTransitionEasing] = useState("ease-in-out"); // ease-in-out
   const transitionEasingOptions = [
@@ -48,6 +48,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   ];
   const [defaultChecked, setDefaultChecked] = useState("false"); // default checked state
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [previewChecked, setPreviewChecked] = useState(false);

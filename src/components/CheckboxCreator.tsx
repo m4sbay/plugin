@@ -30,22 +30,23 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     codeText: isDark ? "#E2E8F0" : "#222222",
     buttonShadow: isDark ? "0 10px 24px rgba(15, 23, 42, 0.55)" : "0 2px 8px rgba(0,0,0,0.04)",
   };
-  // State Style Statis
+  // --- Style Statis (urutan sesuai input di UI) ---
   const [checkboxLabel, setCheckboxLabel] = useState("Setuju");
-  const [checkboxDescription, setCheckboxDescription] = useState("Ya saya setuju dengan syarat dan ketentuan.");
   const [labelColor, setLabelColor] = useState("#3B82F6");
   const [labelFontSize, setLabelFontSize] = useState("14");
   const [labelFontWeight, setLabelFontWeight] = useState("500");
+  const [checkboxDescription, setCheckboxDescription] = useState("Ya saya setuju dengan syarat dan ketentuan.");
   const [descriptionColor, setDescriptionColor] = useState("#9CA3AF");
   const [descriptionFontSize, setDescriptionFontSize] = useState("14");
   const [checkboxSize, setCheckboxSize] = useState("15");
   const [borderRadius, setBorderRadius] = useState("4");
-  const [checkedBgColor, setCheckedBgColor] = useState("#3B82F6");
   const [uncheckedBgColor, setUncheckedBgColor] = useState("#FFFFFF");
+  const [checkedBgColor, setCheckedBgColor] = useState("#3B82F6");
   const [gapBetweenCheckboxLabel, setGapBetweenCheckboxLabel] = useState("8");
   const [checkmarkSize, setCheckmarkSize] = useState("12");
   const [checkmarkColor, setCheckmarkColor] = useState("#FFFFFF");
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [checkedStates, setCheckedStates] = useState<boolean[]>([]);

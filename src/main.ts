@@ -1932,5 +1932,5 @@ export default function () {
     figma.notify(`✅ Radio Button berhasil dibuat (${labels.length} radio)!`);
   });
 
-  showUI({ width: 1200, height: 700 });
+  showUI({ width: 1200, height: 900 });
 }

@@ -37,19 +37,20 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
   const DEFAULT_LABEL_FONT_WEIGHT_CHECKED = "600";
   const DEFAULT_TRANSITION_DURATION = "200";
 
-  // State Style Statis
-  const [radioLabels, setRadioLabels] = useState("UI Designer,Frontend Developer");
+  // --- Style Statis (urutan sesuai input di UI) ---
   const [radioCount, setRadioCount] = useState("2");
-  const [labelColor, setLabelColor] = useState("#00BCFF");
-  const [labelFontSize, setLabelFontSize] = useState("14");
-  const [labelColorChecked, setLabelColorChecked] = useState("#4F46E5");
-  const [checkedColor, setCheckedColor] = useState("#4F46E5");
+  const [radioLabels, setRadioLabels] = useState("UI Designer,Frontend Developer");
   const [radioSize, setRadioSize] = useState("20");
   const [defaultBorderColor, setDefaultBorderColor] = useState("#CBD5E1");
+  const [checkedColor, setCheckedColor] = useState("#4F46E5");
+  const [labelColorChecked, setLabelColorChecked] = useState("#4F46E5");
+  const [labelColor, setLabelColor] = useState("#00BCFF");
+  const [labelFontSize, setLabelFontSize] = useState("14");
 
-  // State Style Dinamis
+  // --- Style Dinamis ---
   const [hoverBorderColor, setHoverBorderColor] = useState("#818CF8");
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 

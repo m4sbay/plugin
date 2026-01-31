@@ -27,23 +27,19 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State untuk Tabs - sesuai template HTML/Tailwind
+  // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
   const [tabCount, setTabCount] = useState("3");
   const [tabLabels, setTabLabels] = useState("Profile,Settings,Activity");
   const [fontSize, setFontSize] = useState("14"); // arbitrary value untuk text-[value]px
-
-  // Warna sesuai template - menggunakan hex colors untuk arbitrary values
   const [activeTextColor, setActiveTextColor] = useState("#4F46E5"); // text color untuk tab aktif (indigo-600)
   const [activeBorderColor, setActiveBorderColor] = useState("#6366F1"); // border color untuk tab aktif (indigo-500)
   const [inactiveTextColor, setInactiveTextColor] = useState("#707070"); // text color untuk tab tidak aktif (slate-500)
-  const [hoverTextColor, setHoverTextColor] = useState("#171717"); // text color saat hover (slate-700)
-  const [hoverBorderColor, setHoverBorderColor] = useState("#CBD5E1"); // border color saat hover (slate-300)
-
-  // Styling - menggunakan arbitrary values
   const [tabGap, setTabGap] = useState("16"); // arbitrary value untuk gap-[value]px
   const [textBorderGap, setTextBorderGap] = useState("12"); // jarak antara text dan border bottom
 
-  // Transisi
+  // --- Style Dinamis (urutan sesuai input di UI Kolom 2) ---
+  const [hoverTextColor, setHoverTextColor] = useState("#171717"); // text color saat hover (slate-700)
+  const [hoverBorderColor, setHoverBorderColor] = useState("#CBD5E1"); // border color saat hover (slate-300)
   const [transitionType, setTransitionType] = useState("normal");
   const transitionOptions = [
     { value: "none", text: "Tanpa Transisi" },
@@ -52,6 +48,7 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     { value: "slow", text: "Lambat (500ms)" },
   ];
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [hoveredTabIndex, setHoveredTabIndex] = useState<number | null>(null);

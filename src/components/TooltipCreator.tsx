@@ -26,7 +26,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State untuk Tooltip
+  // --- Properti (urutan sesuai input di UI) ---
   const [tooltipText, setTooltipText] = useState("Click Me");
   const [bgColor, setBgColor] = useState("#00BCFF");
   const [textColor, setTextColor] = useState("#FFFFFF");
@@ -35,6 +35,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
   const [borderRadius, setBorderRadius] = useState("8");
   const [marginBottom, setMarginBottom] = useState("16");
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
