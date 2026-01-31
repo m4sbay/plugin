@@ -1,7 +1,7 @@
-import { Button, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { SelectionChangeHandler } from "../types/types";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
@@ -30,28 +30,29 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     codeText: isDark ? "#E2E8F0" : "#222222",
     buttonShadow: isDark ? "0 10px 24px rgba(15, 23, 42, 0.55)" : "0 2px 8px rgba(0,0,0,0.04)",
   };
-  // State Style Statis
+  // --- Style Statis (urutan sesuai input di UI) ---
   const [checkboxLabel, setCheckboxLabel] = useState("Setuju");
-  const [checkboxDescription, setCheckboxDescription] = useState("Ya saya setuju dengan syarat dan ketentuan.");
   const [labelColor, setLabelColor] = useState("#3B82F6");
   const [labelFontSize, setLabelFontSize] = useState("14");
   const [labelFontWeight, setLabelFontWeight] = useState("500");
+  const [checkboxDescription, setCheckboxDescription] = useState("Ya saya setuju dengan syarat dan ketentuan.");
   const [descriptionColor, setDescriptionColor] = useState("#9CA3AF");
   const [descriptionFontSize, setDescriptionFontSize] = useState("14");
   const [checkboxSize, setCheckboxSize] = useState("15");
   const [borderRadius, setBorderRadius] = useState("4");
-  const [checkedBgColor, setCheckedBgColor] = useState("#3B82F6");
   const [uncheckedBgColor, setUncheckedBgColor] = useState("#FFFFFF");
+  const [checkedBgColor, setCheckedBgColor] = useState("#3B82F6");
   const [gapBetweenCheckboxLabel, setGapBetweenCheckboxLabel] = useState("8");
   const [checkmarkSize, setCheckmarkSize] = useState("12");
   const [checkmarkColor, setCheckmarkColor] = useState("#FFFFFF");
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [checkedStates, setCheckedStates] = useState<boolean[]>([]);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     // Parse values
     const checkboxSizeValue = checkboxSize.replace(/px/gi, "").trim() || "20";
     const gapValue = gapBetweenCheckboxLabel.replace(/px/gi, "").trim();
@@ -64,9 +65,10 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     // Normalize hex colors
     const checkedBgColorHex = normalizeHex(checkedBgColor);
     const checkmarkColorHex = normalizeHex(checkmarkColor);
+    const uncheckedBgColorHex = normalizeHex(uncheckedBgColor);
 
     // Classes untuk checkbox input
-    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] focus:outline-none`;
+    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] bg-[${uncheckedBgColorHex}] focus:outline-none`;
 
     // Normalize colors untuk label dan deskripsi
     const labelColorHex = normalizeHex(labelColor);
@@ -92,13 +94,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   ${description ? `<div class="ml-[${descriptionIndent}px]"><p class="text-[${descriptionFontSize}px] text-[${descriptionColorHex}]">${description}</p></div>` : ""}
 </div>`;
 
-    const html = `<div>
-${checkboxItem}
-</div>`;
-
-    const formattedHtml = formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<div>${checkboxItem}</div>`;
   }, [
     checkboxLabel,
     checkboxDescription,
@@ -110,16 +106,19 @@ ${checkboxItem}
     checkboxSize,
     borderRadius,
     checkedBgColor,
-    uncheckedBgColor,
     gapBetweenCheckboxLabel,
     checkmarkSize,
     checkmarkColor,
-    normalizeHex,
+    uncheckedBgColor,
   ]);
 
+  // Format HTML secara async
   useEffect(() => {
-    generateCode();
-  }, [generateCode]);
+    (async () => {
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
+    })();
+  }, [htmlCode]);
 
   // Load data when checkbox component is selected
   useEffect(() => {
@@ -198,7 +197,7 @@ ${checkboxItem}
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
           <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -210,11 +209,12 @@ ${checkboxItem}
         <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Checkbox</Text>
       </div>
 
+      <VerticalSpace space="large" />
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4, paddingRight: 16 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
+        <div style={{ maxHeight: "calc(100vh - 120px)", paddingTop: 12, overflowY: "auto", flex: 1, minWidth: 260, paddingRight: 16 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
 
           <InputField label="Label Checkbox :" value={checkboxLabel} onChange={setCheckboxLabel} placeholder="Contoh: Offers" />
 
@@ -237,15 +237,15 @@ ${checkboxItem}
         </div>
 
         {/* Kolom 2: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.panelBackground,
               minHeight: 120,
-              marginBottom: 24,
               padding: 24,
             }}
           >
@@ -329,18 +329,27 @@ ${checkboxItem}
             })()}
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateCheckbox}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
           </div>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -383,9 +392,12 @@ ${checkboxItem}
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+          <VerticalSpace space="large" />
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>

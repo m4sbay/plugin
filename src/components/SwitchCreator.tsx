@@ -1,7 +1,7 @@
-import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Dropdown, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -16,6 +16,11 @@ type SwitchCreatorProps = {
   isDark?: boolean;
 };
 
+const SWITCH_WIDTH = 51;
+const SWITCH_HEIGHT = 31;
+const TRACK_BORDER_RADIUS = 16;
+const THUMB_SIZE = 27;
+
 export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   const theme = {
     background: isDark ? "#0B1120" : "#FFFFFF",
@@ -27,18 +32,12 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State Style Statis - Track
-  const [switchWidth, setSwitchWidth] = useState("51"); // w-[51px]
-  const [switchHeight, setSwitchHeight] = useState("31"); // h-[31px]
-  const [trackBorderRadius, setTrackBorderRadius] = useState("16"); // rounded-[16px]
-  const [uncheckedBgColor, setUncheckedBgColor] = useState("rgba(118,118,128,0.12)"); // bg unchecked
+  // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
+  const [uncheckedBgColor, setUncheckedBgColor] = useState("#e9ecef"); // bg unchecked
   const [checkedBgColor, setCheckedBgColor] = useState("#00BCFF"); // peer-checked:bg
-
-  // State Style Statis - Thumb
-  const [thumbSize, setThumbSize] = useState("27"); // h-[27px] w-[27px]
   const [thumbBgColor, setThumbBgColor] = useState("#FFFFFF"); // bg-white
 
-  // State Style Dinamis - Transition
+  // --- Style Dinamis (urutan sesuai input di UI Kolom 2) ---
   const [transitionDuration, setTransitionDuration] = useState("300"); // duration-300
   const [transitionEasing, setTransitionEasing] = useState("ease-in-out"); // ease-in-out
   const transitionEasingOptions = [
@@ -49,29 +48,26 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
   ];
   const [defaultChecked, setDefaultChecked] = useState("false"); // default checked state
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [previewChecked, setPreviewChecked] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(() => {
-    const translateX = parseInt(switchWidth) - parseInt(thumbSize) - 4; // 2px left + 2px spacing
+  // Generate HTML string menggunakan useMemo (ukuran pakai konstanta default)
+  const translateXValue = SWITCH_WIDTH - THUMB_SIZE - 4; // 2px left + 2px spacing
+  const htmlCode = useMemo(() => {
     const isChecked = defaultChecked === "true";
 
-    const html = `<label for="toggle-switch" class="relative inline-flex cursor-pointer items-center">
-  <input type="checkbox" id="toggle-switch" class="peer sr-only" ${isChecked ? "checked" : ""} />
-  <div class="peer flex h-[${switchHeight}px] w-[${switchWidth}px] items-center rounded-[${trackBorderRadius}px] bg-[${uncheckedBgColor}] transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:bg-[${checkedBgColor}] peer-focus:outline-none"></div>
-  <div class="absolute top-[2px] left-[2px] h-[${thumbSize}px] w-[${thumbSize}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateX}px]"></div>
-</label>`;
+    return `<label for="toggle-switch" class="relative inline-flex cursor-pointer items-center"><input type="checkbox" id="toggle-switch" class="peer sr-only" ${isChecked ? "checked" : ""} /><div class="peer flex h-[${SWITCH_HEIGHT}px] w-[${SWITCH_WIDTH}px] items-center rounded-[${TRACK_BORDER_RADIUS}px] bg-[${uncheckedBgColor}] transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:bg-[${checkedBgColor}] peer-focus:outline-none"></div><div class="absolute top-[2px] left-[2px] h-[${THUMB_SIZE}px] w-[${THUMB_SIZE}px] rounded-full bg-[${thumbBgColor}] shadow-sm transition-all duration-${transitionDuration} ${transitionEasing} peer-checked:translate-x-[${translateXValue}px]"></div></label>`;
+  }, [uncheckedBgColor, checkedBgColor, thumbBgColor, transitionDuration, transitionEasing, defaultChecked]);
 
-    const formattedHtml = formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
-  }, [switchWidth, switchHeight, trackBorderRadius, uncheckedBgColor, checkedBgColor, thumbSize, thumbBgColor, transitionDuration, transitionEasing, defaultChecked]);
-
+  // Format HTML secara async
   useEffect(() => {
-    generateCode();
-  }, [generateCode]);
+    (async () => {
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
+    })();
+  }, [htmlCode]);
 
   // Update preview checked state when defaultChecked changes
   useEffect(() => {
@@ -86,12 +82,8 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
       try {
         const parsed = JSON.parse(data);
         if (parsed?.componentType === "switch") {
-          if (parsed.switchWidth !== undefined) setSwitchWidth(parsed.switchWidth || "51");
-          if (parsed.switchHeight !== undefined) setSwitchHeight(parsed.switchHeight || "31");
-          if (parsed.trackBorderRadius !== undefined) setTrackBorderRadius(parsed.trackBorderRadius || "16");
           if (parsed.uncheckedBgColor !== undefined) setUncheckedBgColor(parsed.uncheckedBgColor || "rgba(118,118,128,0.12)");
           if (parsed.checkedBgColor !== undefined) setCheckedBgColor(parsed.checkedBgColor || "#00BCFF");
-          if (parsed.thumbSize !== undefined) setThumbSize(parsed.thumbSize || "27");
           if (parsed.thumbBgColor !== undefined) setThumbBgColor(parsed.thumbBgColor || "#FFFFFF");
           if (parsed.transitionDuration !== undefined) setTransitionDuration(parsed.transitionDuration || "300");
           if (parsed.transitionEasing !== undefined) setTransitionEasing(parsed.transitionEasing || "ease-in-out");
@@ -125,15 +117,11 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
     }
   }, [htmltailwind]);
 
-  // Emit ke Figma
+  // Emit ke Figma (hanya warna + transisi + state, ukuran pakai default di main)
   const handleCreateSwitch = () => {
     emit("CREATE_SWITCH", {
-      switchWidth,
-      switchHeight,
-      trackBorderRadius,
       uncheckedBgColor,
       checkedBgColor,
-      thumbSize,
       thumbBgColor,
       transitionDuration,
       transitionEasing,
@@ -141,8 +129,6 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
       htmltailwind,
     });
   };
-
-  const translateX = parseInt(switchWidth) - parseInt(thumbSize) - 4;
 
   return (
     <div
@@ -155,7 +141,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
           <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -167,25 +153,20 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
         <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Switch</Text>
       </div>
 
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
+      <VerticalSpace space="large" />
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-start", paddingTop: 24 }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
-          <VerticalSpace space="small" />
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
-          <InputField label="Lebar switch (px) :" value={switchWidth} onChange={setSwitchWidth} placeholder="Contoh: 51" />
-          <InputField label="Tinggi switch (px) :" value={switchHeight} onChange={setSwitchHeight} placeholder="Contoh: 31" />
-          <InputField label="Border radius track (px) :" value={trackBorderRadius} onChange={setTrackBorderRadius} placeholder="Contoh: 16" />
-          <ColorPicker label="Background (unchecked) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
-          <ColorPicker label="Background (checked) :" value={checkedBgColor} onChange={setCheckedBgColor} />
-
-          <InputField label="Ukuran thumb (Toggle Circle) (px) :" value={thumbSize} onChange={setThumbSize} placeholder="Contoh: 27" />
-          <ColorPicker label="Warna thumb :" value={thumbBgColor} onChange={setThumbBgColor} />
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
+          <ColorPicker label="Background (Off) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
+          <ColorPicker label="Background (On) :" value={checkedBgColor} onChange={setCheckedBgColor} />
+          <ColorPicker label="Warna Thumb :" value={thumbBgColor} onChange={setThumbBgColor} />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
-        <div style={{ flex: 1, minWidth: 260 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 20, color: theme.primaryText }}>Style Dinamis :</Text>
+        <div style={{ flex: 1, minWidth: 260, paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Dinamis :</Text>
           <VerticalSpace space="large" />
 
           <InputField label="Durasi transisi (ms) :" value={transitionDuration} onChange={setTransitionDuration} placeholder="Contoh: 300" />
@@ -194,7 +175,7 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
           <Dropdown options={transitionEasingOptions} value={transitionEasing} onValueChange={setTransitionEasing} />
           <VerticalSpace space="large" />
 
-          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>Default State :</Text>
+          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: "#6b7280" }}>On/Off :</Text>
           <Dropdown
             options={[
               { value: "false", text: "Off (Unchecked)" },
@@ -206,8 +187,9 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 400, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -215,7 +197,6 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
               background: theme.panelBackground,
               flex: 1,
               minHeight: 0,
-              marginBottom: 24,
               padding: 24,
               width: "100%",
               maxWidth: "100%",
@@ -230,8 +211,8 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
               style={{
                 position: "relative",
                 display: "inline-flex",
-                height: `${switchHeight}px`,
-                width: `${switchWidth}px`,
+                height: `${SWITCH_HEIGHT}px`,
+                width: `${SWITCH_WIDTH}px`,
                 cursor: "pointer",
                 alignItems: "center",
               }}
@@ -243,10 +224,10 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
                   position: "absolute",
                   inset: 0,
                   display: "flex",
-                  height: `${switchHeight}px`,
-                  width: `${switchWidth}px`,
+                  height: `${SWITCH_HEIGHT}px`,
+                  width: `${SWITCH_WIDTH}px`,
                   alignItems: "center",
-                  borderRadius: `${trackBorderRadius}px`,
+                  borderRadius: `${TRACK_BORDER_RADIUS}px`,
                   background: previewChecked ? checkedBgColor : uncheckedBgColor,
                   transition: `all ${transitionDuration}ms ${transitionEasing}`,
                 }}
@@ -256,28 +237,37 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
                   position: "absolute",
                   top: "2px",
                   left: "2px",
-                  height: `${thumbSize}px`,
-                  width: `${thumbSize}px`,
+                  height: `${THUMB_SIZE}px`,
+                  width: `${THUMB_SIZE}px`,
                   borderRadius: "50%",
                   background: thumbBgColor,
                   boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                  transform: previewChecked ? `translateX(${translateX}px)` : "translateX(0)",
+                  transform: previewChecked ? `translateX(${translateXValue}px)` : "translateX(0)",
                   transition: `all ${transitionDuration}ms ${transitionEasing}`,
                 }}
               />
             </label>
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateSwitch}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
 
-          <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
+          <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -320,9 +310,12 @@ export function SwitchCreator({ onBack, isDark = false }: SwitchCreatorProps) {
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
+          <VerticalSpace space="large" />
           <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>

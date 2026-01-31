@@ -1,4 +1,4 @@
-import { Muted, Text, VerticalSpace } from "@create-figma-plugin/ui";
+import { Muted, Text, TextboxColor, VerticalSpace } from "@create-figma-plugin/ui";
 import { h, Fragment } from "preact";
 
 interface ColorPickerProps {
@@ -8,11 +8,18 @@ interface ColorPickerProps {
   error?: string;
 }
 
+function normalizeHex(value: string): string {
+  if (!value) return value;
+  return value.startsWith("#") ? value : `#${value}`;
+}
+
 export function ColorPicker({ label, value, onChange, error }: ColorPickerProps) {
-  const handleChange = (e: any) => {
-    const newColor = e.target.value;
-    onChange(newColor);
+  const handleHexColorValueInput = (newHex: string) => {
+    onChange(normalizeHex(newHex));
   };
+
+  const hexColor = value ? value.replace(/^#/, "") : "";
+  const displayHexColor = hexColor || "000000";
 
   return (
     <>
@@ -20,7 +27,7 @@ export function ColorPicker({ label, value, onChange, error }: ColorPickerProps)
         <Muted>{label}</Muted>
       </Text>
       <VerticalSpace space="small" />
-      <input type="color" value={value} onChange={handleChange} className="color-picker" />
+      <TextboxColor hexColor={displayHexColor} opacity="100" onHexColorValueInput={handleHexColorValueInput} fullWidth />
       {error && (
         <Text>
           <Muted style={{ color: "red" }}>{error}</Muted>

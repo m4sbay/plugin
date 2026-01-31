@@ -1,7 +1,7 @@
-import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Dropdown, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useMemo, useEffect } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
@@ -88,13 +88,16 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State untuk Alert Banner - hanya properti standar
+  // --- Properti (urutan sesuai input di UI) ---
   const [alertType, setAlertType] = useState("information");
   const [title, setTitle] = useState("Information");
   const [message, setMessage] = useState("This is an informational alert with important details.");
-  const [borderRadius, setBorderRadius] = useState("6");
   const [width, setWidth] = useState("");
   const [padding, setPadding] = useState("16");
+  const [borderRadius, setBorderRadius] = useState("6");
+
+  // --- UI state ---
+  const [htmltailwind, setHtmltailwind] = useState("");
 
   const alertTypeOptions = [
     { value: "information", text: "Information" },
@@ -157,30 +160,25 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
     }
   };
 
-  const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     const defaultColors = getAlertColors();
     const roundedClass = borderRadius ? `rounded-[${borderRadius}px]` : "rounded-md";
     const widthClass = width ? `w-[${width}px]` : "";
     const paddingClass = padding ? `p-[${padding}px]` : "p-4";
 
-    const html = `<div role="alert" class="flex flex-col gap-1 ${roundedClass} border ${defaultColors.border} ${defaultColors.bg} ${paddingClass} ${widthClass}">
-  <div class="font-semibold text-sm ${defaultColors.titleColor}">${title}</div>
-  <p class="text-sm ${defaultColors.messageColor} text-justify">
-    ${message}
-  </p>
-</div>`;
-    const formattedHtml = formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<div role="alert" class="flex flex-col gap-1 ${roundedClass} border ${defaultColors.border} ${defaultColors.bg} ${paddingClass} ${widthClass}"><div class="font-semibold text-sm ${defaultColors.titleColor}">${title}</div><p class="text-sm ${defaultColors.messageColor} text-justify">${message}</p></div>`;
   }, [alertType, title, message, borderRadius, width, padding]);
 
+  // Format HTML secara async
   useEffect(() => {
-    generateCode();
-  }, [generateCode]);
+    (async () => {
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
+    })();
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
@@ -249,8 +247,8 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+      <div>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
             <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -262,15 +260,17 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
           <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Alert Banner</Text>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
+      <VerticalSpace space="large" />
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-start",}}>
         {/* Kolom 1: Pengaturan */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 4 }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
-          <div style={{ marginBottom: 16 }}>
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
+          <div>
             <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 8, color: theme.secondaryText }}>Jenis Alert :</Text>
             <Dropdown options={alertTypeOptions} value={alertType} onValueChange={setAlertType} />
           </div>
+          <VerticalSpace space="large" />
           <InputField label="Judul Alert :" value={title} onChange={setTitle} placeholder="Contoh: Information" />
           <InputField label="Pesan Alert :" value={message} onChange={setMessage} placeholder="Contoh: This is an informational alert with important details." />
           <InputField label="Lebar (px) :" value={width} onChange={setWidth} placeholder="Kosongkan untuk auto" />
@@ -279,8 +279,9 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
         </div>
 
         {/* Kolom 2: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -288,7 +289,6 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
               background: theme.panelBackground,
               flex: 1,
               minHeight: 0,
-              marginBottom: 24,
               padding: 24,
               overflow: "auto",
               display: "flex",
@@ -300,15 +300,24 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
               <AlertPreview alertType={alertType} title={title} message={message} borderRadius={borderRadius} width={width} padding={padding} />
             </div>
           </div>
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateAlertBanner}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
-          <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
+          <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -351,9 +360,12 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+          <VerticalSpace space="large" />
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>

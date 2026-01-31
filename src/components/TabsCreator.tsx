@@ -1,7 +1,7 @@
-import { Button, Dropdown, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Dropdown, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -27,23 +27,19 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     codeBackground: isDark ? "#0F172A" : "#f8f9fa",
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
-  // State untuk Tabs - sesuai template HTML/Tailwind
+  // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
   const [tabCount, setTabCount] = useState("3");
   const [tabLabels, setTabLabels] = useState("Profile,Settings,Activity");
   const [fontSize, setFontSize] = useState("14"); // arbitrary value untuk text-[value]px
-
-  // Warna sesuai template - menggunakan hex colors untuk arbitrary values
   const [activeTextColor, setActiveTextColor] = useState("#4F46E5"); // text color untuk tab aktif (indigo-600)
   const [activeBorderColor, setActiveBorderColor] = useState("#6366F1"); // border color untuk tab aktif (indigo-500)
   const [inactiveTextColor, setInactiveTextColor] = useState("#707070"); // text color untuk tab tidak aktif (slate-500)
-  const [hoverTextColor, setHoverTextColor] = useState("#171717"); // text color saat hover (slate-700)
-  const [hoverBorderColor, setHoverBorderColor] = useState("#CBD5E1"); // border color saat hover (slate-300)
-
-  // Styling - menggunakan arbitrary values
   const [tabGap, setTabGap] = useState("16"); // arbitrary value untuk gap-[value]px
   const [textBorderGap, setTextBorderGap] = useState("12"); // jarak antara text dan border bottom
 
-  // Transisi
+  // --- Style Dinamis (urutan sesuai input di UI Kolom 2) ---
+  const [hoverTextColor, setHoverTextColor] = useState("#171717"); // text color saat hover (slate-700)
+  const [hoverBorderColor, setHoverBorderColor] = useState("#CBD5E1"); // border color saat hover (slate-300)
   const [transitionType, setTransitionType] = useState("normal");
   const transitionOptions = [
     { value: "none", text: "Tanpa Transisi" },
@@ -52,6 +48,7 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     { value: "slow", text: "Lambat (500ms)" },
   ];
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
   const [hoveredTabIndex, setHoveredTabIndex] = useState<number | null>(null);
@@ -64,8 +61,8 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     return `#${cleanColor}`;
   }, []);
 
-  // Generate Tailwind code - border-bottom tabs (UI statis saja, hanya Tailwind classes dengan arbitrary values)
-  const generateCode = useCallback(() => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     const labels = tabLabels.split(",").map(l => l.trim());
     const tabCountNum = parseInt(tabCount) || labels.length;
     const gap = tabGap || "16";
@@ -101,18 +98,16 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
       .join("\n\n");
 
     // HTML structure dengan border-bottom tabs (menggunakan arbitrary values)
-    const html = `<div class="flex gap-[${gap}px]">
-${tabButtonsHtml}
-</div>`;
-
-    const formattedHtml = formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
+    return `<div class="flex gap-[${gap}px]">${tabButtonsHtml}</div>`;
   }, [tabCount, tabLabels, fontSize, activeTextColor, activeBorderColor, inactiveTextColor, hoverTextColor, hoverBorderColor, tabGap, textBorderGap, normalizeHex]);
 
+  // Format HTML secara async
   useEffect(() => {
-    generateCode();
-  }, [generateCode]);
+    (async () => {
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
+    })();
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
@@ -194,7 +189,7 @@ ${tabButtonsHtml}
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
           <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -205,12 +200,11 @@ ${tabButtonsHtml}
         </button>
         <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Tabs</Text>
       </div>
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-start", paddingTop: 24 }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
-          <VerticalSpace space="small" />
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-          <VerticalSpace space="small" />
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
           <InputField label="Jumlah Tab :" value={tabCount} onChange={setTabCount} placeholder="Contoh: 3" />
           <InputField label="Label Tab (pisahkan dengan koma) :" value={tabLabels} onChange={setTabLabels} placeholder="Contoh: Profile,Settings,Activity" />
           <InputField label="Ukuran teks (px) :" value={fontSize} onChange={setFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
@@ -222,21 +216,21 @@ ${tabButtonsHtml}
         </div>
 
         {/* Kolom 2: Style Dinamis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
-          <VerticalSpace space="small" />
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
-          <VerticalSpace space="small" />
+        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260, paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Dinamis :</Text>
+          <VerticalSpace space="large" />
           <ColorPicker label="Warna teks saat hover :" value={hoverTextColor} onChange={setHoverTextColor} />
           <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
           <div>
-          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom:10, color: "#6b7280" }}>Tipe Transisi :</Text>
+            <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 10, color: "#6b7280" }}>Tipe Transisi :</Text>
             <Dropdown options={transitionOptions} value={transitionType} onValueChange={setTransitionType} />
           </div>
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 500, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", paddingTop: 12 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -244,7 +238,6 @@ ${tabButtonsHtml}
               background: theme.panelBackground,
               flex: 1,
               minHeight: 0,
-              marginBottom: 24,
               padding: 24,
               width: "100%",
               maxWidth: "100%",
@@ -350,16 +343,25 @@ ${tabButtonsHtml}
               })}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateTabs}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
 
-          <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
+          <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -402,9 +404,12 @@ ${tabButtonsHtml}
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+          <VerticalSpace space="large" />
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>

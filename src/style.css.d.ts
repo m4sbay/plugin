@@ -1,5 +1,4 @@
 declare const styles: {
-  readonly "color-picker": string;
   readonly "controls-scroll": string;
   readonly "create-figma-plugin_textbox__input": string;
   readonly "equal-columns": string;

@@ -1,7 +1,7 @@
-import { Button, Text, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, IconClose16, IconDev16, IconWand16, Text, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
 import { InputField } from "./ui/InputField";
 import { ColorPicker } from "./ui/ColorPicker";
 import { SelectionChangeHandler } from "../types/types";
@@ -37,24 +37,25 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
   const DEFAULT_LABEL_FONT_WEIGHT_CHECKED = "600";
   const DEFAULT_TRANSITION_DURATION = "200";
 
-  // State Style Statis
-  const [radioLabels, setRadioLabels] = useState("UI Designer,Frontend Developer");
+  // --- Style Statis (urutan sesuai input di UI) ---
   const [radioCount, setRadioCount] = useState("2");
-  const [labelColor, setLabelColor] = useState("#00BCFF");
-  const [labelFontSize, setLabelFontSize] = useState("14");
-  const [labelColorChecked, setLabelColorChecked] = useState("#4F46E5");
-  const [checkedColor, setCheckedColor] = useState("#4F46E5");
+  const [radioLabels, setRadioLabels] = useState("UI Designer,Frontend Developer");
   const [radioSize, setRadioSize] = useState("20");
   const [defaultBorderColor, setDefaultBorderColor] = useState("#CBD5E1");
+  const [checkedColor, setCheckedColor] = useState("#4F46E5");
+  const [labelColorChecked, setLabelColorChecked] = useState("#4F46E5");
+  const [labelColor, setLabelColor] = useState("#00BCFF");
+  const [labelFontSize, setLabelFontSize] = useState("14");
 
-  // State Style Dinamis
+  // --- Style Dinamis ---
   const [hoverBorderColor, setHoverBorderColor] = useState("#818CF8");
 
+  // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // Generate Tailwind code
-  const generateCode = useCallback(() => {
+  // Generate HTML string menggunakan useMemo
+  const htmlCode = useMemo(() => {
     // Parse values dengan default
     const gapValue = DEFAULT_GAP_BETWEEN_ITEMS;
     const gapRadioLabel = DEFAULT_GAP_RADIO_LABEL;
@@ -86,22 +87,20 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
     <input type="radio" name="role_clean" class="peer sr-only" ${i === 0 ? "checked" : ""} />
     <div class="flex items-center justify-center w-[${radioSizeValue}px] h-[${radioSizeValue}px] rounded-[50%] border-[${borderWidthValue}px] border-[${defaultBorderColorHex}] group-hover:border-[${hoverBorderColorHex}] peer-checked:border-[${checkedColorHex}] transition-colors duration-[${transitionMs}ms] after:content-[''] after:w-[${innerDotSizeValue}px] after:h-[${innerDotSizeValue}px] after:rounded-[50%] after:bg-[${checkedColorHex}] after:scale-[0] peer-checked:after:scale-[1] after:transition-transform after:duration-[${transitionMs}ms]"></div>
     <span class="text-[${labelSize}px] font-[${DEFAULT_LABEL_FONT_WEIGHT}] text-[${labelColorHex}] transition-colors duration-[${transitionMs}ms] peer-checked:text-[${labelColorCheckedHex}] peer-checked:font-[${DEFAULT_LABEL_FONT_WEIGHT_CHECKED}]">${label}</span>
-  </label>`
+  </label>`,
       )
       .join("\n\n");
 
-    const html = `<div class="space-y-[${gapValue}px]">
-${radioItems}
-</div>`;
+    return `<div class="space-y-[${gapValue}px]">${radioItems}</div>`;
+  }, [radioLabels, radioCount, labelColor, labelFontSize, labelColorChecked, checkedColor, radioSize, defaultBorderColor, hoverBorderColor]);
 
-    const formattedHtml = formatHTML(html);
-    setHtmltailwind(formattedHtml);
-    return formattedHtml;
-  }, [radioLabels, radioCount, labelColor, labelFontSize, labelColorChecked, checkedColor, radioSize, defaultBorderColor, hoverBorderColor, normalizeHex]);
-
+  // Format HTML secara async
   useEffect(() => {
-    generateCode();
-  }, [generateCode]);
+    (async () => {
+      const formattedHtml = await formatHTML(htmlCode);
+      setHtmltailwind(formattedHtml);
+    })();
+  }, [htmlCode]);
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
@@ -180,8 +179,8 @@ ${radioItems}
         transition: "background 0.25s ease, color 0.25s ease",
       }}
     >
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+      <div>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", marginRight: 8, padding: 0, display: "flex", alignItems: "center" }}>
             <svg width="15" height="20" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -193,40 +192,39 @@ ${radioItems}
           <Text style={{ fontSize: 28, fontWeight: 600, color: theme.primaryText }}>Radio Button</Text>
         </div>
       </div>
+      <VerticalSpace space="large" />
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
         {/* Kolom 1: Style Statis */}
-        <div style={{ maxHeight: "calc(100vh - 120px)", overflowY: "auto", flex: 1, minWidth: 260 }}>
-          <VerticalSpace space="small" />
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Statis :</Text>
-
-          <VerticalSpace space="small" />
+        <div style={{ maxHeight: "calc(100vh - 120px)",  flex: 1, minWidth: 260 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Statis :</Text>
+          <VerticalSpace space="large" />
           <InputField label="Jumlah Radio :" value={radioCount} onChange={setRadioCount} placeholder="Contoh: 2" />
           <InputField label="Label Radio (pisahkan dengan koma) :" value={radioLabels} onChange={setRadioLabels} placeholder="Contoh: UI Designer,Frontend Developer" />
           <InputField label="Ukuran radio button (px) :" value={radioSize} onChange={setRadioSize} placeholder="Contoh: 20 (akan menjadi w-[20px] h-[20px])" />
           <ColorPicker label="Warna border default :" value={defaultBorderColor} onChange={setDefaultBorderColor} />
           <ColorPicker label="Warna checked :" value={checkedColor} onChange={setCheckedColor} />
-          <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
+          <ColorPicker label="Warna label checked :" value={labelColorChecked} onChange={setLabelColorChecked} />
+          <ColorPicker label="Warna label unchecked :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran font label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
-          <ColorPicker label="Warna label saat checked :" value={labelColorChecked} onChange={setLabelColorChecked} />
         </div>
 
         {/* Kolom 2: Style Dinamis */}
-        <div style={{ flex: 0.3, minWidth: 160}}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Style Dinamis :</Text>
-          <VerticalSpace space="small" />
+        <div style={{ flex: 0.3, minWidth: 160 }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Style Dinamis :</Text>
+          <VerticalSpace space="large" />
           <ColorPicker label="Warna border saat hover :" value={hoverBorderColor} onChange={setHoverBorderColor} />
         </div>
 
         {/* Kolom 3: Live Preview & Kode */}
-        <div style={{ flex: 1.9, minWidth: 320, maxWidth: 500, position: "sticky", top: 24, alignSelf: "flex-start", zIndex: 2, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-          <Text style={{ fontWeight: 600, fontSize: 18, marginBottom: 16, color: theme.primaryText }}>Live Preview :</Text>
+        <div style={{ flex: 1.9, minWidth: 320, maxWidth: 500, display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+          <Text style={{ fontWeight: 600, fontSize: 18, color: theme.primaryText }}>Live Preview :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
               borderRadius: 8,
               background: theme.panelBackground,
               minHeight: 120,
-              marginBottom: 24,
               padding: 24,
             }}
           >
@@ -290,16 +288,25 @@ ${radioItems}
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <VerticalSpace space="large" />
+          <div style={{ display: "flex", gap: 12 }}>
             <Button fullWidth danger onClick={onBack}>
-              Tutup
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconClose16 />
+                Tutup
+              </span>
             </Button>
             <Button fullWidth onClick={handleCreateRadioButton}>
-              Buat
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <IconWand16 />
+                Buat
+              </span>
             </Button>
           </div>
 
-          <Text style={{ fontWeight: 600, fontSize: 16, marginBottom: 8, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
+          <Text style={{ fontWeight: 600, fontSize: 16, color: theme.primaryText }}>Kode :</Text>
+          <VerticalSpace space="large" />
           <div
             style={{
               border: `1px solid ${theme.panelBorder}`,
@@ -342,9 +349,12 @@ ${radioItems}
               {htmltailwind}
             </SyntaxHighlighter>
           </div>
-          <VerticalSpace space="small" />
-          <Button onClick={handleCopyCode}  style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
-            {copied ? "Tersalin!" : "Copy"}
+          <VerticalSpace space="large" />
+          <Button onClick={handleCopyCode} style={{ padding: "4px 12px", fontSize: 12, height: "auto" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconDev16 />
+              {copied ? "Tersalin!" : "Copy"}
+            </span>
           </Button>
         </div>
       </div>

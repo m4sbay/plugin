@@ -90,12 +90,8 @@ export interface CreateTabsHandler extends EventHandler {
 export interface CreateSwitchHandler extends EventHandler {
   name: "CREATE_SWITCH";
   handler: (props: {
-    switchWidth: string;
-    switchHeight: string;
-    trackBorderRadius: string;
     uncheckedBgColor: string;
     checkedBgColor: string;
-    thumbSize: string;
     thumbBgColor: string;
     transitionDuration: string;
     transitionEasing: string;
@@ -164,6 +160,48 @@ export interface CreateRadioButtonHandler extends EventHandler {
     hoverBorderColor: string;
     innerDotSize: string;
     transitionDuration: string;
+    htmltailwind: string;
+  }) => void;
+}
+
+export interface CreateCheckboxHandler extends EventHandler {
+  name: "CREATE_CHECKBOX";
+  handler: (props: {
+    checkboxLabel: string;
+    checkboxDescription: string;
+    labelColor: string;
+    labelFontSize: string;
+    labelFontWeight: string;
+    descriptionColor: string;
+    descriptionFontSize: string;
+    checkboxSize: string;
+    borderRadius: string;
+    checkedBgColor: string;
+    uncheckedBgColor: string;
+    gapBetweenCheckboxLabel: string;
+    checkmarkSize: string;
+    checkmarkColor: string;
+    htmltailwind: string;
+  }) => void;
+}
+
+export interface CreateTextFieldHandler extends EventHandler {
+  name: "CREATE_TEXT_FIELD";
+  handler: (props: {
+    label: string;
+    labelColor: string;
+    fontSize: string;
+    placeholder: string;
+    width: string;
+    height: string;
+    bgColor: string;
+    borderRadius: string;
+    borderColor: string;
+    paddingX: string;
+    paddingY: string;
+    gap: string;
+    inputTextColor: string;
+    focusRingColor: string;
     htmltailwind: string;
   }) => void;
 }
