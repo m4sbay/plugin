@@ -231,7 +231,7 @@ export default function () {
           borderColor: selectedNode.getPluginData("borderColor") || "",
           checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
           checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
-          uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
+          defaultChecked: selectedNode.getPluginData("defaultChecked") || "off",
           gapBetweenCheckboxLabel: selectedNode.getPluginData("gapBetweenCheckboxLabel") || "",
           hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
           hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
@@ -459,7 +459,7 @@ export default function () {
           borderColor: selectedNode.getPluginData("borderColor") || "",
           checkedBgColor: selectedNode.getPluginData("checkedBgColor") || "",
           checkedBorderColor: selectedNode.getPluginData("checkedBorderColor") || "",
-          uncheckedBgColor: selectedNode.getPluginData("uncheckedBgColor") || "",
+          defaultChecked: selectedNode.getPluginData("defaultChecked") || "off",
           gapBetweenCheckboxLabel: selectedNode.getPluginData("gapBetweenCheckboxLabel") || "",
           hoverBorderColor: selectedNode.getPluginData("hoverBorderColor") || "",
           hoverBgColor: selectedNode.getPluginData("hoverBgColor") || "",
@@ -699,8 +699,8 @@ export default function () {
       descriptionFontSize = "",
       checkboxSize = "",
       borderRadius = "",
+      defaultChecked = "off",
       checkedBgColor = "",
-      uncheckedBgColor = "",
       gapBetweenCheckboxLabel = "",
       checkmarkSize = "",
       checkmarkColor = "",
@@ -746,8 +746,37 @@ export default function () {
     const size = Number(checkboxSize) || 20;
     checkboxBox.resize(size, size);
     checkboxBox.cornerRadius = Number(borderRadius) || 4;
-    checkboxBox.fills = [{ type: "SOLID", color: customConvertHexColorToRgbColor(uncheckedBgColor) || { r: 1, g: 1, b: 1 } }];
+    checkboxBox.fills = [{ type: "SOLID", color: customConvertHexColorToRgbColor(checkedBgColor) || { r: 1, g: 1, b: 1 } }];
     checkboxBox.strokes = [];
+
+    // Wrapper frame: kotak + checkmark (checkmark di atas kotak)
+    const checkboxWrapper = figma.createFrame();
+    checkboxWrapper.name = "Checkbox Wrapper";
+    checkboxWrapper.resize(size, size);
+    checkboxWrapper.fills = [];
+    checkboxWrapper.clipsContent = false;
+    checkboxWrapper.layoutMode = "NONE";
+
+    checkboxBox.x = 0;
+    checkboxBox.y = 0;
+    checkboxWrapper.appendChild(checkboxBox);
+
+    // Checkmark dari SVG
+    const checkmarkSizePx = Number(checkmarkSize) || 12;
+    const checkmarkColorHex = checkmarkColor && /^#?[0-9A-Fa-f]{6}$/.test(checkmarkColor.replace("#", "")) ? (checkmarkColor.startsWith("#") ? checkmarkColor : "#" + checkmarkColor) : "#FFFFFF";
+    const checkmarkSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20"><path fill="${checkmarkColorHex}" fill-rule="evenodd" clip-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>`;
+
+    try {
+      const checkmarkNode = figma.createNodeFromSvg(checkmarkSvg);
+      checkmarkNode.name = "Checkmark";
+      checkmarkNode.resize(checkmarkSizePx, checkmarkSizePx);
+      checkmarkNode.x = (size - checkmarkSizePx) / 2;
+      checkmarkNode.y = (size - checkmarkSizePx) / 2;
+      checkmarkNode.visible = defaultChecked === "on";
+      checkboxWrapper.appendChild(checkmarkNode);
+    } catch {
+      figma.notify("Checkmark tidak dapat dibuat");
+    }
 
     // Label
     const labelText = figma.createText();
@@ -758,7 +787,7 @@ export default function () {
     labelText.fills = [{ type: "SOLID", color: customConvertHexColorToRgbColor(labelColor) || { r: 1, g: 1, b: 1 } }];
     labelText.name = "Label";
 
-    row.appendChild(checkboxBox);
+    row.appendChild(checkboxWrapper);
     row.appendChild(labelText);
 
     component.appendChild(row);
@@ -805,8 +834,8 @@ export default function () {
     component.setPluginData("descriptionFontSize", descriptionFontSize);
     component.setPluginData("checkboxSize", checkboxSize);
     component.setPluginData("borderRadius", borderRadius);
+    component.setPluginData("defaultChecked", defaultChecked);
     component.setPluginData("checkedBgColor", checkedBgColor);
-    component.setPluginData("uncheckedBgColor", uncheckedBgColor);
     component.setPluginData("gapBetweenCheckboxLabel", gapBetweenCheckboxLabel);
     component.setPluginData("checkmarkSize", checkmarkSize);
     component.setPluginData("checkmarkColor", checkmarkColor);
@@ -1932,5 +1961,5 @@ export default function () {
     figma.notify(`✅ Radio Button berhasil dibuat (${labels.length} radio)!`);
   });
 
-  showUI({ width: 1200, height: 900 });
+  showUI({ width: 1200, height: 700 });
 }

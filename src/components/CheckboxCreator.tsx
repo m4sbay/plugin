@@ -1,4 +1,4 @@
-import { Button, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
+import { Button, Dropdown, IconClose16, IconDev16, IconWand16, Text, Textbox, VerticalSpace } from "@create-figma-plugin/ui";
 import { emit, on } from "@create-figma-plugin/utilities";
 import { h } from "preact";
 import { useState, useCallback, useEffect, useMemo } from "preact/hooks";
@@ -40,16 +40,21 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   const [descriptionFontSize, setDescriptionFontSize] = useState("14");
   const [checkboxSize, setCheckboxSize] = useState("15");
   const [borderRadius, setBorderRadius] = useState("4");
-  const [uncheckedBgColor, setUncheckedBgColor] = useState("#FFFFFF");
+  const [defaultChecked, setDefaultChecked] = useState("on");
   const [checkedBgColor, setCheckedBgColor] = useState("#3B82F6");
   const [gapBetweenCheckboxLabel, setGapBetweenCheckboxLabel] = useState("8");
   const [checkmarkSize, setCheckmarkSize] = useState("12");
   const [checkmarkColor, setCheckmarkColor] = useState("#FFFFFF");
 
+  const defaultCheckedOptions = [
+    { value: "on", text: "On" },
+    { value: "off", text: "Off" },
+  ];
+
   // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
   const [copied, setCopied] = useState(false);
-  const [checkedStates, setCheckedStates] = useState<boolean[]>([]);
+  const [checkedStates, setCheckedStates] = useState<boolean[]>([true]);
 
   // Generate HTML string menggunakan useMemo
   const htmlCode = useMemo(() => {
@@ -62,13 +67,12 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     const borderRadiusValue = borderRadius.replace(/px/gi, "").trim() || "4";
     const checkmarkSizeValue = checkmarkSize.replace(/px/gi, "").trim() || "14";
 
-    // Normalize hex colors
+    // Normalize hex colors (unchecked bg = checked bg)
     const checkedBgColorHex = normalizeHex(checkedBgColor);
     const checkmarkColorHex = normalizeHex(checkmarkColor);
-    const uncheckedBgColorHex = normalizeHex(uncheckedBgColor);
 
-    // Classes untuk checkbox input
-    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] bg-[${uncheckedBgColorHex}] focus:outline-none`;
+    // Classes untuk checkbox input (bg unchecked = checkedBgColor)
+    const checkboxClasses = `peer h-[${checkboxSizeValue}px] w-[${checkboxSizeValue}px] cursor-pointer transition-all appearance-none rounded-[${borderRadiusValue}px] shadow hover:shadow-md checked:bg-[${checkedBgColorHex}] bg-[${checkedBgColorHex}] focus:outline-none`;
 
     // Normalize colors untuk label dan deskripsi
     const labelColorHex = normalizeHex(labelColor);
@@ -76,11 +80,12 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
 
     const label = checkboxLabel || "Checkbox";
     const description = checkboxDescription || "";
+    const isCheckedDefault = defaultChecked === "on";
 
-    const checkboxItem = `  <div class="flex flex-col gap-[4px]">
+    const checkboxItem = `  <div class="flex flex-col">
   <div class="inline-flex items-center">
     <label class="flex items-center cursor-pointer relative">
-      <input type="checkbox" checked class="${checkboxClasses}" />
+      <input type="checkbox" ${isCheckedDefault ? "checked" : ""} class="${checkboxClasses}" />
       <span class="absolute text-[${checkmarkColorHex}] opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-[${checkmarkSizeValue}px] w-[${checkmarkSizeValue}px]" viewBox="0 0 20 20" fill="currentColor" stroke="currentColor" stroke-width="1">
           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
@@ -105,11 +110,11 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
     descriptionFontSize,
     checkboxSize,
     borderRadius,
+    defaultChecked,
     checkedBgColor,
     gapBetweenCheckboxLabel,
     checkmarkSize,
     checkmarkColor,
-    uncheckedBgColor,
   ]);
 
   // Format HTML secara async
@@ -138,7 +143,10 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
             if (checkboxData.checkboxSize) setCheckboxSize(checkboxData.checkboxSize);
             if (checkboxData.borderRadius) setBorderRadius(checkboxData.borderRadius);
             if (checkboxData.checkedBgColor) setCheckedBgColor(checkboxData.checkedBgColor);
-            if (checkboxData.uncheckedBgColor) setUncheckedBgColor(checkboxData.uncheckedBgColor);
+            if (checkboxData.defaultChecked !== undefined) {
+              setDefaultChecked(checkboxData.defaultChecked || "off");
+              setCheckedStates([checkboxData.defaultChecked === "on"]);
+            }
             if (checkboxData.gapBetweenCheckboxLabel) setGapBetweenCheckboxLabel(checkboxData.gapBetweenCheckboxLabel);
             if (checkboxData.checkmarkSize) setCheckmarkSize(checkboxData.checkmarkSize);
             if (checkboxData.checkmarkColor) setCheckmarkColor(checkboxData.checkmarkColor);
@@ -175,8 +183,8 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
       labelFontWeight,
       checkboxSize,
       borderRadius,
+      defaultChecked,
       checkedBgColor,
-      uncheckedBgColor,
       gapBetweenCheckboxLabel,
       checkmarkSize,
       checkmarkColor,
@@ -229,8 +237,11 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
 
           <InputField label="Ukuran checkbox (px) :" value={checkboxSize} onChange={setCheckboxSize} placeholder="Contoh: 20" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 4" />
-          <ColorPicker label="Background (unchecked) :" value={uncheckedBgColor} onChange={setUncheckedBgColor} />
+          <Text style={{ fontWeight: 400, fontSize: 11, marginBottom: 10, color: theme.secondaryText }}>Default State (on/off) :</Text>
+          <Dropdown options={defaultCheckedOptions} value={defaultChecked} onValueChange={v => { setDefaultChecked(v); setCheckedStates([v === "on"]); }} />
+          <VerticalSpace space="large" />
           <ColorPicker label="Background (checked) :" value={checkedBgColor} onChange={setCheckedBgColor} />
+          
           <InputField label="Padding checkbox-label (px) :" value={gapBetweenCheckboxLabel} onChange={setGapBetweenCheckboxLabel} placeholder="Contoh: 8" />
           <InputField label="Ukuran checkmark (px) :" value={checkmarkSize} onChange={setCheckmarkSize} placeholder="Contoh: 14 (akan menjadi h-[14px] w-[14px])" />
           <ColorPicker label="Warna checkmark :" value={checkmarkColor} onChange={setCheckmarkColor} />
@@ -254,12 +265,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
               const label = checkboxLabel || "Checkbox";
               const description = checkboxDescription || "";
 
-              // Initialize checked state if needed
-              if (checkedStates.length === 0) {
-                setCheckedStates([true]);
-              }
-
-              const isChecked = checkedStates[0] ?? true;
+              const isChecked = checkedStates[0] ?? (defaultChecked === "on");
 
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4, width: "100%" }}>
@@ -275,7 +281,7 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
                           width: `${checkboxSize.replace(/px/gi, "") || 20}px`,
                           height: `${checkboxSize.replace(/px/gi, "") || 20}px`,
                           borderRadius: `${borderRadius.replace(/px/gi, "") || 4}px`,
-                          background: isChecked ? checkedBgColor : uncheckedBgColor,
+                          background: checkedBgColor,
                           cursor: "pointer",
                           appearance: "none",
                           boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",

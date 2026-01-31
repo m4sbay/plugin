@@ -176,8 +176,8 @@ export interface CreateCheckboxHandler extends EventHandler {
     descriptionFontSize: string;
     checkboxSize: string;
     borderRadius: string;
+    defaultChecked: string;
     checkedBgColor: string;
-    uncheckedBgColor: string;
     gapBetweenCheckboxLabel: string;
     checkmarkSize: string;
     checkmarkColor: string;
