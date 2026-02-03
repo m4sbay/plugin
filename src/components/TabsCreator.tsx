@@ -28,11 +28,11 @@ export function TabsCreator({ onBack, isDark = false }: TabsCreatorProps) {
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
   // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
-  const [tabCount, setTabCount] = useState("3");
-  const [tabLabels, setTabLabels] = useState("Profile,Settings,Activity");
-  const [fontSize, setFontSize] = useState("14"); // arbitrary value untuk text-[value]px
-  const [activeTextColor, setActiveTextColor] = useState("#4F46E5"); // text color untuk tab aktif (indigo-600)
-  const [activeBorderColor, setActiveBorderColor] = useState("#6366F1"); // border color untuk tab aktif (indigo-500)
+  const [tabCount, setTabCount] = useState("2");
+  const [tabLabels, setTabLabels] = useState("Profil,Akun");
+  const [fontSize, setFontSize] = useState("10"); // arbitrary value untuk text-[value]px
+  const [activeTextColor, setActiveTextColor] = useState("#0B99FF"); // text color untuk tab aktif (indigo-600)
+  const [activeBorderColor, setActiveBorderColor] = useState("#0B99FF"); // border color untuk tab aktif 
   const [inactiveTextColor, setInactiveTextColor] = useState("#707070"); // text color untuk tab tidak aktif (slate-500)
   const [tabGap, setTabGap] = useState("16"); // arbitrary value untuk gap-[value]px
   const [textBorderGap, setTextBorderGap] = useState("12"); // jarak antara text dan border bottom

@@ -38,13 +38,13 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
   const DEFAULT_TRANSITION_DURATION = "200";
 
   // --- Style Statis (urutan sesuai input di UI) ---
-  const [radioCount, setRadioCount] = useState("2");
-  const [radioLabels, setRadioLabels] = useState("UI Designer,Frontend Developer");
-  const [radioSize, setRadioSize] = useState("20");
+  const [radioCount, setRadioCount] = useState("1");
+  const [radioLabels, setRadioLabels] = useState("UI Designer");
+  const [radioSize, setRadioSize] = useState("15");
   const [defaultBorderColor, setDefaultBorderColor] = useState("#CBD5E1");
-  const [checkedColor, setCheckedColor] = useState("#4F46E5");
-  const [labelColorChecked, setLabelColorChecked] = useState("#4F46E5");
-  const [labelColor, setLabelColor] = useState("#00BCFF");
+  const [checkedColor, setCheckedColor] = useState("#0B99FF");
+  const [labelColorChecked, setLabelColorChecked] = useState("#0B99FF");
+  const [labelColor, setLabelColor] = useState("#ADDBFB");
   const [labelFontSize, setLabelFontSize] = useState("14");
 
   // --- Style Dinamis ---

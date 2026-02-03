@@ -27,13 +27,13 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
     codeText: isDark ? "#E2E8F0" : "#222222",
   };
   // --- Style Statis (urutan sesuai input di UI Kolom 1) ---
-  const [label, setLabel] = useState("Nama Lengkap");
+  const [label, setLabel] = useState("Username");
   const [labelColor, setLabelColor] = useState("#64748B");
-  const [labelFontSize, setLabelFontSize] = useState("14");
-  const [placeholder, setPlaceholder] = useState("Masukkan nama lengkap kamu");
+  const [labelFontSize, setLabelFontSize] = useState("12");
+  const [placeholder, setPlaceholder] = useState("");
   const [width, setWidth] = useState("");
   const [gap, setGap] = useState("10");
-  const [borderRadius, setBorderRadius] = useState("8");
+  const [borderRadius, setBorderRadius] = useState("16");
   const [borderColor, setBorderColor] = useState("#CBD5E1");
   const [paddingX, setPaddingX] = useState("12");
   const [paddingY, setPaddingY] = useState("8");
@@ -42,7 +42,7 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
   const [inputTextColor, setInputTextColor] = useState("#111827");
 
   // --- Style Dinamis (urutan sesuai input di UI Kolom 2) ---
-  const [focusRingColor, setFocusRingColor] = useState("#6366F1");
+  const [focusRingColor, setFocusRingColor] = useState("#0B99FF");
 
   // --- UI state ---
   const [htmltailwind, setHtmltailwind] = useState("");
@@ -225,8 +225,8 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
           <InputField label="Label Input :" value={label} onChange={setLabel} placeholder="Contoh: Nama Lengkap" />
           <ColorPicker label="Warna label :" value={labelColor} onChange={setLabelColor} />
           <InputField label="Ukuran teks label (px) :" value={labelFontSize} onChange={setLabelFontSize} placeholder="Contoh: 14 (akan menjadi text-[14px])" />
-          <InputField label="Placeholder :" value={placeholder} onChange={setPlaceholder} placeholder="Contoh: Masukkan nama tampilan" />
-          <InputField label="Lebar input (px) :" value={width} onChange={setWidth} placeholder="Contoh: 300 (kosongkan untuk auto)" />
+          <InputField label="Placeholder :" value={placeholder} onChange={setPlaceholder} placeholder="Contoh: Masukkan username kamu" />
+          <InputField label="Lebar input (px) :" value={width} onChange={setWidth} placeholder="Contoh: 300 atau kosongkan untuk auto" />
           <InputField label="Gap label dan input (px) :" value={gap} onChange={setGap} placeholder="Contoh: 12 (akan menjadi gap-[12px])" />
           <InputField label="Border radius (px) :" value={borderRadius} onChange={setBorderRadius} placeholder="Contoh: 8 (akan menjadi rounded-[8px])" />
           <ColorPicker label="Warna border input :" value={borderColor} onChange={setBorderColor} />
