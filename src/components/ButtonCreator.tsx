@@ -11,6 +11,7 @@ import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
 import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
+import { copyToClipboard } from "../utils/clipboardUtils";
 
 type ButtonCreatorProps = {
   onBack: () => void;
@@ -386,6 +387,7 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
       setHtmltailwind(formattedHtml);
     })();
   }, [htmlCode]);
+  
 
   const handleCreateButtonClick = useCallback(() => {
     const hexColor = color ? cleanHexColor(color) : "#171717";
@@ -451,61 +453,56 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
-      if (data) {
-        try {
-          // Try to parse as JSON (button data)
-          const buttonData = JSON.parse(data);
-          if (buttonData.htmltailwind) {
-            // Load all button data
-            setHtmltailwind(buttonData.htmltailwind);
-            if (buttonData.color) setColor(buttonData.color);
-            if (buttonData.label) setLabel(buttonData.label);
-            if (buttonData.borderRadius) setBorderRadius(Number(buttonData.borderRadius) || null);
-            if (buttonData.fontSize) setFontSize(Number(buttonData.fontSize) || null);
-            if (buttonData.fontWeight) setFontWeight(buttonData.fontWeight || "400");
-            if (buttonData.padding) setPadding(buttonData.padding);
-            if (buttonData.labelColor) setLabelColor(buttonData.labelColor);
-            if (buttonData.borderWidth) setBorderWidth(Number(buttonData.borderWidth) || null);
-            if (buttonData.borderColor) setBorderColor(buttonData.borderColor);
-            if (buttonData.hoverTextColor) setHoverTextColor(buttonData.hoverTextColor);
-            if (buttonData.hoverBgColor) setHoverBgColor(buttonData.hoverBgColor);
-            if (buttonData.hoverBorderColor) setHoverBorderColor(buttonData.hoverBorderColor);
-            if (buttonData.focusBorderColor) setFocusBorderColor(buttonData.focusBorderColor);
-            if (buttonData.focusRingSize) setFocusRingSize(Number(buttonData.focusRingSize) || null);
-            if (buttonData.activeBgColor) setActiveBgColor(buttonData.activeBgColor);
-            if (buttonData.activeShadowSize) setActiveShadowSize(Number(buttonData.activeShadowSize) || null);
-            if (buttonData.transitionType) setTransitionType(buttonData.transitionType);
-            if (buttonData.transitionDelay) setTransitionDelay(Number(buttonData.transitionDelay) || null);
-            if (buttonData.hoverScaleType) setHoverScaleType(buttonData.hoverScaleType);
-            // Only update state if data exists, is not empty string, and is a valid number
-            // For hoverScale and hoverScaleDuration, only update if value is > 0 (0 is not a valid scale/duration)
-            if (buttonData.hoverOpacity !== undefined && buttonData.hoverOpacity !== "" && buttonData.hoverOpacity !== null) {
-              const opacityValue = Number(buttonData.hoverOpacity);
-              if (!isNaN(opacityValue)) setHoverOpacity(opacityValue);
-            }
-            if (buttonData.hoverScale !== undefined && buttonData.hoverScale !== "" && buttonData.hoverScale !== null) {
-              const scaleValue = Number(buttonData.hoverScale);
-              if (!isNaN(scaleValue) && scaleValue > 0) setHoverScale(scaleValue);
-            }
-            if (buttonData.hoverScaleDuration !== undefined && buttonData.hoverScaleDuration !== "" && buttonData.hoverScaleDuration !== null) {
-              const durationValue = Number(buttonData.hoverScaleDuration);
-              if (!isNaN(durationValue) && durationValue > 0) setHoverScaleDuration(durationValue);
-            }
-            if (buttonData.hoverTranslateX !== undefined && buttonData.hoverTranslateX !== "" && buttonData.hoverTranslateX !== null) {
-              const translateXValue = Number(buttonData.hoverTranslateX);
-              if (!isNaN(translateXValue)) setHoverTranslateX(translateXValue);
-            }
-            if (buttonData.hoverRotate !== undefined && buttonData.hoverRotate !== "" && buttonData.hoverRotate !== null) {
-              const rotateValue = Number(buttonData.hoverRotate);
-              if (!isNaN(rotateValue)) setHoverRotate(rotateValue);
-            }
-          }
-        } catch (e) {
-          // If not JSON, treat as plain htmltailwind string (for other components)
-          setHtmltailwind(data);
-        }
-      } else {
+      if (!data) {
         setHtmltailwind("");
+        return;
+      }
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed?.componentType === "button") {
+          setHtmltailwind(parsed.htmltailwind || "");
+          if (parsed.color) setColor(parsed.color);
+          if (parsed.label) setLabel(parsed.label);
+          if (parsed.borderRadius !== undefined) setBorderRadius(Number(parsed.borderRadius) || null);
+          if (parsed.fontSize !== undefined) setFontSize(Number(parsed.fontSize) || null);
+          if (parsed.fontWeight) setFontWeight(parsed.fontWeight || "400");
+          if (parsed.padding) setPadding(parsed.padding);
+          if (parsed.labelColor) setLabelColor(parsed.labelColor);
+          if (parsed.borderWidth !== undefined) setBorderWidth(Number(parsed.borderWidth) || null);
+          if (parsed.borderColor) setBorderColor(parsed.borderColor);
+          if (parsed.hoverTextColor) setHoverTextColor(parsed.hoverTextColor);
+          if (parsed.hoverBgColor) setHoverBgColor(parsed.hoverBgColor);
+          if (parsed.hoverBorderColor) setHoverBorderColor(parsed.hoverBorderColor);
+          if (parsed.focusBorderColor) setFocusBorderColor(parsed.focusBorderColor);
+          if (parsed.focusRingSize !== undefined) setFocusRingSize(Number(parsed.focusRingSize) || null);
+          if (parsed.activeBgColor) setActiveBgColor(parsed.activeBgColor);
+          if (parsed.activeShadowSize !== undefined) setActiveShadowSize(Number(parsed.activeShadowSize) || null);
+          if (parsed.transitionType) setTransitionType(parsed.transitionType);
+          if (parsed.transitionDelay !== undefined) setTransitionDelay(Number(parsed.transitionDelay) || null);
+          if (parsed.hoverScaleType) setHoverScaleType(parsed.hoverScaleType);
+          if (parsed.hoverOpacity !== undefined && parsed.hoverOpacity !== "" && parsed.hoverOpacity !== null) {
+            const opacityValue = Number(parsed.hoverOpacity);
+            if (!isNaN(opacityValue)) setHoverOpacity(opacityValue);
+          }
+          if (parsed.hoverScale !== undefined && parsed.hoverScale !== "" && parsed.hoverScale !== null) {
+            const scaleValue = Number(parsed.hoverScale);
+            if (!isNaN(scaleValue) && scaleValue > 0) setHoverScale(scaleValue);
+          }
+          if (parsed.hoverScaleDuration !== undefined && parsed.hoverScaleDuration !== "" && parsed.hoverScaleDuration !== null) {
+            const durationValue = Number(parsed.hoverScaleDuration);
+            if (!isNaN(durationValue) && durationValue > 0) setHoverScaleDuration(durationValue);
+          }
+          if (parsed.hoverTranslateX !== undefined && parsed.hoverTranslateX !== "" && parsed.hoverTranslateX !== null) {
+            const translateXValue = Number(parsed.hoverTranslateX);
+            if (!isNaN(translateXValue)) setHoverTranslateX(translateXValue);
+          }
+          if (parsed.hoverRotate !== undefined && parsed.hoverRotate !== "" && parsed.hoverRotate !== null) {
+            const rotateValue = Number(parsed.hoverRotate);
+            if (!isNaN(rotateValue)) setHoverRotate(rotateValue);
+          }
+        }
+      } catch (e) {
+        setHtmltailwind(data);
       }
     });
   }, []);
@@ -514,24 +511,10 @@ export function ButtonCreator({ onBack, isDark = false }: ButtonCreatorProps) {
 
   // Fungsi untuk copy kode ke clipboard
   const handleCopyCode = useCallback(async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(htmltailwind);
-      } else {
-        // Fallback untuk browser yang tidak support Clipboard API
-        const textArea = document.createElement("textarea");
-        textArea.value = htmltailwind;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
+    const success = await copyToClipboard(htmltailwind);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
     }
   }, [htmltailwind]);
 

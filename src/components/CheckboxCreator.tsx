@@ -128,38 +128,35 @@ export function CheckboxCreator({ onBack, isDark = false }: CheckboxCreatorProps
   // Load data when checkbox component is selected
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
-      if (data) {
-        try {
-          // Try to parse as JSON (checkbox data)
-          const checkboxData = JSON.parse(data);
-          if (checkboxData.htmltailwind) {
-            // Load all checkbox data
-            setHtmltailwind(checkboxData.htmltailwind);
-            if (checkboxData.checkboxLabel) setCheckboxLabel(checkboxData.checkboxLabel);
-            if (checkboxData.checkboxDescription) setCheckboxDescription(checkboxData.checkboxDescription);
-            if (checkboxData.labelColor) setLabelColor(checkboxData.labelColor);
-            if (checkboxData.labelFontSize) setLabelFontSize(checkboxData.labelFontSize);
-            if (checkboxData.labelFontWeight) setLabelFontWeight(checkboxData.labelFontWeight);
-            if (checkboxData.checkboxSize) setCheckboxSize(checkboxData.checkboxSize);
-            if (checkboxData.borderRadius) setBorderRadius(checkboxData.borderRadius);
-            if (checkboxData.checkedBgColor) setCheckedBgColor(checkboxData.checkedBgColor);
-            if (checkboxData.defaultChecked !== undefined) {
-              setDefaultChecked(checkboxData.defaultChecked || "off");
-              setCheckedStates([checkboxData.defaultChecked === "on"]);
-            }
-            if (checkboxData.gapBetweenCheckboxLabel) setGapBetweenCheckboxLabel(checkboxData.gapBetweenCheckboxLabel);
-            if (checkboxData.checkmarkSize) setCheckmarkSize(checkboxData.checkmarkSize);
-            if (checkboxData.checkmarkColor) setCheckmarkColor(checkboxData.checkmarkColor);
-            if (checkboxData.checkboxDescriptions) setCheckboxDescription(checkboxData.checkboxDescriptions); // fallback lama
-            if (checkboxData.descriptionColor) setDescriptionColor(checkboxData.descriptionColor);
-            if (checkboxData.descriptionFontSize) setDescriptionFontSize(checkboxData.descriptionFontSize);
-          }
-        } catch (e) {
-          // If not JSON, treat as plain htmltailwind string (for other components)
-          setHtmltailwind(data);
-        }
-      } else {
+      if (!data) {
         setHtmltailwind("");
+        return;
+      }
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed?.componentType === "checkbox") {
+          setHtmltailwind(parsed.htmltailwind || "");
+          if (parsed.checkboxLabel !== undefined) setCheckboxLabel(parsed.checkboxLabel);
+          if (parsed.checkboxDescription !== undefined) setCheckboxDescription(parsed.checkboxDescription);
+          if (parsed.labelColor !== undefined) setLabelColor(parsed.labelColor);
+          if (parsed.labelFontSize !== undefined) setLabelFontSize(parsed.labelFontSize);
+          if (parsed.labelFontWeight !== undefined) setLabelFontWeight(parsed.labelFontWeight);
+          if (parsed.checkboxSize !== undefined) setCheckboxSize(parsed.checkboxSize);
+          if (parsed.borderRadius !== undefined) setBorderRadius(parsed.borderRadius);
+          if (parsed.checkedBgColor !== undefined) setCheckedBgColor(parsed.checkedBgColor);
+          if (parsed.defaultChecked !== undefined) {
+            setDefaultChecked(parsed.defaultChecked || "off");
+            setCheckedStates([parsed.defaultChecked === "on"]);
+          }
+          if (parsed.gapBetweenCheckboxLabel !== undefined) setGapBetweenCheckboxLabel(parsed.gapBetweenCheckboxLabel);
+          if (parsed.checkmarkSize !== undefined) setCheckmarkSize(parsed.checkmarkSize);
+          if (parsed.checkmarkColor !== undefined) setCheckmarkColor(parsed.checkmarkColor);
+          if (parsed.checkboxDescriptions !== undefined) setCheckboxDescription(parsed.checkboxDescriptions);
+          if (parsed.descriptionColor !== undefined) setDescriptionColor(parsed.descriptionColor);
+          if (parsed.descriptionFontSize !== undefined) setDescriptionFontSize(parsed.descriptionFontSize);
+        }
+      } catch (e) {
+        setHtmltailwind(data);
       }
     });
   }, []);

@@ -9,6 +9,7 @@ import * as prettierPluginHtml from "prettier/plugins/html";
 export async function formatHTML(htmlString: string): Promise<string> {
   if (!htmlString || htmlString.trim() === "") {
     return htmlString;
+    
   }
 
   try {

@@ -10,6 +10,7 @@ import { duotoneDark, prism, shadesOfPurple, vscDarkPlus } from "react-syntax-hi
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
 import { formatHTML } from "../utils/htmlFormatter";
+import { copyToClipboard } from "../utils/clipboardUtils";
 
 type TextFieldCreatorProps = {
   onBack: () => void;
@@ -113,63 +114,44 @@ export function TextFieldCreator({ onBack, isDark = false }: TextFieldCreatorPro
   // Load data when text field component is selected
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
-      if (data) {
-        try {
-          // Try to parse as JSON (text field data)
-          const textFieldData = JSON.parse(data);
-          if (textFieldData.htmltailwind) {
-            // Load all text field data
-            setHtmltailwind(textFieldData.htmltailwind);
-            if (textFieldData.label) setLabel(textFieldData.label);
-            if (textFieldData.labelColor) setLabelColor(textFieldData.labelColor);
-            if (textFieldData.labelFontSize) setLabelFontSize(textFieldData.labelFontSize);
-            if (textFieldData.placeholder) setPlaceholder(textFieldData.placeholder);
-            if (textFieldData.width) setWidth(textFieldData.width);
-            if (textFieldData.bgColor) setBgColor(textFieldData.bgColor);
-            if (textFieldData.borderRadius) setBorderRadius(textFieldData.borderRadius);
-            if (textFieldData.borderColor) setBorderColor(textFieldData.borderColor);
-            if (textFieldData.paddingX) setPaddingX(textFieldData.paddingX);
-            if (textFieldData.paddingY) setPaddingY(textFieldData.paddingY);
-            // Update padding state dari paddingX dan paddingY
-            if (textFieldData.paddingX || textFieldData.paddingY) {
-              const x = textFieldData.paddingX || "12";
-              const y = textFieldData.paddingY || "8";
-              setPadding(formatPadding(x, y));
-            }
-            if (textFieldData.gap) setGap(textFieldData.gap);
-            if (textFieldData.inputTextColor) setInputTextColor(textFieldData.inputTextColor);
-            if (textFieldData.focusRingColor) setFocusRingColor(textFieldData.focusRingColor);
-          }
-        } catch (e) {
-          // If not JSON, treat as plain htmltailwind string (for other components)
-          setHtmltailwind(data);
-        }
-      } else {
+      if (!data) {
         setHtmltailwind("");
+        return;
+      }
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed?.componentType === "text-field") {
+          setHtmltailwind(parsed.htmltailwind || "");
+          if (parsed.label !== undefined) setLabel(parsed.label);
+          if (parsed.labelColor !== undefined) setLabelColor(parsed.labelColor);
+          if (parsed.labelFontSize !== undefined) setLabelFontSize(parsed.labelFontSize);
+          if (parsed.placeholder !== undefined) setPlaceholder(parsed.placeholder);
+          if (parsed.width !== undefined) setWidth(parsed.width);
+          if (parsed.bgColor !== undefined) setBgColor(parsed.bgColor);
+          if (parsed.borderRadius !== undefined) setBorderRadius(parsed.borderRadius);
+          if (parsed.borderColor !== undefined) setBorderColor(parsed.borderColor);
+          if (parsed.paddingX !== undefined) setPaddingX(parsed.paddingX);
+          if (parsed.paddingY !== undefined) setPaddingY(parsed.paddingY);
+          if (parsed.paddingX !== undefined || parsed.paddingY !== undefined) {
+            const x = parsed.paddingX || "12";
+            const y = parsed.paddingY || "8";
+            setPadding(formatPadding(x, y));
+          }
+          if (parsed.gap !== undefined) setGap(parsed.gap);
+          if (parsed.inputTextColor !== undefined) setInputTextColor(parsed.inputTextColor);
+          if (parsed.focusRingColor !== undefined) setFocusRingColor(parsed.focusRingColor);
+        }
+      } catch (e) {
+        setHtmltailwind(data);
       }
     });
   }, []);
 
-  // Fungsi untuk copy kode ke clipboard
   const handleCopyCode = useCallback(async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(htmltailwind);
-      } else {
-        // Fallback untuk browser yang tidak support Clipboard API
-        const textArea = document.createElement("textarea");
-        textArea.value = htmltailwind;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
+    const success = await copyToClipboard(htmltailwind);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
     }
   }, [htmltailwind]);
 

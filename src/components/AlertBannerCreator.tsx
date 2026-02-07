@@ -7,6 +7,7 @@ import { SelectionChangeHandler } from "../types/types";
 import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
+import { copyToClipboard } from "../utils/clipboardUtils";
 
 // Gunakan casting 'as any' untuk menghindari error JSX
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
@@ -183,6 +184,7 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
       if (!data) {
+        setHtmltailwind("");
         return;
       }
       try {
@@ -203,23 +205,10 @@ export function AlertBannerCreator({ onBack, isDark = false }: AlertBannerCreato
   }, []);
 
   const handleCopyCode = useCallback(async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(htmltailwind);
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = htmltailwind;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
+    const success = await copyToClipboard(htmltailwind);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
     }
   }, [htmltailwind]);
 

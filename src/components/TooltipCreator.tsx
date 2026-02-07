@@ -10,6 +10,7 @@ import { Prism as SyntaxHighlighterComponent } from "react-syntax-highlighter";
 const SyntaxHighlighter = SyntaxHighlighterComponent as any;
 import { shadesOfPurple, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { formatHTML } from "../utils/htmlFormatter";
+import { copyToClipboard } from "../utils/clipboardUtils";
 
 type TooltipCreatorProps = {
   onBack: () => void;
@@ -62,6 +63,7 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
       if (!data) {
+        setHtmltailwind("");
         return;
       }
       try {
@@ -97,25 +99,12 @@ export function TooltipCreator({ onBack, isDark = false }: TooltipCreatorProps) 
   };
 
   const handleCopyCode = useCallback(async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(htmltailwind);
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = htmltailwind;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
+    const success = await copyToClipboard(htmltailwind);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
     }
-  }, [htmltailwind]);
+  }, [htmltailwind]); 
 
   return (
     <div

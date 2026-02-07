@@ -9,7 +9,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       const textArea = document.createElement("textarea");
       textArea.value = text;
       textArea.style.position = "fixed";
-      textArea.style.opacity = "0";
+      textArea.style.opacity = "100";
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
@@ -21,3 +21,4 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     return false;
   }
 }
+

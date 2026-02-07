@@ -105,6 +105,7 @@ export function RadioButton({ onBack, isDark = false }: RadioButtonProps) {
   useEffect(() => {
     on<SelectionChangeHandler>("SELECTION_CHANGE", data => {
       if (!data) {
+        setHtmltailwind("");
         return;
       }
       try {
